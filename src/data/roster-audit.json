@@ -1,0 +1,1421 @@
+{
+  "checkedAt": "2026-09-04T07:06:05.368Z",
+  "regulation": "M-B",
+  "season": "M-5",
+  "announcement": "https://champions-news.pokemon-home.com/ja/page/803.html",
+  "source": "https://web-view.app.pokemonchampions.jp/battle/pages/events/rs178402365238qpefxb/sc/pokemon.html",
+  "scope": "Current ranked eligibility, not a claim that all game mechanics or Mega forms are officially verified",
+  "roster": [
+    {
+      "code": "0003-000",
+      "id": "venusaur",
+      "name": "Venusaur",
+      "zh": "妙蛙花"
+    },
+    {
+      "code": "0006-000",
+      "id": "charizard",
+      "name": "Charizard",
+      "zh": "喷火龙"
+    },
+    {
+      "code": "0009-000",
+      "id": "blastoise",
+      "name": "Blastoise",
+      "zh": "水箭龟"
+    },
+    {
+      "code": "0015-000",
+      "id": "beedrill",
+      "name": "Beedrill",
+      "zh": "大针蜂"
+    },
+    {
+      "code": "0018-000",
+      "id": "pidgeot",
+      "name": "Pidgeot",
+      "zh": "大比鸟"
+    },
+    {
+      "code": "0024-000",
+      "id": "arbok",
+      "name": "Arbok",
+      "zh": "阿柏怪"
+    },
+    {
+      "code": "0025-000",
+      "id": "pikachu",
+      "name": "Pikachu",
+      "zh": "皮卡丘"
+    },
+    {
+      "code": "0026-000",
+      "id": "raichu",
+      "name": "Raichu",
+      "zh": "雷丘"
+    },
+    {
+      "code": "0026-001",
+      "id": "raichualola",
+      "name": "Raichu (Alolan Form)",
+      "zh": "雷丘 (阿罗拉的样子)"
+    },
+    {
+      "code": "0036-000",
+      "id": "clefable",
+      "name": "Clefable",
+      "zh": "皮可西"
+    },
+    {
+      "code": "0038-000",
+      "id": "ninetales",
+      "name": "Ninetales",
+      "zh": "九尾"
+    },
+    {
+      "code": "0038-001",
+      "id": "ninetalesalola",
+      "name": "Ninetales (Alolan Form)",
+      "zh": "九尾 (阿罗拉的样子)"
+    },
+    {
+      "code": "0045-000",
+      "id": "vileplume",
+      "name": "Vileplume",
+      "zh": "霸王花"
+    },
+    {
+      "code": "0059-000",
+      "id": "arcanine",
+      "name": "Arcanine",
+      "zh": "风速狗"
+    },
+    {
+      "code": "0059-001",
+      "id": "arcaninehisui",
+      "name": "Arcanine (Hisuian Form)",
+      "zh": "风速狗 (洗翠的样子)"
+    },
+    {
+      "code": "0065-000",
+      "id": "alakazam",
+      "name": "Alakazam",
+      "zh": "胡地"
+    },
+    {
+      "code": "0068-000",
+      "id": "machamp",
+      "name": "Machamp",
+      "zh": "怪力"
+    },
+    {
+      "code": "0071-000",
+      "id": "victreebel",
+      "name": "Victreebel",
+      "zh": "大食花"
+    },
+    {
+      "code": "0080-000",
+      "id": "slowbro",
+      "name": "Slowbro",
+      "zh": "呆壳兽"
+    },
+    {
+      "code": "0080-002",
+      "id": "slowbrogalar",
+      "name": "Slowbro (Galarian Form)",
+      "zh": "呆壳兽 (伽勒尔的样子)"
+    },
+    {
+      "code": "0094-000",
+      "id": "gengar",
+      "name": "Gengar",
+      "zh": "耿鬼"
+    },
+    {
+      "code": "0115-000",
+      "id": "kangaskhan",
+      "name": "Kangaskhan",
+      "zh": "袋兽"
+    },
+    {
+      "code": "0121-000",
+      "id": "starmie",
+      "name": "Starmie",
+      "zh": "宝石海星"
+    },
+    {
+      "code": "0127-000",
+      "id": "pinsir",
+      "name": "Pinsir",
+      "zh": "凯罗斯"
+    },
+    {
+      "code": "0128-000",
+      "id": "tauros",
+      "name": "Tauros",
+      "zh": "肯泰罗"
+    },
+    {
+      "code": "0128-001",
+      "id": "taurospaldeacombat",
+      "name": "Tauros (Paldean Form (Combat Breed))",
+      "zh": "肯泰罗 (帕底亚的样子・斗战种)"
+    },
+    {
+      "code": "0128-002",
+      "id": "taurospaldeablaze",
+      "name": "Tauros (Paldean Form (Blaze Breed))",
+      "zh": "肯泰罗 (帕底亚的样子・火炽种)"
+    },
+    {
+      "code": "0128-003",
+      "id": "taurospaldeaaqua",
+      "name": "Tauros (Paldean Form (Aqua Breed))",
+      "zh": "肯泰罗 (帕底亚的样子・水澜种)"
+    },
+    {
+      "code": "0130-000",
+      "id": "gyarados",
+      "name": "Gyarados",
+      "zh": "暴鲤龙"
+    },
+    {
+      "code": "0132-000",
+      "id": "ditto",
+      "name": "Ditto",
+      "zh": "百变怪"
+    },
+    {
+      "code": "0134-000",
+      "id": "vaporeon",
+      "name": "Vaporeon",
+      "zh": "水伊布"
+    },
+    {
+      "code": "0135-000",
+      "id": "jolteon",
+      "name": "Jolteon",
+      "zh": "雷伊布"
+    },
+    {
+      "code": "0136-000",
+      "id": "flareon",
+      "name": "Flareon",
+      "zh": "火伊布"
+    },
+    {
+      "code": "0142-000",
+      "id": "aerodactyl",
+      "name": "Aerodactyl",
+      "zh": "化石翼龙"
+    },
+    {
+      "code": "0143-000",
+      "id": "snorlax",
+      "name": "Snorlax",
+      "zh": "卡比兽"
+    },
+    {
+      "code": "0149-000",
+      "id": "dragonite",
+      "name": "Dragonite",
+      "zh": "快龙"
+    },
+    {
+      "code": "0154-000",
+      "id": "meganium",
+      "name": "Meganium",
+      "zh": "大竺葵"
+    },
+    {
+      "code": "0157-000",
+      "id": "typhlosion",
+      "name": "Typhlosion",
+      "zh": "火暴兽"
+    },
+    {
+      "code": "0157-001",
+      "id": "typhlosionhisui",
+      "name": "Typhlosion (Hisuian Form)",
+      "zh": "火暴兽 (洗翠的样子)"
+    },
+    {
+      "code": "0160-000",
+      "id": "feraligatr",
+      "name": "Feraligatr",
+      "zh": "大力鳄"
+    },
+    {
+      "code": "0168-000",
+      "id": "ariados",
+      "name": "Ariados",
+      "zh": "阿利多斯"
+    },
+    {
+      "code": "0181-000",
+      "id": "ampharos",
+      "name": "Ampharos",
+      "zh": "电龙"
+    },
+    {
+      "code": "0184-000",
+      "id": "azumarill",
+      "name": "Azumarill",
+      "zh": "玛力露丽"
+    },
+    {
+      "code": "0186-000",
+      "id": "politoed",
+      "name": "Politoed",
+      "zh": "蚊香蛙皇"
+    },
+    {
+      "code": "0196-000",
+      "id": "espeon",
+      "name": "Espeon",
+      "zh": "太阳伊布"
+    },
+    {
+      "code": "0197-000",
+      "id": "umbreon",
+      "name": "Umbreon",
+      "zh": "月亮伊布"
+    },
+    {
+      "code": "0199-000",
+      "id": "slowking",
+      "name": "Slowking",
+      "zh": "呆呆王"
+    },
+    {
+      "code": "0199-001",
+      "id": "slowkinggalar",
+      "name": "Slowking (Galarian Form)",
+      "zh": "呆呆王 (伽勒尔的样子)"
+    },
+    {
+      "code": "0205-000",
+      "id": "forretress",
+      "name": "Forretress",
+      "zh": "佛烈托斯"
+    },
+    {
+      "code": "0208-000",
+      "id": "steelix",
+      "name": "Steelix",
+      "zh": "大钢蛇"
+    },
+    {
+      "code": "0211-000",
+      "id": "qwilfish",
+      "name": "Qwilfish",
+      "zh": "千针鱼"
+    },
+    {
+      "code": "0212-000",
+      "id": "scizor",
+      "name": "Scizor",
+      "zh": "巨钳螳螂"
+    },
+    {
+      "code": "0214-000",
+      "id": "heracross",
+      "name": "Heracross",
+      "zh": "赫拉克罗斯"
+    },
+    {
+      "code": "0227-000",
+      "id": "skarmory",
+      "name": "Skarmory",
+      "zh": "盔甲鸟"
+    },
+    {
+      "code": "0229-000",
+      "id": "houndoom",
+      "name": "Houndoom",
+      "zh": "黑鲁加"
+    },
+    {
+      "code": "0248-000",
+      "id": "tyranitar",
+      "name": "Tyranitar",
+      "zh": "班基拉斯"
+    },
+    {
+      "code": "0254-000",
+      "id": "sceptile",
+      "name": "Sceptile",
+      "zh": "蜥蜴王"
+    },
+    {
+      "code": "0257-000",
+      "id": "blaziken",
+      "name": "Blaziken",
+      "zh": "火焰鸡"
+    },
+    {
+      "code": "0260-000",
+      "id": "swampert",
+      "name": "Swampert",
+      "zh": "巨沼怪"
+    },
+    {
+      "code": "0279-000",
+      "id": "pelipper",
+      "name": "Pelipper",
+      "zh": "大嘴鸥"
+    },
+    {
+      "code": "0282-000",
+      "id": "gardevoir",
+      "name": "Gardevoir",
+      "zh": "沙奈朵"
+    },
+    {
+      "code": "0302-000",
+      "id": "sableye",
+      "name": "Sableye",
+      "zh": "勾魂眼"
+    },
+    {
+      "code": "0303-000",
+      "id": "mawile",
+      "name": "Mawile",
+      "zh": "大嘴娃"
+    },
+    {
+      "code": "0306-000",
+      "id": "aggron",
+      "name": "Aggron",
+      "zh": "波士可多拉"
+    },
+    {
+      "code": "0308-000",
+      "id": "medicham",
+      "name": "Medicham",
+      "zh": "恰雷姆"
+    },
+    {
+      "code": "0310-000",
+      "id": "manectric",
+      "name": "Manectric",
+      "zh": "雷电兽"
+    },
+    {
+      "code": "0319-000",
+      "id": "sharpedo",
+      "name": "Sharpedo",
+      "zh": "巨牙鲨"
+    },
+    {
+      "code": "0323-000",
+      "id": "camerupt",
+      "name": "Camerupt",
+      "zh": "喷火驼"
+    },
+    {
+      "code": "0324-000",
+      "id": "torkoal",
+      "name": "Torkoal",
+      "zh": "煤炭龟"
+    },
+    {
+      "code": "0334-000",
+      "id": "altaria",
+      "name": "Altaria",
+      "zh": "七夕青鸟"
+    },
+    {
+      "code": "0350-000",
+      "id": "milotic",
+      "name": "Milotic",
+      "zh": "美纳斯"
+    },
+    {
+      "code": "0351-000",
+      "id": "castform",
+      "name": "Castform",
+      "zh": "飘浮泡泡"
+    },
+    {
+      "code": "0354-000",
+      "id": "banette",
+      "name": "Banette",
+      "zh": "诅咒娃娃"
+    },
+    {
+      "code": "0358-000",
+      "id": "chimecho",
+      "name": "Chimecho",
+      "zh": "风铃铃"
+    },
+    {
+      "code": "0359-000",
+      "id": "absol",
+      "name": "Absol",
+      "zh": "阿勃梭鲁"
+    },
+    {
+      "code": "0362-000",
+      "id": "glalie",
+      "name": "Glalie",
+      "zh": "冰鬼护"
+    },
+    {
+      "code": "0376-000",
+      "id": "metagross",
+      "name": "Metagross",
+      "zh": "巨金怪"
+    },
+    {
+      "code": "0389-000",
+      "id": "torterra",
+      "name": "Torterra",
+      "zh": "土台龟"
+    },
+    {
+      "code": "0392-000",
+      "id": "infernape",
+      "name": "Infernape",
+      "zh": "烈焰猴"
+    },
+    {
+      "code": "0395-000",
+      "id": "empoleon",
+      "name": "Empoleon",
+      "zh": "帝王拿波"
+    },
+    {
+      "code": "0398-000",
+      "id": "staraptor",
+      "name": "Staraptor",
+      "zh": "姆克鹰"
+    },
+    {
+      "code": "0405-000",
+      "id": "luxray",
+      "name": "Luxray",
+      "zh": "伦琴猫"
+    },
+    {
+      "code": "0407-000",
+      "id": "roserade",
+      "name": "Roserade",
+      "zh": "罗丝雷朵"
+    },
+    {
+      "code": "0409-000",
+      "id": "rampardos",
+      "name": "Rampardos",
+      "zh": "战槌龙"
+    },
+    {
+      "code": "0411-000",
+      "id": "bastiodon",
+      "name": "Bastiodon",
+      "zh": "护城龙"
+    },
+    {
+      "code": "0428-000",
+      "id": "lopunny",
+      "name": "Lopunny",
+      "zh": "长耳兔"
+    },
+    {
+      "code": "0442-000",
+      "id": "spiritomb",
+      "name": "Spiritomb",
+      "zh": "花岩怪"
+    },
+    {
+      "code": "0445-000",
+      "id": "garchomp",
+      "name": "Garchomp",
+      "zh": "烈咬陆鲨"
+    },
+    {
+      "code": "0448-000",
+      "id": "lucario",
+      "name": "Lucario",
+      "zh": "路卡利欧"
+    },
+    {
+      "code": "0450-000",
+      "id": "hippowdon",
+      "name": "Hippowdon",
+      "zh": "河马兽"
+    },
+    {
+      "code": "0454-000",
+      "id": "toxicroak",
+      "name": "Toxicroak",
+      "zh": "毒骷蛙"
+    },
+    {
+      "code": "0460-000",
+      "id": "abomasnow",
+      "name": "Abomasnow",
+      "zh": "暴雪王"
+    },
+    {
+      "code": "0461-000",
+      "id": "weavile",
+      "name": "Weavile",
+      "zh": "玛狃拉"
+    },
+    {
+      "code": "0464-000",
+      "id": "rhyperior",
+      "name": "Rhyperior",
+      "zh": "超甲狂犀"
+    },
+    {
+      "code": "0470-000",
+      "id": "leafeon",
+      "name": "Leafeon",
+      "zh": "叶伊布"
+    },
+    {
+      "code": "0471-000",
+      "id": "glaceon",
+      "name": "Glaceon",
+      "zh": "冰伊布"
+    },
+    {
+      "code": "0472-000",
+      "id": "gliscor",
+      "name": "Gliscor",
+      "zh": "天蝎王"
+    },
+    {
+      "code": "0473-000",
+      "id": "mamoswine",
+      "name": "Mamoswine",
+      "zh": "象牙猪"
+    },
+    {
+      "code": "0475-000",
+      "id": "gallade",
+      "name": "Gallade",
+      "zh": "艾路雷朵"
+    },
+    {
+      "code": "0478-000",
+      "id": "froslass",
+      "name": "Froslass",
+      "zh": "雪妖女"
+    },
+    {
+      "code": "0479-000",
+      "id": "rotom",
+      "name": "Rotom (Rotom)",
+      "zh": "洛托姆 (洛托姆的样子)"
+    },
+    {
+      "code": "0479-001",
+      "id": "rotomheat",
+      "name": "Rotom (Heat Rotom)",
+      "zh": "洛托姆 (加热洛托姆)"
+    },
+    {
+      "code": "0479-002",
+      "id": "rotomwash",
+      "name": "Rotom (Wash Rotom)",
+      "zh": "洛托姆 (清洗洛托姆)"
+    },
+    {
+      "code": "0479-003",
+      "id": "rotomfrost",
+      "name": "Rotom (Frost Rotom)",
+      "zh": "洛托姆 (结冰洛托姆)"
+    },
+    {
+      "code": "0479-004",
+      "id": "rotomfan",
+      "name": "Rotom (Fan Rotom)",
+      "zh": "洛托姆 (旋转洛托姆)"
+    },
+    {
+      "code": "0479-005",
+      "id": "rotommow",
+      "name": "Rotom (Mow Rotom)",
+      "zh": "洛托姆 (切割洛托姆)"
+    },
+    {
+      "code": "0497-000",
+      "id": "serperior",
+      "name": "Serperior",
+      "zh": "君主蛇"
+    },
+    {
+      "code": "0500-000",
+      "id": "emboar",
+      "name": "Emboar",
+      "zh": "炎武王"
+    },
+    {
+      "code": "0503-000",
+      "id": "samurott",
+      "name": "Samurott",
+      "zh": "大剑鬼"
+    },
+    {
+      "code": "0503-001",
+      "id": "samurotthisui",
+      "name": "Samurott (Hisuian Form)",
+      "zh": "大剑鬼 (洗翠的样子)"
+    },
+    {
+      "code": "0505-000",
+      "id": "watchog",
+      "name": "Watchog",
+      "zh": "步哨鼠"
+    },
+    {
+      "code": "0510-000",
+      "id": "liepard",
+      "name": "Liepard",
+      "zh": "酷豹"
+    },
+    {
+      "code": "0512-000",
+      "id": "simisage",
+      "name": "Simisage",
+      "zh": "花椰猿"
+    },
+    {
+      "code": "0514-000",
+      "id": "simisear",
+      "name": "Simisear",
+      "zh": "爆香猿"
+    },
+    {
+      "code": "0516-000",
+      "id": "simipour",
+      "name": "Simipour",
+      "zh": "冷水猿"
+    },
+    {
+      "code": "0518-000",
+      "id": "musharna",
+      "name": "Musharna",
+      "zh": "梦梦蚀"
+    },
+    {
+      "code": "0530-000",
+      "id": "excadrill",
+      "name": "Excadrill",
+      "zh": "龙头地鼠"
+    },
+    {
+      "code": "0531-000",
+      "id": "audino",
+      "name": "Audino",
+      "zh": "差不多娃娃"
+    },
+    {
+      "code": "0534-000",
+      "id": "conkeldurr",
+      "name": "Conkeldurr",
+      "zh": "修建老匠"
+    },
+    {
+      "code": "0545-000",
+      "id": "scolipede",
+      "name": "Scolipede",
+      "zh": "蜈蚣王"
+    },
+    {
+      "code": "0547-000",
+      "id": "whimsicott",
+      "name": "Whimsicott",
+      "zh": "风妖精"
+    },
+    {
+      "code": "0553-000",
+      "id": "krookodile",
+      "name": "Krookodile",
+      "zh": "流氓鳄"
+    },
+    {
+      "code": "0560-000",
+      "id": "scrafty",
+      "name": "Scrafty",
+      "zh": "头巾混混"
+    },
+    {
+      "code": "0563-000",
+      "id": "cofagrigus",
+      "name": "Cofagrigus",
+      "zh": "迭失棺"
+    },
+    {
+      "code": "0569-000",
+      "id": "garbodor",
+      "name": "Garbodor",
+      "zh": "灰尘山"
+    },
+    {
+      "code": "0571-000",
+      "id": "zoroark",
+      "name": "Zoroark",
+      "zh": "索罗亚克"
+    },
+    {
+      "code": "0571-001",
+      "id": "zoroarkhisui",
+      "name": "Zoroark (Hisuian Form)",
+      "zh": "索罗亚克 (洗翠的样子)"
+    },
+    {
+      "code": "0579-000",
+      "id": "reuniclus",
+      "name": "Reuniclus",
+      "zh": "人造细胞卵"
+    },
+    {
+      "code": "0584-000",
+      "id": "vanilluxe",
+      "name": "Vanilluxe",
+      "zh": "双倍多多冰"
+    },
+    {
+      "code": "0587-000",
+      "id": "emolga",
+      "name": "Emolga",
+      "zh": "电飞鼠"
+    },
+    {
+      "code": "0604-000",
+      "id": "eelektross",
+      "name": "Eelektross",
+      "zh": "麻麻鳗鱼王"
+    },
+    {
+      "code": "0609-000",
+      "id": "chandelure",
+      "name": "Chandelure",
+      "zh": "水晶灯火灵"
+    },
+    {
+      "code": "0614-000",
+      "id": "beartic",
+      "name": "Beartic",
+      "zh": "冻原熊"
+    },
+    {
+      "code": "0618-000",
+      "id": "stunfisk",
+      "name": "Stunfisk",
+      "zh": "泥巴鱼"
+    },
+    {
+      "code": "0618-001",
+      "id": "stunfiskgalar",
+      "name": "Stunfisk (Galarian Form)",
+      "zh": "泥巴鱼 (伽勒尔的样子)"
+    },
+    {
+      "code": "0623-000",
+      "id": "golurk",
+      "name": "Golurk",
+      "zh": "泥偶巨人"
+    },
+    {
+      "code": "0635-000",
+      "id": "hydreigon",
+      "name": "Hydreigon",
+      "zh": "三首恶龙"
+    },
+    {
+      "code": "0637-000",
+      "id": "volcarona",
+      "name": "Volcarona",
+      "zh": "火神蛾"
+    },
+    {
+      "code": "0652-000",
+      "id": "chesnaught",
+      "name": "Chesnaught",
+      "zh": "布里卡隆"
+    },
+    {
+      "code": "0655-000",
+      "id": "delphox",
+      "name": "Delphox",
+      "zh": "妖火红狐"
+    },
+    {
+      "code": "0658-000",
+      "id": "greninja",
+      "name": "Greninja",
+      "zh": "甲贺忍蛙"
+    },
+    {
+      "code": "0660-000",
+      "id": "diggersby",
+      "name": "Diggersby",
+      "zh": "掘地兔"
+    },
+    {
+      "code": "0663-000",
+      "id": "talonflame",
+      "name": "Talonflame",
+      "zh": "烈箭鹰"
+    },
+    {
+      "code": "0666-018",
+      "id": "vivillon",
+      "name": "Vivillon",
+      "zh": "彩粉蝶"
+    },
+    {
+      "code": "0668-000",
+      "id": "pyroar",
+      "name": "Pyroar",
+      "zh": "火炎狮"
+    },
+    {
+      "code": "0670-005",
+      "id": "floetteeternal",
+      "name": "Floette",
+      "zh": "花叶蒂"
+    },
+    {
+      "code": "0671-000",
+      "id": "florges",
+      "name": "Florges",
+      "zh": "花洁夫人"
+    },
+    {
+      "code": "0675-000",
+      "id": "pangoro",
+      "name": "Pangoro",
+      "zh": "霸道熊猫"
+    },
+    {
+      "code": "0676-000",
+      "id": "furfrou",
+      "name": "Furfrou",
+      "zh": "多丽米亚"
+    },
+    {
+      "code": "0678-000",
+      "id": "meowstic",
+      "name": "Meowstic (Male)",
+      "zh": "超能妙喵 (雄性的样子)"
+    },
+    {
+      "code": "0678-001",
+      "id": "meowsticf",
+      "name": "Meowstic (Female)",
+      "zh": "超能妙喵 (雌性的样子)"
+    },
+    {
+      "code": "0681-000",
+      "id": "aegislash",
+      "name": "Aegislash",
+      "zh": "坚盾剑怪"
+    },
+    {
+      "code": "0683-000",
+      "id": "aromatisse",
+      "name": "Aromatisse",
+      "zh": "芳香精"
+    },
+    {
+      "code": "0685-000",
+      "id": "slurpuff",
+      "name": "Slurpuff",
+      "zh": "胖甜妮"
+    },
+    {
+      "code": "0687-000",
+      "id": "malamar",
+      "name": "Malamar",
+      "zh": "乌贼王"
+    },
+    {
+      "code": "0689-000",
+      "id": "barbaracle",
+      "name": "Barbaracle",
+      "zh": "龟足巨铠"
+    },
+    {
+      "code": "0691-000",
+      "id": "dragalge",
+      "name": "Dragalge",
+      "zh": "毒藻龙"
+    },
+    {
+      "code": "0693-000",
+      "id": "clawitzer",
+      "name": "Clawitzer",
+      "zh": "钢炮臂虾"
+    },
+    {
+      "code": "0695-000",
+      "id": "heliolisk",
+      "name": "Heliolisk",
+      "zh": "光电伞蜥"
+    },
+    {
+      "code": "0697-000",
+      "id": "tyrantrum",
+      "name": "Tyrantrum",
+      "zh": "怪颚龙"
+    },
+    {
+      "code": "0699-000",
+      "id": "aurorus",
+      "name": "Aurorus",
+      "zh": "冰雪巨龙"
+    },
+    {
+      "code": "0700-000",
+      "id": "sylveon",
+      "name": "Sylveon",
+      "zh": "仙子伊布"
+    },
+    {
+      "code": "0701-000",
+      "id": "hawlucha",
+      "name": "Hawlucha",
+      "zh": "摔角鹰人"
+    },
+    {
+      "code": "0702-000",
+      "id": "dedenne",
+      "name": "Dedenne",
+      "zh": "咚咚鼠"
+    },
+    {
+      "code": "0706-000",
+      "id": "goodra",
+      "name": "Goodra",
+      "zh": "黏美龙"
+    },
+    {
+      "code": "0706-001",
+      "id": "goodrahisui",
+      "name": "Goodra (Hisuian Form)",
+      "zh": "黏美龙 (洗翠的样子)"
+    },
+    {
+      "code": "0707-000",
+      "id": "klefki",
+      "name": "Klefki",
+      "zh": "钥圈儿"
+    },
+    {
+      "code": "0709-000",
+      "id": "trevenant",
+      "name": "Trevenant",
+      "zh": "朽木妖"
+    },
+    {
+      "code": "0711-000",
+      "id": "gourgeist",
+      "name": "Gourgeist (Medium Variety)",
+      "zh": "南瓜怪人 (中颗种)"
+    },
+    {
+      "code": "0711-001",
+      "id": "gourgeistsmall",
+      "name": "Gourgeist (Small Variety)",
+      "zh": "南瓜怪人 (小颗种)"
+    },
+    {
+      "code": "0711-002",
+      "id": "gourgeistlarge",
+      "name": "Gourgeist (Large Variety)",
+      "zh": "南瓜怪人 (大颗种)"
+    },
+    {
+      "code": "0711-003",
+      "id": "gourgeistsuper",
+      "name": "Gourgeist (Jumbo Variety)",
+      "zh": "南瓜怪人 (巨颗种)"
+    },
+    {
+      "code": "0713-000",
+      "id": "avalugg",
+      "name": "Avalugg",
+      "zh": "冰岩怪"
+    },
+    {
+      "code": "0713-001",
+      "id": "avalugghisui",
+      "name": "Avalugg (Hisuian Form)",
+      "zh": "冰岩怪 (洗翠的样子)"
+    },
+    {
+      "code": "0715-000",
+      "id": "noivern",
+      "name": "Noivern",
+      "zh": "音波龙"
+    },
+    {
+      "code": "0724-000",
+      "id": "decidueye",
+      "name": "Decidueye",
+      "zh": "狙射树枭"
+    },
+    {
+      "code": "0724-001",
+      "id": "decidueyehisui",
+      "name": "Decidueye (Hisuian Form)",
+      "zh": "狙射树枭 (洗翠的样子)"
+    },
+    {
+      "code": "0727-000",
+      "id": "incineroar",
+      "name": "Incineroar",
+      "zh": "炽焰咆哮虎"
+    },
+    {
+      "code": "0730-000",
+      "id": "primarina",
+      "name": "Primarina",
+      "zh": "西狮海壬"
+    },
+    {
+      "code": "0733-000",
+      "id": "toucannon",
+      "name": "Toucannon",
+      "zh": "铳嘴大鸟"
+    },
+    {
+      "code": "0740-000",
+      "id": "crabominable",
+      "name": "Crabominable",
+      "zh": "好胜毛蟹"
+    },
+    {
+      "code": "0745-000",
+      "id": "lycanroc",
+      "name": "Lycanroc (Midday Form)",
+      "zh": "鬃岩狼人 (白昼的样子)"
+    },
+    {
+      "code": "0745-001",
+      "id": "lycanrocmidnight",
+      "name": "Lycanroc (Midnight Form)",
+      "zh": "鬃岩狼人 (黑夜的样子)"
+    },
+    {
+      "code": "0745-002",
+      "id": "lycanrocdusk",
+      "name": "Lycanroc (Dusk Form)",
+      "zh": "鬃岩狼人 (黄昏的样子)"
+    },
+    {
+      "code": "0748-000",
+      "id": "toxapex",
+      "name": "Toxapex",
+      "zh": "超坏星"
+    },
+    {
+      "code": "0750-000",
+      "id": "mudsdale",
+      "name": "Mudsdale",
+      "zh": "重泥挽马"
+    },
+    {
+      "code": "0752-000",
+      "id": "araquanid",
+      "name": "Araquanid",
+      "zh": "滴蛛霸"
+    },
+    {
+      "code": "0758-000",
+      "id": "salazzle",
+      "name": "Salazzle",
+      "zh": "焰后蜥"
+    },
+    {
+      "code": "0763-000",
+      "id": "tsareena",
+      "name": "Tsareena",
+      "zh": "甜冷美后"
+    },
+    {
+      "code": "0765-000",
+      "id": "oranguru",
+      "name": "Oranguru",
+      "zh": "智挥猩"
+    },
+    {
+      "code": "0766-000",
+      "id": "passimian",
+      "name": "Passimian",
+      "zh": "投掷猴"
+    },
+    {
+      "code": "0778-000",
+      "id": "mimikyu",
+      "name": "Mimikyu",
+      "zh": "谜拟丘"
+    },
+    {
+      "code": "0780-000",
+      "id": "drampa",
+      "name": "Drampa",
+      "zh": "老翁龙"
+    },
+    {
+      "code": "0784-000",
+      "id": "kommoo",
+      "name": "Kommo-o",
+      "zh": "杖尾鳞甲龙"
+    },
+    {
+      "code": "0823-000",
+      "id": "corviknight",
+      "name": "Corviknight",
+      "zh": "钢铠鸦"
+    },
+    {
+      "code": "0841-000",
+      "id": "flapple",
+      "name": "Flapple",
+      "zh": "苹裹龙"
+    },
+    {
+      "code": "0842-000",
+      "id": "appletun",
+      "name": "Appletun",
+      "zh": "丰蜜龙"
+    },
+    {
+      "code": "0844-000",
+      "id": "sandaconda",
+      "name": "Sandaconda",
+      "zh": "沙螺蟒"
+    },
+    {
+      "code": "0855-000",
+      "id": "polteageist",
+      "name": "Polteageist",
+      "zh": "怖思壶"
+    },
+    {
+      "code": "0858-000",
+      "id": "hatterene",
+      "name": "Hatterene",
+      "zh": "布莉姆温"
+    },
+    {
+      "code": "0861-000",
+      "id": "grimmsnarl",
+      "name": "Grimmsnarl",
+      "zh": "长毛巨魔"
+    },
+    {
+      "code": "0866-000",
+      "id": "mrrime",
+      "name": "Mr. Rime",
+      "zh": "踏冰人偶"
+    },
+    {
+      "code": "0867-000",
+      "id": "runerigus",
+      "name": "Runerigus",
+      "zh": "迭失板"
+    },
+    {
+      "code": "0869-000",
+      "id": "alcremie",
+      "name": "Alcremie",
+      "zh": "霜奶仙"
+    },
+    {
+      "code": "0870-000",
+      "id": "falinks",
+      "name": "Falinks",
+      "zh": "列阵兵"
+    },
+    {
+      "code": "0877-000",
+      "id": "morpeko",
+      "name": "Morpeko",
+      "zh": "莫鲁贝可"
+    },
+    {
+      "code": "0887-000",
+      "id": "dragapult",
+      "name": "Dragapult",
+      "zh": "多龙巴鲁托"
+    },
+    {
+      "code": "0899-000",
+      "id": "wyrdeer",
+      "name": "Wyrdeer",
+      "zh": "诡角鹿"
+    },
+    {
+      "code": "0900-000",
+      "id": "kleavor",
+      "name": "Kleavor",
+      "zh": "劈斧螳螂"
+    },
+    {
+      "code": "0902-000",
+      "id": "basculegion",
+      "name": "Basculegion (Male)",
+      "zh": "幽尾玄鱼 (雄性的样子)"
+    },
+    {
+      "code": "0902-001",
+      "id": "basculegionf",
+      "name": "Basculegion (Female)",
+      "zh": "幽尾玄鱼 (雌性的样子)"
+    },
+    {
+      "code": "0903-000",
+      "id": "sneasler",
+      "name": "Sneasler",
+      "zh": "大狃拉"
+    },
+    {
+      "code": "0904-000",
+      "id": "overqwil",
+      "name": "Overqwil",
+      "zh": "万针鱼"
+    },
+    {
+      "code": "0908-000",
+      "id": "meowscarada",
+      "name": "Meowscarada",
+      "zh": "魔幻假面喵"
+    },
+    {
+      "code": "0911-000",
+      "id": "skeledirge",
+      "name": "Skeledirge",
+      "zh": "骨纹巨声鳄"
+    },
+    {
+      "code": "0914-000",
+      "id": "quaquaval",
+      "name": "Quaquaval",
+      "zh": "狂欢浪舞鸭"
+    },
+    {
+      "code": "0925-000",
+      "id": "maushold",
+      "name": "Maushold",
+      "zh": "一家鼠"
+    },
+    {
+      "code": "0934-000",
+      "id": "garganacl",
+      "name": "Garganacl",
+      "zh": "盐石巨灵"
+    },
+    {
+      "code": "0936-000",
+      "id": "armarouge",
+      "name": "Armarouge",
+      "zh": "红莲铠骑"
+    },
+    {
+      "code": "0937-000",
+      "id": "ceruledge",
+      "name": "Ceruledge",
+      "zh": "苍炎刃鬼"
+    },
+    {
+      "code": "0939-000",
+      "id": "bellibolt",
+      "name": "Bellibolt",
+      "zh": "电肚蛙"
+    },
+    {
+      "code": "0952-000",
+      "id": "scovillain",
+      "name": "Scovillain",
+      "zh": "狠辣椒"
+    },
+    {
+      "code": "0956-000",
+      "id": "espathra",
+      "name": "Espathra",
+      "zh": "超能艳鸵"
+    },
+    {
+      "code": "0959-000",
+      "id": "tinkaton",
+      "name": "Tinkaton",
+      "zh": "巨锻匠"
+    },
+    {
+      "code": "0964-000",
+      "id": "palafin",
+      "name": "Palafin",
+      "zh": "海豚侠"
+    },
+    {
+      "code": "0968-000",
+      "id": "orthworm",
+      "name": "Orthworm",
+      "zh": "拖拖蚓"
+    },
+    {
+      "code": "0970-000",
+      "id": "glimmora",
+      "name": "Glimmora",
+      "zh": "晶光花"
+    },
+    {
+      "code": "0972-000",
+      "id": "houndstone",
+      "name": "Houndstone",
+      "zh": "墓扬犬"
+    },
+    {
+      "code": "0979-000",
+      "id": "annihilape",
+      "name": "Annihilape",
+      "zh": "弃世猴"
+    },
+    {
+      "code": "0981-000",
+      "id": "farigiraf",
+      "name": "Farigiraf",
+      "zh": "奇麒麟"
+    },
+    {
+      "code": "0983-000",
+      "id": "kingambit",
+      "name": "Kingambit",
+      "zh": "仆刀将军"
+    },
+    {
+      "code": "1000-000",
+      "id": "gholdengo",
+      "name": "Gholdengo",
+      "zh": "赛富豪"
+    },
+    {
+      "code": "1013-000",
+      "id": "sinistcha",
+      "name": "Sinistcha",
+      "zh": "来悲粗茶"
+    },
+    {
+      "code": "1018-000",
+      "id": "archaludon",
+      "name": "Archaludon",
+      "zh": "铝钢桥龙"
+    },
+    {
+      "code": "1019-000",
+      "id": "hydrapple",
+      "name": "Hydrapple",
+      "zh": "蜜集大蛇"
+    }
+  ],
+  "missing": []
+}
