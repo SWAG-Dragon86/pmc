@@ -1,0 +1,36 @@
+import { createRequire } from "node:module";
+import { execFileSync } from "node:child_process";
+import { writeFileSync } from "node:fs";
+import { resolve } from "node:path";
+import assert from "node:assert/strict";
+const require = createRequire(import.meta.url);
+const { chromium } = require("C:/Users/30912/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright");
+const adb = (...args) => execFileSync(resolve("output/android-tools/adb/platform-tools/adb.exe"), ["-s", "emulator-5556", ...args], { encoding: "utf8", windowsHide: true }).trim();
+const browser = await chromium.connectOverCDP("http://127.0.0.1:9225", { noDefaults: true });
+const page = browser.contexts()[0].pages()[0];
+const checks = [];
+try {
+  await page.evaluate(() => { document.documentElement.style.scrollBehavior='auto'; scrollTo(0,0); });
+  await page.waitForFunction(() => scrollY === 0);
+  await page.screenshot({path:'output/android/qa/android-home.png'});
+  assert.equal(await page.locator('.brand-mark img').evaluate(i=>i.naturalWidth>0),true);
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  checks.push('Portrait layout and Rotom logo render without horizontal overflow');
+  adb('shell','settings','put','system','accelerometer_rotation','0');
+  adb('shell','settings','put','system','user_rotation','1');
+  await page.waitForFunction(()=>innerWidth>innerHeight);
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await page.screenshot({path:'output/android/qa/android-landscape.png'});
+  checks.push('Rotation switches to landscape without horizontal overflow');
+  adb('shell','settings','put','system','user_rotation','0');
+  await page.waitForFunction(()=>innerWidth<innerHeight);
+  const url = page.url();
+  await page.getByRole('link',{name:'讨论频道',exact:true}).click({ noWaitAfter: true });
+  assert.equal(page.url(),url);
+  const activity = adb('shell','dumpsys','activity','activities');
+  assert.match(activity,/android.intent.action.VIEW/);
+  assert.match(activity,/qun.qq.com/);
+  checks.push('QQ invitation launches an external VIEW intent; privileged WebView stays local');
+  writeFileSync('output/android/qa/final-checks.json',JSON.stringify({checks},null,2));
+  checks.forEach(c=>console.log('PASS',c));
+} finally { await browser.close(); }

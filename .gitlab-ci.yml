@@ -1,0 +1,25 @@
+image: node:24-bookworm-slim
+
+stages:
+  - deploy
+
+deploy-pages:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  before_script:
+    - npm install --global pnpm@11.19.0
+    - pnpm install --frozen-lockfile
+  script:
+    - pnpm test
+    - pnpm run build
+    # Replace only the disposable CI checkout's input assets after building.
+    - mv public pages-source-assets
+    - mv dist public
+  pages:
+    publish: public
+    expire_in: never
+  artifacts:
+    paths:
+      - public
+

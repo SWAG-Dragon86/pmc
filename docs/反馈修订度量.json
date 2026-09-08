@@ -1,0 +1,17 @@
+{
+  "task": "PMC first user feedback revision",
+  "first_artifact_created_utc": "2026-09-04T04:47:27Z",
+  "validated_utc": "2026-09-04T07:10:36Z",
+  "observable_window_minutes": 143.15,
+  "measurement_note": "Includes interruption before user resumed. Initial reading not fully timed; this is not exact total working time.",
+  "user_rework_rounds": 1,
+  "new_scope": ["bolder fonts", "QQ discussion link", "custom heading settings"],
+  "internal_revisions": 2,
+  "node_tests": 24,
+  "existing_browser_flows": 16,
+  "new_browser_flows": 7,
+  "update_assertions": 5,
+  "images_decoded": 315,
+  "official_MB_entries_matched": 235,
+  "full_game_accuracy_verified": false
+}

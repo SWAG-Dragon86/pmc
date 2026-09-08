@@ -1,0 +1,16 @@
+{
+  "task": "PMC glass transparency correction and supplied Rotom logo",
+  "started_utc": "2026-09-04T08:46:08Z",
+  "validated_utc": "2026-09-04T08:58:46Z",
+  "validation_window_minutes": 12.63,
+  "measurement_note": "Measured inspection-to-validation window, excluding final handoff bookkeeping.",
+  "user_rework_rounds": 1,
+  "new_scope": ["supplied Rotom header logo and platform icons"],
+  "internal_revisions": 2,
+  "node_tests_passed": 29,
+  "new_browser_checks_passed": 12,
+  "existing_browser_flows_passed": 28,
+  "update_assertions_passed": 5,
+  "real_device_installation_verified": false,
+  "public_deployment_performed": false
+}

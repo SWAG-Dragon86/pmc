@@ -1,0 +1,18 @@
+{
+  "task": "准备便携 Android 环境并交付 PMC 离线安卓版",
+  "first_observed_start_utc": "2026-09-04T10:15:42Z",
+  "measurement_note": "起点为本轮首次记录的时钟，早于此的少量检查未计入。交付耗时为近似值。",
+  "finished_utc": "2026-09-04T11:01:34Z",
+  "elapsed_minutes_approx": 46,
+  "user_rework_count": 0,
+  "internal_revision_count": 3,
+  "internal_revision_definition": "交付前 3 组实质修正：APK 资产路径、便携模拟器环境、旧 WebView 兼容提示。自动化测试等待与连接适配另记为测试脚本修正，不计入产品修正。",
+  "unit_tests_passed": 31,
+  "package_checks_passed": 5,
+  "android_runtime_checks_passed": 15,
+  "verified_platform": "Android 15 emulator, WebView 124, Wi-Fi and mobile data disabled",
+  "real_device_tested": false,
+  "token_cost": null,
+  "financial_cost": null,
+  "artifact": "output/android/PMC-1.0.0-android.apk"
+}

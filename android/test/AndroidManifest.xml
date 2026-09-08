@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="cn.pmc.calculator.probe" android:versionCode="1" android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="35" />
+    <application android:label="PMC QA Probe" />
+    <instrumentation android:name="cn.pmc.calculator.probe.Probe" android:targetPackage="cn.pmc.calculator" android:label="Local QA only" />
+</manifest>

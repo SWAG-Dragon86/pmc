@@ -1,0 +1,1185 @@
+{
+  "checkedAt": "2026-09-04T07:06:05.373Z",
+  "sources": [
+    "https://gamewith.ai/pokemon-champions/en/items",
+    "https://gamewith.ai/pokemon-champions/zh-hans/items",
+    "https://gamewith.ai/pokemon-champions/en/pokemon",
+    "https://gamewith.ai/pokemon-champions/zh-hans/pokemon"
+  ],
+  "translations": {
+    "Bright Powder": "光粉",
+    "White Herb": "白色香草",
+    "Quick Claw": "先制之爪",
+    "Mental Herb": "心灵香草",
+    "King’s Rock": "王者之证",
+    "Silver Powder": "银粉",
+    "Focus Band": "气势头带",
+    "Scope Lens": "焦点镜",
+    "Metal Coat": "金属膜",
+    "Leftovers": "吃剩的东西",
+    "Soft Sand": "柔软沙子",
+    "Hard Stone": "硬石头",
+    "Miracle Seed": "奇迹种子",
+    "Black Glasses": "黑色眼镜",
+    "Black Belt": "黑带",
+    "Magnet": "磁铁",
+    "Mystic Water": "神秘水滴",
+    "Sharp Beak": "锐利鸟嘴",
+    "Poison Barb": "毒针",
+    "Never-Melt Ice": "不融冰",
+    "Spell Tag": "咒术之符",
+    "Twisted Spoon": "弯曲的汤匙",
+    "Charcoal": "木炭",
+    "Dragon Fang": "龙之牙",
+    "Silk Scarf": "丝绸围巾",
+    "Shell Bell": "贝壳之铃",
+    "Wide Lens": "广角镜",
+    "Muscle Band": "力量头带",
+    "Wise Glasses": "博识眼镜",
+    "Expert Belt": "达人带",
+    "Light Clay": "光之黏土",
+    "Life Orb": "生命宝珠",
+    "Focus Sash": "气势披带",
+    "Zoom Lens": "对焦镜",
+    "Metronome": "节拍器",
+    "Iron Ball": "黑色铁球",
+    "Icy Rock": "冰冷岩石",
+    "Smooth Rock": "沙沙岩石",
+    "Heat Rock": "炽热岩石",
+    "Damp Rock": "潮湿岩石",
+    "Choice Scarf": "讲究围巾",
+    "Shed Shell": "美丽空壳",
+    "Big Root": "大根茎",
+    "Cheri Berry": "樱子果",
+    "Chesto Berry": "零余果",
+    "Pecha Berry": "桃桃果",
+    "Rawst Berry": "莓莓果",
+    "Aspear Berry": "利木果",
+    "Leppa Berry": "苹野果",
+    "Oran Berry": "橙橙果",
+    "Persim Berry": "柿仔果",
+    "Lum Berry": "木子果",
+    "Sitrus Berry": "文柚果",
+    "Occa Berry": "巧可果",
+    "Passho Berry": "千香果",
+    "Wacan Berry": "烛木果",
+    "Rindo Berry": "罗子果",
+    "Yache Berry": "番荔果",
+    "Chople Berry": "莲蒲果",
+    "Kebia Berry": "通通果",
+    "Shuca Berry": "腰木果",
+    "Coba Berry": "棱瓜果",
+    "Payapa Berry": "福禄果",
+    "Tanga Berry": "扁樱果",
+    "Charti Berry": "草蚕果",
+    "Kasib Berry": "佛柑果",
+    "Haban Berry": "莓榴果",
+    "Colbur Berry": "刺耳果",
+    "Babiri Berry": "霹霹果",
+    "Roseli Berry": "洛玫果",
+    "Chilan Berry": "灯浆果",
+    "Fairy Feather": "妖精之羽",
+    "Light Ball": "电气球",
+    "Feraligite": "大力鳄进化石",
+    "Meganiumite": "大竺葵进化石",
+    "Emboarite": "炎武王进化石",
+    "Beedrillite": "大针蜂进化石",
+    "Ampharosite": "电龙进化石",
+    "Barbaracite": "龟足巨铠进化石",
+    "Starminite": "宝石海星进化石",
+    "Victreebelite": "大食花进化石",
+    "Altarianite": "七夕青鸟进化石",
+    "Banettite": "诅咒娃娃进化石",
+    "Cameruptite": "喷火驼进化石",
+    "Mawilite": "大嘴娃进化石",
+    "Absolite": "阿勃梭鲁进化石",
+    "Slowbronite": "呆壳兽进化石",
+    "Dragoninite": "快龙进化石",
+    "Froslassite": "雪妖女进化石",
+    "Hawluchanite": "摔角鹰人进化石",
+    "Tyranitarite": "班基拉斯进化石",
+    "Pidgeotite": "大比鸟进化石",
+    "Manectite": "雷电兽进化石",
+    "Houndoominite": "黑鲁加进化石",
+    "Audinite": "差不多娃娃进化石",
+    "Lopunnite": "长耳兔进化石",
+    "Sablenite": "勾魂眼进化石",
+    "Sharpedonite": "巨牙鲨进化石",
+    "Gyaradosite": "暴鲤龙进化石",
+    "Lucarionite": "路卡利欧进化石",
+    "Heracronite": "赫拉克罗斯进化石",
+    "Aerodactylite": "化石翼龙进化石",
+    "Alakazite": "胡地进化石",
+    "Drampanite": "老翁龙进化石",
+    "Eelektrossite": "麻麻鳗鱼王进化石",
+    "Glalitite": "冰鬼护进化石",
+    "Pinsirite": "凯罗斯进化石",
+    "Falinksite": "列阵兵进化石",
+    "Scolipite": "蜈蚣王进化石",
+    "Gardevoirite": "沙奈朵进化石",
+    "Galladite": "艾路雷朵进化石",
+    "Skarmorite": "盔甲鸟进化石",
+    "Clefablite": "皮可西进化石",
+    "Dragalgite": "毒藻龙进化石",
+    "Scraftinite": "头巾混混进化石",
+    "Pyroarite": "火炎狮进化石",
+    "Malamarite": "乌贼王进化石",
+    "Excadrite": "龙头地鼠进化石",
+    "Chandelurite": "水晶灯火灵进化石",
+    "Aggronite": "波士可多拉进化石",
+    "Metagrossite": "巨金怪进化石",
+    "Gengarite": "耿鬼进化石",
+    "Medichamite": "恰雷姆进化石",
+    "Abomasite": "暴雪王进化石",
+    "Scizorite": "巨钳螳螂进化石",
+    "Garchompite": "烈咬陆鲨进化石",
+    "Steelixite": "大钢蛇进化石",
+    "Kangaskhanite": "袋兽进化石",
+    "Charizardite X": "喷火龙进化石X",
+    "Charizardite Y": "喷火龙进化石Y",
+    "Blastoisinite": "水箭龟进化石",
+    "Venusaurite": "妙蛙花进化石",
+    "Greninjite": "甲贺忍蛙进化石",
+    "Delphoxite": "妖火红狐进化石",
+    "Chesnaughtite": "布里卡隆进化石",
+    "Floettite": "花叶蒂进化石",
+    "Raichunite X": "雷丘进化石Ｘ",
+    "Raichunite Y": "雷丘进化石Ｙ",
+    "Sceptilite": "蜥蜴王进化石",
+    "Swampertite": "巨沼怪进化石",
+    "Blazikenite": "火焰鸡进化石",
+    "Staraptite": "姆克鹰进化石",
+    "Chimechite": "风铃铃进化石",
+    "Crabominite": "好胜毛蟹进化石",
+    "Scovillainite": "狠辣椒进化石",
+    "Golurkite": "泥偶巨人进化石",
+    "Meowsticite": "超能妙喵进化石",
+    "Glimmoranite": "晶光花进化石",
+    "Stench": "恶臭",
+    "Drizzle": "降雨",
+    "Speed Boost": "加速",
+    "Battle Armor": "战斗盔甲",
+    "Sturdy": "结实",
+    "Damp": "湿气",
+    "Limber": "柔软",
+    "Sand Veil": "沙隐",
+    "Static": "静电",
+    "Volt Absorb": "蓄电",
+    "Water Absorb": "储水",
+    "Oblivious": "迟钝",
+    "Cloud Nine": "无关天气",
+    "Compound Eyes": "复眼",
+    "Insomnia": "不眠",
+    "Color Change": "变色",
+    "Immunity": "免疫",
+    "Flash Fire": "引火",
+    "Shield Dust": "鳞粉",
+    "Own Tempo": "我行我素",
+    "Suction Cups": "吸盘",
+    "Intimidate": "威吓",
+    "Shadow Tag": "踩影",
+    "Rough Skin": "粗糙皮肤",
+    "Wonder Guard": "神奇守护",
+    "Levitate": "飘浮",
+    "Effect Spore": "孢子",
+    "Synchronize": "同步",
+    "Clear Body": "恒净之躯",
+    "Natural Cure": "自然回复",
+    "Lightning Rod": "避雷针",
+    "Serene Grace": "天恩",
+    "Swift Swim": "悠游自如",
+    "Chlorophyll": "叶绿素",
+    "Illuminate": "发光",
+    "Trace": "复制",
+    "Huge Power": "大力士",
+    "Poison Point": "毒刺",
+    "Inner Focus": "精神力",
+    "Magma Armor": "熔岩铠甲",
+    "Water Veil": "水幕",
+    "Magnet Pull": "磁力",
+    "Soundproof": "隔音",
+    "Rain Dish": "雨盘",
+    "Sand Stream": "扬沙",
+    "Pressure": "压迫感",
+    "Thick Fat": "厚脂肪",
+    "Early Bird": "早起",
+    "Flame Body": "火焰之躯",
+    "Run Away": "逃跑",
+    "Keen Eye": "锐利目光",
+    "Hyper Cutter": "怪力钳",
+    "Pickup": "捡拾",
+    "Truant": "懒惰",
+    "Hustle": "活力",
+    "Cute Charm": "迷人之躯",
+    "Plus": "正电",
+    "Minus": "负电",
+    "Forecast": "阴晴不定",
+    "Sticky Hold": "黏着",
+    "Shed Skin": "蜕皮",
+    "Guts": "毅力",
+    "Marvel Scale": "神奇鳞片",
+    "Liquid Ooze": "污泥浆",
+    "Overgrow": "茂盛",
+    "Blaze": "猛火",
+    "Torrent": "激流",
+    "Swarm": "虫之预感",
+    "Rock Head": "坚硬脑袋",
+    "Drought": "日照",
+    "Arena Trap": "沙穴",
+    "Vital Spirit": "干劲",
+    "White Smoke": "白色烟雾",
+    "Pure Power": "瑜伽之力",
+    "Shell Armor": "硬壳盔甲",
+    "Air Lock": "气闸",
+    "Tangled Feet": "蹒跚",
+    "Motor Drive": "电气引擎",
+    "Rivalry": "斗争心",
+    "Steadfast": "不屈之心",
+    "Snow Cloak": "雪隐",
+    "Gluttony": "贪吃鬼",
+    "Anger Point": "愤怒穴位",
+    "Unburden": "轻装",
+    "Heatproof": "耐热",
+    "Simple": "单纯",
+    "Dry Skin": "干燥皮肤",
+    "Download": "下载",
+    "Iron Fist": "铁拳",
+    "Poison Heal": "毒疗",
+    "Adaptability": "适应力",
+    "Skill Link": "连续攻击",
+    "Hydration": "湿润之躯",
+    "Solar Power": "太阳之力",
+    "Quick Feet": "飞毛腿",
+    "Normalize": "一般皮肤",
+    "Sniper": "狙击手",
+    "Magic Guard": "魔法防守",
+    "No Guard": "无防守",
+    "Stall": "慢出",
+    "Technician": "技术高手",
+    "Leaf Guard": "叶子防守",
+    "Klutz": "笨拙",
+    "Mold Breaker": "破格",
+    "Super Luck": "超幸运",
+    "Aftermath": "诱爆",
+    "Anticipation": "危险预知",
+    "Forewarn": "预知梦",
+    "Unaware": "纯朴",
+    "Tinted Lens": "有色眼镜",
+    "Filter": "过滤",
+    "Slow Start": "慢启动",
+    "Scrappy": "胆量",
+    "Storm Drain": "引水",
+    "Ice Body": "冰冻之躯",
+    "Solid Rock": "坚硬岩石",
+    "Snow Warning": "降雪",
+    "Honey Gather": "采蜜",
+    "Frisk": "察觉",
+    "Reckless": "舍身",
+    "Multitype": "多属性",
+    "Flower Gift": "花之礼",
+    "Bad Dreams": "梦魇",
+    "Pickpocket": "顺手牵羊",
+    "Sheer Force": "强行",
+    "Contrary": "唱反调",
+    "Unnerve": "紧张感",
+    "Defiant": "不服输",
+    "Defeatist": "软弱",
+    "Cursed Body": "咒术之躯",
+    "Healer": "治愈之心",
+    "Friend Guard": "友情防守",
+    "Weak Armor": "碎裂铠甲",
+    "Heavy Metal": "重金属",
+    "Light Metal": "轻金属",
+    "Multiscale": "多重鳞片",
+    "Toxic Boost": "中毒激升",
+    "Flare Boost": "受热激升",
+    "Harvest": "收获",
+    "Telepathy": "心灵感应",
+    "Moody": "心情不定",
+    "Overcoat": "防尘",
+    "Poison Touch": "毒手",
+    "Regenerator": "再生力",
+    "Big Pecks": "健壮胸肌",
+    "Sand Rush": "拨沙",
+    "Wonder Skin": "奇迹皮肤",
+    "Analytic": "分析",
+    "Illusion": "幻觉",
+    "Imposter": "变身者",
+    "Infiltrator": "穿透",
+    "Mummy": "木乃伊",
+    "Moxie": "自信过度",
+    "Justified": "正义之心",
+    "Rattled": "胆怯",
+    "Magic Bounce": "魔法镜",
+    "Sap Sipper": "食草",
+    "Prankster": "恶作剧之心",
+    "Sand Force": "沙之力",
+    "Iron Barbs": "铁刺",
+    "Zen Mode": "达摩模式",
+    "Victory Star": "胜利之星",
+    "Turboblaze": "涡轮火焰",
+    "Teravolt": "兆级电压",
+    "Aroma Veil": "芳香幕",
+    "Flower Veil": "花幕",
+    "Cheek Pouch": "颊囊",
+    "Protean": "变幻自如",
+    "Fur Coat": "毛皮大衣",
+    "Magician": "魔术师",
+    "Bulletproof": "防弹",
+    "Competitive": "好胜",
+    "Strong Jaw": "强壮之颚",
+    "Refrigerate": "冰冻皮肤",
+    "Sweet Veil": "甜幕",
+    "Stance Change": "战斗切换",
+    "Gale Wings": "疾风之翼",
+    "Mega Launcher": "超级发射器",
+    "Grass Pelt": "草之毛皮",
+    "Symbiosis": "共生",
+    "Tough Claws": "硬爪",
+    "Pixilate": "妖精皮肤",
+    "Gooey": "黏滑",
+    "Aerilate": "飞行皮肤",
+    "Parental Bond": "亲子爱",
+    "Dark Aura": "暗黑气场",
+    "Fairy Aura": "妖精气场",
+    "Aura Break": "气场破坏",
+    "Primordial Sea": "始源之海",
+    "Desolate Land": "终结之地",
+    "Delta Stream": "德尔塔气流",
+    "Stamina": "持久力",
+    "Wimp Out": "跃跃欲逃",
+    "Emergency Exit": "危险回避",
+    "Water Compaction": "遇水凝固",
+    "Merciless": "不仁不义",
+    "Shields Down": "界限盾壳",
+    "Stakeout": "蹲守",
+    "Water Bubble": "水泡",
+    "Steelworker": "钢能力者",
+    "Berserk": "怒火冲天",
+    "Slush Rush": "拨雪",
+    "Long Reach": "远隔",
+    "Liquid Voice": "湿润之声",
+    "Triage": "先行治疗",
+    "Galvanize": "电气皮肤",
+    "Surge Surfer": "冲浪之尾",
+    "Schooling": "鱼群",
+    "Disguise": "画皮",
+    "Battle Bond": "牵绊变身",
+    "Power Construct": "群聚变形",
+    "Corrosion": "腐蚀",
+    "Comatose": "绝对睡眠",
+    "Queenly Majesty": "女王的威严",
+    "Innards Out": "飞出的内在物",
+    "Dancer": "舞者",
+    "Battery": "蓄电池",
+    "Fluffy": "毛茸茸",
+    "Dazzling": "鲜艳之躯",
+    "Soul-Heart": "魂心",
+    "Tangling Hair": "卷发",
+    "Receiver": "接球手",
+    "Power of Alchemy": "化学之力",
+    "Beast Boost": "异兽提升",
+    "RKS System": "ＡＲ系统",
+    "Electric Surge": "电气制造者",
+    "Psychic Surge": "精神制造者",
+    "Misty Surge": "薄雾制造者",
+    "Grassy Surge": "青草制造者",
+    "Full Metal Body": "金属防护",
+    "Shadow Shield": "幻影防守",
+    "Prism Armor": "棱镜装甲",
+    "Neuroforce": "脑核之力",
+    "Intrepid Sword": "不挠之剑",
+    "Dauntless Shield": "不屈之盾",
+    "Libero": "自由者",
+    "Ball Fetch": "捡球",
+    "Cotton Down": "棉絮",
+    "Propeller Tail": "螺旋尾鳍",
+    "Mirror Armor": "镜甲",
+    "Gulp Missile": "一口导弹",
+    "Stalwart": "坚毅",
+    "Steam Engine": "蒸汽机",
+    "Punk Rock": "庞克摇滚",
+    "Sand Spit": "吐沙",
+    "Ice Scales": "冰鳞粉",
+    "Ripen": "熟成",
+    "Ice Face": "结冻头",
+    "Power Spot": "能量点",
+    "Mimicry": "拟态",
+    "Screen Cleaner": "除障",
+    "Steely Spirit": "钢之意志",
+    "Perish Body": "灭亡之躯",
+    "Wandering Spirit": "游魂",
+    "Gorilla Tactics": "一猩一意",
+    "Neutralizing Gas": "化学变化气体",
+    "Pastel Veil": "粉彩护幕",
+    "Hunger Switch": "饱了又饿",
+    "Quick Draw": "速击",
+    "Unseen Fist": "无形拳",
+    "Curious Medicine": "怪药",
+    "Transistor": "电晶体",
+    "Dragon’s Maw": "龙颚",
+    "Chilling Neigh": "苍白嘶鸣",
+    "Grim Neigh": "漆黑嘶鸣",
+    "As One": "人马一体",
+    "Lingering Aroma": "甩不掉的气味",
+    "Seed Sower": "掉出种子",
+    "Thermal Exchange": "热交换",
+    "Anger Shell": "愤怒甲壳",
+    "Purifying Salt": "洁净之盐",
+    "Well-Baked Body": "焦香之躯",
+    "Wind Rider": "乘风",
+    "Guard Dog": "看门犬",
+    "Rocky Payload": "搬岩",
+    "Wind Power": "风力发电",
+    "Zero to Hero": "全能变身",
+    "Commander": "发号施令",
+    "Electromorphosis": "电力转换",
+    "Protosynthesis": "古代活性",
+    "Quark Drive": "夸克充能",
+    "Good as Gold": "黄金之躯",
+    "Vessel of Ruin": "灾祸之鼎",
+    "Sword of Ruin": "灾祸之剑",
+    "Tablets of Ruin": "灾祸之简",
+    "Beads of Ruin": "灾祸之玉",
+    "Orichalcum Pulse": "绯红脉动",
+    "Hadron Engine": "强子引擎",
+    "Opportunist": "跟风",
+    "Cud Chew": "反刍",
+    "Sharpness": "锋锐",
+    "Supreme Overlord": "大将",
+    "Costar": "同台共演",
+    "Toxic Debris": "毒满地",
+    "Armor Tail": "尾甲",
+    "Earth Eater": "食土",
+    "Mycelium Might": "菌丝之力",
+    "Mind’s Eye": "心眼",
+    "Supersweet Syrup": "甘露之蜜",
+    "Hospitality": "款待",
+    "Toxic Chain": "毒锁链",
+    "Embody Aspect": "面影辉映",
+    "Tera Shift": "太晶变形",
+    "Tera Shell": "太晶甲壳",
+    "Teraform Zero": "归零化境",
+    "Poison Puppeteer": "毒傀儡",
+    "Mega Sol": "超级日光",
+    "Dragonize": "龙皮肤",
+    "As One (Glastrier)": "人马一体(白马)",
+    "As One (Spectrier)": "人马一体(黑马)",
+    "Piercing Drill": "贯穿钻",
+    "Spicy Spray": "辣椒喷发",
+    "Eelevate": "鳗鳗高升",
+    "Fire Mane": "火焰鬃毛"
+  },
+  "images": {
+    "venusaur": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/003.png",
+      "name": "Venusaur",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/3"
+    },
+    "venusaurmega": {
+      "name": "Venusaur-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/4",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/003_1.png"
+    },
+    "charizard": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/006.png",
+      "name": "Charizard",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/7"
+    },
+    "charizardmegax": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/006_1.png",
+      "name": "Mega Charizard X",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/8"
+    },
+    "charizardmegay": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/006_2.png",
+      "name": "Mega Charizard Y",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/9"
+    },
+    "blastoise": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/009.png",
+      "name": "Blastoise",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/12"
+    },
+    "blastoisemega": {
+      "name": "Blastoise-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/13",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/009_1.png"
+    },
+    "raichu": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/026.png",
+      "name": "Raichu",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/34"
+    },
+    "raichumegax": {
+      "name": "Raichu-Mega-X",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/36",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/026_2.png"
+    },
+    "raichumegay": {
+      "name": "Raichu-Mega-Y",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/37",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/026_3.png"
+    },
+    "clefable": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/036.png",
+      "name": "Clefable",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/49"
+    },
+    "clefablemega": {
+      "name": "Clefable-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/50",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/036_1.png"
+    },
+    "alolanninetales": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/038_1.png",
+      "name": "Alolan Ninetales",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/54"
+    },
+    "victreebel": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/071.png",
+      "name": "Victreebel",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/95"
+    },
+    "victreebelmega": {
+      "name": "Victreebel-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/96",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/071_1.png"
+    },
+    "gengar": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/094.png",
+      "name": "Gengar",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/130"
+    },
+    "gengarmega": {
+      "name": "Gengar-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/131",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/094_1.png"
+    },
+    "kangaskhan": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/115.png",
+      "name": "Kangaskhan",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/157"
+    },
+    "kangaskhanmega": {
+      "name": "Kangaskhan-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/158",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/115_1.png"
+    },
+    "starmie": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/121.png",
+      "name": "Starmie",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/164"
+    },
+    "starmiemega": {
+      "name": "Starmie-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/165",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/121_1.png"
+    },
+    "gyarados": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/130.png",
+      "name": "Gyarados",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/176"
+    },
+    "gyaradosmega": {
+      "name": "Gyarados-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/177",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/130_1.png"
+    },
+    "snorlax": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/143.png",
+      "name": "Snorlax",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/191"
+    },
+    "dragonite": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/149.png",
+      "name": "Dragonite",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/200"
+    },
+    "dragonitemega": {
+      "name": "Dragonite-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/201",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/149_1.png"
+    },
+    "niummega": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/154.png",
+      "name": "Meganium",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/208"
+    },
+    "meganiummega": {
+      "name": "Meganium-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/209",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/154_1.png"
+    },
+    "umbreon": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/197.png",
+      "name": "Umbreon",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/255"
+    },
+    "scizor": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/212.png",
+      "name": "Scizor",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/273"
+    },
+    "scizormega": {
+      "name": "Scizor-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/274",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/212_1.png"
+    },
+    "tyranitar": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/248.png",
+      "name": "Tyranitar",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/315"
+    },
+    "tyranitarmega": {
+      "name": "Tyranitar-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/316",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/248_1.png"
+    },
+    "blaziken": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/257.png",
+      "name": "Blaziken",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/326"
+    },
+    "blazikenmega": {
+      "name": "Blaziken-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/327",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/257_1.png"
+    },
+    "swampert": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/260.png",
+      "name": "Swampert",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/330"
+    },
+    "swampertmega": {
+      "name": "Swampert-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/331",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/260_1.png"
+    },
+    "pelipper": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/279.png",
+      "name": "Pelipper",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/352"
+    },
+    "sableye": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/302.png",
+      "name": "Sableye",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/376"
+    },
+    "sableyemega": {
+      "name": "Sableye-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/377",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/302_1.png"
+    },
+    "mawile": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/303.png",
+      "name": "Mawile",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/378"
+    },
+    "mawilemega": {
+      "name": "Mawile-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/379",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/303_1.png"
+    },
+    "metagross": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/376.png",
+      "name": "Metagross",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/467"
+    },
+    "metagrossmega": {
+      "name": "Metagross-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/468",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/376_1.png"
+    },
+    "staraptor": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/398.png",
+      "name": "Staraptor",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/498"
+    },
+    "staraptormega": {
+      "name": "Staraptor-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/499",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/398_1.png"
+    },
+    "lopunny": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/428.png",
+      "name": "Lopunny",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/536"
+    },
+    "lopunnmegay": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/428_1.png",
+      "name": "Mega Lopunny",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/537"
+    },
+    "garchomp": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/445.png",
+      "name": "Garchomp",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/554"
+    },
+    "garchompmega": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/445_1.png",
+      "name": "Mega Garchomp",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/555"
+    },
+    "lucario": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/448.png",
+      "name": "Lucario",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/559"
+    },
+    "lucariomega": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/448_1.png",
+      "name": "Mega Lucario",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/560"
+    },
+    "hippowdon": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/450_1.png",
+      "name": "Hippowdon ♀",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/564"
+    },
+    "mamoswine": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/473.png",
+      "name": "Mamoswine",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/588"
+    },
+    "heatrotom": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/479_1.png",
+      "name": "Heat Rotom",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/597"
+    },
+    "washrotom": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/479_2.png",
+      "name": "Wash Rotom",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/598"
+    },
+    "hisuiansamurott": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/503_1.png",
+      "name": "Hisuian Samurott",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/633"
+    },
+    "excadrill": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/530.png",
+      "name": "Excadrill",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/661"
+    },
+    "excadrillmega": {
+      "name": "Excadrill-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/662",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/530_1.png"
+    },
+    "scolipede": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/545.png",
+      "name": "Scolipede",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/678"
+    },
+    "scolipedemega": {
+      "name": "Scolipede-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/679",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/545_1.png"
+    },
+    "whimsicott": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/547.png",
+      "name": "Whimsicott",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/681"
+    },
+    "hisuianzoroark": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/571_1.png",
+      "name": "Hisuian Zoroark",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/716"
+    },
+    "vanilluxe": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/584.png",
+      "name": "Vanilluxe",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/729"
+    },
+    "hydreigon": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/635.png",
+      "name": "Hydreigon",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/793"
+    },
+    "volcarona": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/637.png",
+      "name": "Volcarona",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/795"
+    },
+    "delphox": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/655.png",
+      "name": "Delphox",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/821"
+    },
+    "delphomegax": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/655_1.png",
+      "name": "Mega Delphox",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/822"
+    },
+    "greninja": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/658.png",
+      "name": "Greninja",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/825"
+    },
+    "greninjamega": {
+      "name": "Greninja-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/826",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/658_1.png"
+    },
+    "eternalfloette": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/670_2.png",
+      "name": "Eternal Floette",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/842"
+    },
+    "floettemega": {
+      "name": "Floette-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/843",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/670_1.png"
+    },
+    "aegislash": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/681.png",
+      "name": "Aegislash",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/857"
+    },
+    "bladeaegislash": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/681_1.png",
+      "name": "Blade Aegislash",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/858"
+    },
+    "sylveon": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/700.png",
+      "name": "Sylveon",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/880"
+    },
+    "primarina": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/730.png",
+      "name": "Primarina",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/926"
+    },
+    "toxapex": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/748.png",
+      "name": "Toxapex",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/952"
+    },
+    "araquanid": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/752.png",
+      "name": "Araquanid",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/956"
+    },
+    "mimikyu": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/778.png",
+      "name": "Mimikyu",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/984"
+    },
+    "corviknight": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/823.png",
+      "name": "Corviknight",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1037"
+    },
+    "grimmsnarl": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/861.png",
+      "name": "Grimmsnarl",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1078"
+    },
+    "dragapult": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/887.png",
+      "name": "Dragapult",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1108"
+    },
+    "kleavor": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/900.png",
+      "name": "Kleavor",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1127"
+    },
+    "basculegion": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/902.png",
+      "name": "Basculegion",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1129"
+    },
+    "sneasler": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/903.png",
+      "name": "Sneasler",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1131"
+    },
+    "meowscarada": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/908.png",
+      "name": "Meowscarada",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1137"
+    },
+    "skeledirge": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/911.png",
+      "name": "Skeledirge",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1140"
+    },
+    "mausholdfamilyofthree": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/925.png",
+      "name": "Maushold (Family of Three)",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1157"
+    },
+    "ceruledge": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/937.png",
+      "name": "Ceruledge",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1173"
+    },
+    "bellibolt": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/939.png",
+      "name": "Bellibolt",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1175"
+    },
+    "scovillain": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/952.png",
+      "name": "Scovillain",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1193"
+    },
+    "scovillainmega": {
+      "name": "Scovillain-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1194",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/952_1.png"
+    },
+    "espathra": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/956.png",
+      "name": "Espathra",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1198"
+    },
+    "glimmora": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/970.png",
+      "name": "Glimmora",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1213"
+    },
+    "glimmoramega": {
+      "name": "Glimmora-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1214",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/970_1.png"
+    },
+    "kingambit": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/983.png",
+      "name": "Kingambit",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1220"
+    },
+    "gholdengo": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/1000.png",
+      "name": "Gholdengo",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1247"
+    },
+    "archaludon": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/1018.png",
+      "name": "Archaludon",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1271"
+    },
+    "mausholdfamilyoffour": {
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/925_1.png",
+      "name": "Maushold (Family of Four)",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1281"
+    },
+    "beedrillmega": {
+      "name": "Beedrill-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/20",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/015_1.png"
+    },
+    "pidgeotmega": {
+      "name": "Pidgeot-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/24",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/018_1.png"
+    },
+    "alakazammega": {
+      "name": "Alakazam-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/89",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/065_1.png"
+    },
+    "slowbromega": {
+      "name": "Slowbro-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/112",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/080_1.png"
+    },
+    "steelixmega": {
+      "name": "Steelix-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/268",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/208_1.png"
+    },
+    "pinsirmega": {
+      "name": "Pinsir-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/173",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/127_1.png"
+    },
+    "aerodactylmega": {
+      "name": "Aerodactyl-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/190",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/142_1.png"
+    },
+    "feraligatrmega": {
+      "name": "Feraligatr-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/217",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/160_1.png"
+    },
+    "ampharosmega": {
+      "name": "Ampharos-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/239",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/181_1.png"
+    },
+    "heracrossmega": {
+      "name": "Heracross-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/277",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/214_1.png"
+    },
+    "skarmorymega": {
+      "name": "Skarmory-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/293",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/227_1.png"
+    },
+    "houndoommega": {
+      "name": "Houndoom-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/296",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/229_1.png"
+    },
+    "sceptilemega": {
+      "name": "Sceptile-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/323",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/254_1.png"
+    },
+    "gardevoirmega": {
+      "name": "Gardevoir-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/356",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/282_1.png"
+    },
+    "gallademega": {
+      "name": "Gallade-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/591",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/475_1.png"
+    },
+    "aggronmega": {
+      "name": "Aggron-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/383",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/306_1.png"
+    },
+    "medichammega": {
+      "name": "Medicham-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/386",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/308_1.png"
+    },
+    "manectricmega": {
+      "name": "Manectric-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/389",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/310_1.png"
+    },
+    "sharpedomega": {
+      "name": "Sharpedo-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/399",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/319_1.png"
+    },
+    "cameruptmega": {
+      "name": "Camerupt-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/404",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/323_1.png"
+    },
+    "altariamega": {
+      "name": "Altaria-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/416",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/334_1.png"
+    },
+    "banettemega": {
+      "name": "Banette-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/440",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/354_1.png"
+    },
+    "chimechomega": {
+      "name": "Chimecho-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/445",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/358_1.png"
+    },
+    "glaliemega": {
+      "name": "Glalie-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/452",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/362_1.png"
+    },
+    "froslassmega": {
+      "name": "Froslass-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/595",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/478_1.png"
+    },
+    "lopunnymega": {
+      "name": "Lopunny-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/537",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/428_1.png"
+    },
+    "abomasnowmega": {
+      "name": "Abomasnow-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/575",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/460_1.png"
+    },
+    "emboarmega": {
+      "name": "Emboar-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/629",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/500_1.png"
+    },
+    "audinomega": {
+      "name": "Audino-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/664",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/531_1.png"
+    },
+    "scraftymega": {
+      "name": "Scrafty-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/702",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/560_1.png"
+    },
+    "eelektrossmega": {
+      "name": "Eelektross-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/758",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/604_1.png"
+    },
+    "chandeluremega": {
+      "name": "Chandelure-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/764",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/609_1.png"
+    },
+    "golurkmega": {
+      "name": "Golurk-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/780",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/623_1.png"
+    },
+    "chesnaughtmega": {
+      "name": "Chesnaught-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/818",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/652_1.png"
+    },
+    "delphoxmega": {
+      "name": "Delphox-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/822",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/655_1.png"
+    },
+    "pyroarmega": {
+      "name": "Pyroar-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/838",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/668_2.png"
+    },
+    "malamarmega": {
+      "name": "Malamar-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/865",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/687_1.png"
+    },
+    "barbaraclemega": {
+      "name": "Barbaracle-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/868",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/689_1.png"
+    },
+    "dragalgemega": {
+      "name": "Dragalge-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/871",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/691_1.png"
+    },
+    "hawluchamega": {
+      "name": "Hawlucha-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/882",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/701_1.png"
+    },
+    "crabominablemega": {
+      "name": "Crabominable-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/937",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/740_1.png"
+    },
+    "drampamega": {
+      "name": "Drampa-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/987",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/780_1.png"
+    },
+    "falinksmega": {
+      "name": "Falinks-Mega",
+      "page": "https://gamewith.ai/pokemon-champions/en/pokemon/1088",
+      "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/870_1.png"
+    }
+  }
+}
