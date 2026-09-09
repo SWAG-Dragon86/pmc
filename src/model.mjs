@@ -52,6 +52,17 @@ export function validatePoints(points) {
     ? "能力点总和不能超过 66"
     : "";
 }
+export function faintedAlliesOf(build) {
+  return Number.isInteger(build?.faintedAllies)
+    ? Math.min(5, Math.max(0, build.faintedAllies))
+    : 0;
+}
+export function needsFaintedAlliesInput(build) {
+  return (
+    build?.ability === "Supreme Overlord" ||
+    build?.moves?.[build.selected] === "lastrespects"
+  );
+}
 export function createBuild(catalog, species = "charizard") {
   const p = catalog.pokemon.find((p) => p.id === species) || catalog.pokemon[0];
   const preferred =
@@ -89,6 +100,7 @@ export function createBuild(catalog, species = "charizard") {
     crit: false,
     hits: 2,
     secondary: false,
+    faintedAllies: 0,
     target: 0,
   };
 }
@@ -177,6 +189,13 @@ export function validateBuild(b, catalog) {
     issues.push("选定招式无效");
   if (!Number.isFinite(b.hp) || b.hp < 0 || b.hp > 100)
     issues.push("剩余血量应为 0–100%");
+  if (
+    b.faintedAllies !== undefined &&
+    (!Number.isInteger(b.faintedAllies) ||
+      b.faintedAllies < 0 ||
+      b.faintedAllies > 5)
+  )
+    issues.push("已倒下队友数量应为 0–5 的整数");
   if (
     !b.boosts ||
     STAT_KEYS.some(

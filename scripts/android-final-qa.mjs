@@ -10,19 +10,19 @@ const browser = await chromium.connectOverCDP("http://127.0.0.1:9225", { noDefau
 const page = browser.contexts()[0].pages()[0];
 const checks = [];
 try {
+  await page.evaluate(() => PMCAndroid.setScreenMode('auto'));
   await page.evaluate(() => { document.documentElement.style.scrollBehavior='auto'; scrollTo(0,0); });
   await page.waitForFunction(() => scrollY === 0);
   await page.screenshot({path:'output/android/qa/android-home.png'});
   assert.equal(await page.locator('.brand-mark img').evaluate(i=>i.naturalWidth>0),true);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   checks.push('Portrait layout and Rotom logo render without horizontal overflow');
-  adb('shell','settings','put','system','accelerometer_rotation','0');
-  adb('shell','settings','put','system','user_rotation','1');
+  await page.evaluate(() => PMCAndroid.setScreenMode('landscape'));
   await page.waitForFunction(()=>innerWidth>innerHeight);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await page.screenshot({path:'output/android/qa/android-landscape.png'});
   checks.push('Rotation switches to landscape without horizontal overflow');
-  adb('shell','settings','put','system','user_rotation','0');
+  await page.evaluate(() => PMCAndroid.setScreenMode('portrait'));
   await page.waitForFunction(()=>innerWidth<innerHeight);
   const url = page.url();
   await page.getByRole('link',{name:'讨论频道',exact:true}).click({ noWaitAfter: true });
@@ -31,6 +31,7 @@ try {
   assert.match(activity,/android.intent.action.VIEW/);
   assert.match(activity,/qun.qq.com/);
   checks.push('QQ invitation launches an external VIEW intent; privileged WebView stays local');
+  await page.evaluate(() => PMCAndroid.setScreenMode('auto'));
   writeFileSync('output/android/qa/final-checks.json',JSON.stringify({checks},null,2));
   checks.forEach(c=>console.log('PASS',c));
 } finally { await browser.close(); }

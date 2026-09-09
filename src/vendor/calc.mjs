@@ -433,6 +433,7 @@ var SV = SS.concat([
   "Wind Rider",
   "Zero to Hero",
   // Champions exclusive
+  "Aura Guard",
   "Dragonize",
   "Eelevate",
   "Fire Mane",
@@ -449,6 +450,7 @@ var CHAMPIONS = [
   "Anticipation",
   "Armor Tail",
   "Aroma Veil",
+  "Aura Guard",
   "Battle Armor",
   "Berserk",
   "Big Pecks",
@@ -1211,6 +1213,7 @@ var SV2 = SS2.concat(
   ].sort()
 );
 var CHAMPIONS2 = [
+  "Absolite Z",
   "Abomasite",
   "Absolite",
   "Aerodactylite",
@@ -1245,10 +1248,12 @@ var CHAMPIONS2 = [
   "Froslassite",
   "Galladite",
   "Garchompite",
+  "Garchompite Z",
   "Gardevoirite",
   "Gengarite",
   "Glalitite",
   "Glimmoranite",
+  "Golisopite",
   "Golurkite",
   "Greninjite",
   "Gyaradosite",
@@ -1258,6 +1263,7 @@ var CHAMPIONS2 = [
   "Kangaskhanite",
   "Lopunnite",
   "Lucarionite",
+  "Lucarionite Z",
   "Malamarite",
   "Manectite",
   "Mawilite",
@@ -1287,6 +1293,20 @@ var CHAMPIONS2 = [
   "Tyranitarite",
   "Venusaurite",
   "Victreebelite",
+  "Baxcalibrite",
+  "Salamencite",
+  "Leek",
+  "Rocky Helmet",
+  "Air Balloon",
+  "Red Card",
+  "Binding Band",
+  "Eject Button",
+  "Normal Gem",
+  "Terrain Extender",
+  "Electric Seed",
+  "Psychic Seed",
+  "Misty Seed",
+  "Grassy Seed",
   "Aspear Berry",
   "Babiri Berry",
   "Big Root",
@@ -6865,7 +6885,21 @@ var CHAMPIONS_LIST = [
   "X-Scissor",
   "Yawn",
   "Zap Cannon",
-  "Zen Headbutt"
+  "Zen Headbutt",
+  "Court Change",
+  "Double Shock",
+  "Drum Beating",
+  "Glaive Rush",
+  "Jaw Lock",
+  "Meteor Assault",
+  "Milk Drink",
+  "Octolock",
+  "Pyro Ball",
+  "Revival Blessing",
+  "Shift Gear",
+  "Slash",
+  "Snipe Shot",
+  "Zing Zap"
 ];
 var CHAMPIONS_PATCH = {
   "Anchor Shot": { bp: 90 },
@@ -17079,7 +17113,7 @@ var ZA_PATCH2 = {
     types: ["Dark", "Ghost"],
     bs: { hp: 65, at: 154, df: 60, sa: 75, sd: 60, sp: 151 },
     weightkg: 49,
-    abilities: { 0: "Magic Bounce" },
+    abilities: { 0: "Sharpness" },
     baseSpecies: "Absol"
   },
   "Barbaracle-Mega": {
@@ -17223,7 +17257,7 @@ var ZA_PATCH2 = {
     types: ["Dragon"],
     bs: { hp: 108, at: 130, df: 85, sa: 141, sd: 85, sp: 151 },
     weightkg: 99,
-    abilities: { 0: "Sand Force" },
+    abilities: { 0: "Levitate" },
     baseSpecies: "Garchomp"
   },
   "Glimmora-Mega": {
@@ -17237,7 +17271,7 @@ var ZA_PATCH2 = {
     types: ["Bug", "Steel"],
     bs: { hp: 75, at: 150, df: 175, sa: 70, sd: 120, sp: 40 },
     weightkg: 148,
-    abilities: { 0: "Emergency Exit" },
+    abilities: { 0: "Tough Claws" },
     baseSpecies: "Golisopod"
   },
   "Golurk-Mega": {
@@ -17273,7 +17307,7 @@ var ZA_PATCH2 = {
     types: ["Fighting", "Steel"],
     bs: { hp: 70, at: 100, df: 70, sa: 164, sd: 70, sp: 151 },
     weightkg: 49.4,
-    abilities: { 0: "Adaptability" },
+    abilities: { 0: "Aura Guard" },
     baseSpecies: "Lucario"
   },
   "Magearna-Mega": {
@@ -17437,6 +17471,7 @@ var CHAMPIONS_LIST2 = [
   "Abomasnow-Mega",
   "Absol",
   "Absol-Mega",
+  "Absol-Mega-Z",
   "Aegislash-Blade",
   "Aegislash-Both",
   "Aegislash-Shield",
@@ -17452,6 +17487,7 @@ var CHAMPIONS_LIST2 = [
   "Ampharos",
   "Ampharos-Mega",
   "Annihilape",
+  "Arboliva",
   "Appletun",
   "Araquanid",
   "Arbok",
@@ -17473,6 +17509,8 @@ var CHAMPIONS_LIST2 = [
   "Barbaracle-Mega",
   "Basculegion",
   "Basculegion-F",
+  "Baxcalibur",
+  "Baxcalibur-Mega",
   "Bastiodon",
   "Beartic",
   "Beedrill",
@@ -17535,6 +17573,7 @@ var CHAMPIONS_LIST2 = [
   "Farigiraf",
   "Feraligatr",
   "Feraligatr-Mega",
+  "Farfetch\u2019d",
   "Flapple",
   "Flareon",
   "Floette-Eternal",
@@ -17549,6 +17588,7 @@ var CHAMPIONS_LIST2 = [
   "Garbodor",
   "Garchomp",
   "Garchomp-Mega",
+  "Garchomp-Mega-Z",
   "Gardevoir",
   "Gardevoir-Mega",
   "Garganacl",
@@ -17560,6 +17600,9 @@ var CHAMPIONS_LIST2 = [
   "Glalie-Mega",
   "Glimmora",
   "Glimmora-Mega",
+  "Gogoat",
+  "Golisopod",
+  "Golisopod-Mega",
   "Gliscor",
   "Golurk",
   "Golurk-Mega",
@@ -17572,6 +17615,7 @@ var CHAMPIONS_LIST2 = [
   "Greninja",
   "Greninja-Mega",
   "Grimmsnarl",
+  "Grapploct",
   "Gyarados",
   "Gyarados-Mega",
   "Hatterene",
@@ -17587,6 +17631,9 @@ var CHAMPIONS_LIST2 = [
   "Hydrapple",
   "Hydreigon",
   "Incineroar",
+  "Indeedee",
+  "Indeedee-F",
+  "Inteleon",
   "Infernape",
   "Jolteon",
   "Kangaskhan",
@@ -17602,6 +17649,7 @@ var CHAMPIONS_LIST2 = [
   "Lopunny-Mega",
   "Lucario",
   "Lucario-Mega",
+  "Lucario-Mega-Z",
   "Luxray",
   "Lycanroc",
   "Lycanroc-Dusk",
@@ -17610,6 +17658,7 @@ var CHAMPIONS_LIST2 = [
   "Malamar",
   "Malamar-Mega",
   "Mamoswine",
+  "Mabosstiff",
   "Manectric",
   "Manectric-Mega",
   "Maushold",
@@ -17633,6 +17682,7 @@ var CHAMPIONS_LIST2 = [
   "Morpeko",
   "Morpeko-Hangry",
   "Mr. Rime",
+  "Mr. Mime",
   "Mudsdale",
   "Musharna",
   "Ninetales",
@@ -17649,11 +17699,16 @@ var CHAMPIONS_LIST2 = [
   "Pidgeot",
   "Pidgeot-Mega",
   "Pikachu",
+  "Pawmot",
+  "Perrserker",
+  "Persian",
+  "Persian-Alola",
   "Pinsir",
   "Pinsir-Mega",
   "Politoed",
   "Polteageist",
   "Polteageist-Antique",
+  "Pincurchin",
   "Primarina",
   "Pyroar",
   "Pyroar-Mega",
@@ -17666,6 +17721,7 @@ var CHAMPIONS_LIST2 = [
   "Rampardos",
   "Reuniclus",
   "Rhyperior",
+  "Rillaboom",
   "Roserade",
   "Rotom",
   "Rotom-Fan",
@@ -17676,6 +17732,8 @@ var CHAMPIONS_LIST2 = [
   "Runerigus",
   "Sableye",
   "Sableye-Mega",
+  "Salamence",
+  "Salamence-Mega",
   "Salazzle",
   "Samurott",
   "Samurott-Hisui",
@@ -17693,6 +17751,7 @@ var CHAMPIONS_LIST2 = [
   "Serperior",
   "Sharpedo",
   "Sharpedo-Mega",
+  "Sirfetch\u2019d",
   "Simipour",
   "Simisage",
   "Simisear",
@@ -17710,6 +17769,10 @@ var CHAMPIONS_LIST2 = [
   "Sneasler",
   "Snorlax",
   "Spiritomb",
+  "Squawkabilly",
+  "Squawkabilly-Blue",
+  "Squawkabilly-White",
+  "Squawkabilly-Yellow",
   "Staraptor",
   "Staraptor-Mega",
   "Starmie",
@@ -17718,6 +17781,7 @@ var CHAMPIONS_LIST2 = [
   "Steelix-Mega",
   "Stunfisk",
   "Stunfisk-Galar",
+  "Swalot",
   "Swampert",
   "Swampert-Mega",
   "Sylveon",
@@ -17732,6 +17796,8 @@ var CHAMPIONS_LIST2 = [
   "Toucannon",
   "Toxapex",
   "Toxicroak",
+  "Toxtricity",
+  "Toxtricity-Low-Key",
   "Trevenant",
   "Tsareena",
   "Typhlosion",
@@ -17739,6 +17805,7 @@ var CHAMPIONS_LIST2 = [
   "Tyranitar",
   "Tyranitar-Mega",
   "Tyrantrum",
+  "Thievul",
   "Umbreon",
   "Vanilluxe",
   "Vaporeon",
@@ -17752,11 +17819,13 @@ var CHAMPIONS_LIST2 = [
   "Vivillon-Pokeball",
   "Volcarona",
   "Watchog",
+  "Wigglytuff",
   "Weavile",
   "Whimsicott",
   "Wyrdeer",
   "Zoroark",
-  "Zoroark-Hisui"
+  "Zoroark-Hisui",
+  "Cinderace"
 ];
 var CHAMPIONS_PATCH2 = {
   "Floette-Eternal": { otherFormes: ["Floette-Mega"] },
@@ -21242,7 +21311,8 @@ function calculateFinalModsChampions(gen4, attacker, defender, move, field, desc
     finalMods.push(2048);
     desc.defenderAbility = defender.ability;
   }
-  if (defender.hasAbility("Fluffy") && move.flags.contact && !attacker.hasAbility("Long Reach")) {
+  const halveContactMoveDmg = defender.hasAbility("Fluffy") || defender.hasAbility("Aura Guard");
+  if (halveContactMoveDmg && move.flags.contact && !attacker.hasAbility("Long Reach")) {
     finalMods.push(2048);
     desc.defenderAbility = defender.ability;
   }
@@ -24524,7 +24594,8 @@ function calculateFinalModsSMSSSV(gen4, attacker, defender, move, field, desc, i
     finalMods.push(2048);
     desc.defenderAbility = defender.ability;
   }
-  if (defender.hasAbility("Fluffy") && move.flags.contact && !attacker.hasAbility("Long Reach")) {
+  const halveContactMoveDmg = defender.hasAbility("Fluffy") || defender.hasAbility("Aura Guard");
+  if (halveContactMoveDmg && move.flags.contact && !attacker.hasAbility("Long Reach")) {
     finalMods.push(2048);
     desc.defenderAbility = defender.ability;
   } else if (defender.hasAbility("Punk Rock") && move.flags.sound || defender.hasAbility("Ice Scales") && move.category === "Special") {

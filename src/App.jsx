@@ -35,6 +35,7 @@ import { pinyin } from "pinyin-pro";
 import catalog from "./data/catalog.json";
 import spriteInfo from "./data/sprites.json";
 import rosterAudit from "./data/roster-audit.json";
+import mcManifest from "./data/mc-manifest.json";
 import openTeams from "./data/open-teams.json";
 import {
   createBuild,
@@ -48,6 +49,7 @@ import {
   TYPES,
   uid,
   clone,
+  needsFaintedAlliesInput,
 } from "./model.mjs";
 import { statsOf, previewDamage, speedOf } from "./engine.mjs";
 import { natureOptions } from './natures.mjs';
@@ -67,6 +69,7 @@ import { isAndroidApp } from "./platform.mjs";
 import { publicMemberBuild, savePublicMembers, teamSaveability } from "./open-teams.mjs";
 
 const pct = (n) => `${Math.max(0, n || 0).toFixed(1)}%`;
+const APP_VERSION = "1.2.0";
 const range = (r) => `${pct(r.min)} – ${pct(r.max)}`;
 const TYPES_COLOR = {
   Fire: "#ce5841",
@@ -313,6 +316,8 @@ function PokemonCard({
   const update = (key, value) => onChange({ ...build, [key]: value });
   const sum = Object.values(build.points).reduce((s, n) => s + n, 0);
   const isSecondary = index === 3;
+  const selectedMoveId = build.moves[build.selected];
+  const showFaintedAllies = needsFaintedAlliesInput(build);
   return (
     <section
       className={`pokemon-card ${index < 2 ? "offense" : "defense"} ${!build.present ? "absent" : ""}`}
@@ -402,6 +407,35 @@ function PokemonCard({
           />
         </div>
       </div>
+      {showFaintedAllies && (
+        <label className="fainted-allies-control">
+          <span>已倒下队友</span>
+          <input
+            aria-label={`${index + 1}号已倒下队友数量`}
+            inputMode="numeric"
+            type="number"
+            min="0"
+            max="5"
+            step="1"
+            value={build.faintedAllies ?? 0}
+            onChange={(e) =>
+              update(
+                "faintedAllies",
+                Math.min(5, Math.max(0, Number(e.target.value) || 0)),
+              )
+            }
+          />
+          <small>
+            {build.ability === "Supreme Overlord" &&
+              `大将招式威力 +${10 * (build.faintedAllies ?? 0)}%`}
+            {build.ability === "Supreme Overlord" &&
+              selectedMoveId === "lastrespects" &&
+              "；"}
+            {selectedMoveId === "lastrespects" &&
+              `扫墓威力 ${(catalog.moves.lastrespects?.power ?? 50) + 50 * (build.faintedAllies ?? 0)}`}
+          </small>
+        </label>
+      )}
       <div className="stats-heading">
         <h3>
           能力点分配 <span>SP</span>
@@ -918,6 +952,8 @@ function ResultPanel({ scene, result, preview, onEnable, onShare }) {
       <div className="result-footnote">
         <CheckCircle2 size={14} />
         <span>
+          只计算当前一回合，不继承上一回合状态，也不模拟下一回合触发
+          <br />
           命中且不受状态性行动失败影响
           <br />
           所剩血量以目标最大 HP 为分母
@@ -1106,7 +1142,10 @@ export default function App() {
     };
   }, [scene, preview]);
   const updateActor = (index, value) => {
-    if(hasSameDexPartner(scene,index,value,catalog)) {
+    const current = scene.actors[index];
+    const identityChanged =
+      current.species !== value.species || current.present !== value.present;
+    if(identityChanged && hasSameDexPartner(scene,index,value,catalog)) {
       notify("同一方不能同时使用图鉴编号相同的宝可梦");
       return;
     }
@@ -1967,7 +2006,7 @@ export default function App() {
                 </section>
                 <section className="panel settings-card">
                   <h2>安装与备份</h2>
-                  <p>{isAndroidApp ? "安卓离线版 1.1.0 · 数据与图片已内置。网页版记录请先导出，再在这里导入。" : "本地数据不会自动同步到其他设备。"}</p>
+                  <p>{isAndroidApp ? "安卓离线版 1.2.0 · 数据与图片已内置。网页版记录请先导出，再在这里导入。" : "本地数据不会自动同步到其他设备。"}</p>
                   <div className="status-line">
                     <span>离线资源</span>
                     <b>
@@ -2023,12 +2062,12 @@ export default function App() {
                 <section className="panel settings-card data-card">
                   <h2>数据与计算边界</h2>
                   <p>
-                    当前是可操作的社区数据预览版，尚未满足“全部数据经游戏核实”的正式发布标准。
+                    当前数据适用于《宝可梦冠军》1.2.0、排位规则 M-C。计算引擎为非官方工具。
                   </p>
                   <div className="data-summary">
                     <div>
                       <b>{catalog.pokemon.length}</b>
-                      <span>候选形态</span>
+                      <span>可用形态</span>
                     </div>
                     <div>
                       <b>{Object.keys(catalog.moves).length}</b>
@@ -2036,12 +2075,12 @@ export default function App() {
                     </div>
                     <div>
                       <b>{catalog.items.length - 1}</b>
-                      <span>候选道具</span>
+                      <span>可用道具</span>
                     </div>
                   </div>
                   <div className="status-line">
-                    <span>游戏补丁版本</span>
-                    <b className="error-text">未核实</b>
+                    <span>游戏版本 / 排位规则</span>
+                    <b>{catalog.meta.gameVersion} / {catalog.meta.regulation}</b>
                   </div>
                   <div className="status-line">
                     <span>社区数据快照</span>
@@ -2054,13 +2093,12 @@ export default function App() {
                     </b>
                   </div>
                   <p className="hint">
-                    已对照 M-5 赛季（规则 M-B）官方名单，覆盖其中{" "}
-                    {rosterAudit.roster.length}{" "}
-                    个参赛条目；另列超级进化与战斗形态。{spriteInfo.count}{" "}
-                    张形态图片已缓存。此核对不代表全部招式、数值和对战规则均已获官方验证。
+                    M-B 的 {rosterAudit.roster.length} 个参赛条目继续有效；M-C 新增
+                    24 种宝可梦和 6 种超级进化，并按性别、地区及可影响对战的外观形态展开为{" "}
+                    {mcManifest.pokemon.length} 个配置项。{spriteInfo.count} 张形态图片已缓存。
                   </p>
                   <p className="hint">
-                    单招试算使用冠军专用引擎。回合计算尚未覆盖全部特殊招式、特性、道具、开局触发与回合末效果；复杂场景会提示限制。剧毒当前按第一回合处理。请勿据此认定游戏内击倒概率。
+                    本计算器只计算当前一回合，不继承上一回合状态，也不模拟下一回合触发。单招试算使用冠军专用引擎。回合计算尚未覆盖全部特殊招式、特性、道具、开局触发与回合末效果；复杂场景会提示限制。剧毒当前按第一回合处理。请勿据此认定游戏内击倒概率。
                   </p>
                   <div className="button-row">
                     <button
@@ -2073,7 +2111,7 @@ export default function App() {
                       className="button"
                       onClick={async () => {
                         if (isAndroidApp) {
-                          notify("安卓版通过新版 APK 更新。请从原发布者获取，先导出备份，再直接覆盖安装；不要先卸载。当前版本 1.1.0。");
+                          notify("安卓版通过新版 APK 更新。请从原发布者获取，先导出备份，再直接覆盖安装；不要先卸载。当前版本 1.2.0。");
                           return;
                         }
                         if (!online) {
@@ -2085,7 +2123,7 @@ export default function App() {
                           notify(
                             registration?.waiting
                               ? "发现新版本，请在顶部确认更新"
-                              : "检查完成；尚无可安装更新。数据核验状态不变。",
+                              : "检查完成；当前已是最新数据。",
                           );
                           setUpdateReady(!!registration?.waiting);
                         } catch {
@@ -2099,11 +2137,11 @@ export default function App() {
                   </div>
                   <div className="source-links">
                     <a
-                      href={rosterAudit.source}
+                      href={catalog.meta.officialAnnouncement}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      官方参赛名单 / M-B <ArrowUpRight size={13} />
+                      官方公告 / M-C <ArrowUpRight size={13} />
                     </a>
                     <a
                       href={`https://github.com/smogon/damage-calc/tree/${catalog.meta.source.calc.commit}`}
@@ -2148,7 +2186,7 @@ export default function App() {
           <span>
             PMC <span className="footer-slash">/</span> 为每一种配置，找到答案。
           </span>
-          <span>本地优先 · PMC 1.1.0 · 社区试算 {sourceVersion}</span>
+          <span>本地优先 · PMC {APP_VERSION} · M-C {sourceVersion}</span>
         </footer>
       </div>
       {page === "calc" && (

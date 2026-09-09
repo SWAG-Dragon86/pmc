@@ -115,7 +115,10 @@ try {
     await page
       .getByRole("spinbutton", { name: "1号剩余血量百分比", exact: true })
       .fill("47");
-    await page.waitForTimeout(600);
+    await page.waitForFunction(() => {
+      const saved = JSON.parse(localStorage.getItem("pmc.workspace.v1") || "null");
+      return saved?.scene?.actors?.[0]?.hp === 47;
+    });
     await page.reload();
     await page
       .getByRole("spinbutton", { name: "1号剩余血量百分比", exact: true })

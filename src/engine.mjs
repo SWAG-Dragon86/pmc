@@ -1,11 +1,12 @@
 import { Pokemon, Move, Field, calculate, TYPE_CHART } from "./vendor/calc.mjs";
-import { openingBranches, changeBoost, applyOpponentBoost } from './opening.mjs';
+import { openingBranches, changeBoost, applyOpponentBoost, triggerOpportunist } from './opening.mjs';
 import {
   validateBuild,
   activeIndices,
   clone,
   withMandatoryActions,
   duplicateSpeciesIssues,
+  faintedAlliesOf,
 } from "./model.mjs";
 
 export const RESIST_BERRY_TYPES = {
@@ -17,23 +18,52 @@ export const RESIST_BERRY_TYPES = {
   "Babiri Berry": "Steel", "Roseli Berry": "Fairy", "Chilan Berry": "Normal",
 };
 
+export const abilityOf = (build) =>
+  build.currentAbility !== undefined ? build.currentAbility : build.ability;
+
 export function makePokemon(build, catalog) {
   const p = catalog.pokemon.find((p) => p.id === build.species);
   if (!p) throw new Error("形态不在当前数据包");
-  const pokemon = new Pokemon(0, p.name, {
+  const battleName =
+    build.species === "aegislash" && build.battleForm === "blade"
+      ? "Aegislash-Blade"
+      : p.name;
+  const overrides = {};
+  if (build.imposterOriginalSpecies) {
+    const original = catalog.pokemon.find(
+      (entry) => entry.id === build.imposterOriginalSpecies,
+    );
+    overrides.baseStats = { ...p.stats, hp: original.stats.hp };
+  }
+  if (build.battleTypes) overrides.types = build.battleTypes;
+  const runtimeAbility = abilityOf(build);
+  const pokemon = new Pokemon(0, battleName, {
     nature: build.nature,
     evs: build.points,
     boosts: build.boosts,
-    ability: build.ability,
+    // Champions has no gender input here, so Rivalry is intentionally inert.
+    ability: runtimeAbility === "Rivalry" ? "" : runtimeAbility,
     item: build.item,
     status: build.status,
-    abilityOn: true,
+    abilityOn: !!build.abilityOn,
+    alliesFainted: faintedAlliesOf(build),
+    overrides: Object.keys(overrides).length ? overrides : undefined,
   });
   // Internal turn HP stays an integer. Never round a percentage back down a second time.
   pokemon.originalCurHP = Math.floor((pokemon.maxHP() * build.hp) / 100 + 1e-9);
   return pokemon;
 }
 export const statsOf = (build, catalog) => makePokemon(build, catalog).rawStats;
+function weatherOf(scene) {
+  return activeIndices(scene).some(
+    (i) =>
+      scene.actors[i].present &&
+      scene.actors[i].hp > 0 &&
+      abilityOf(scene.actors[i]) === "Cloud Nine",
+  )
+    ? ""
+    : scene.field.weather;
+}
 function targets(scene, attackerIndex, move, catalog) {
   const ally = attackerIndex < 2;
   const live = activeIndices(scene).filter(
@@ -43,7 +73,23 @@ function targets(scene, attackerIndex, move, catalog) {
   if (move.target === "allAdjacent") return live;
   if (move.target === "allAdjacentFoes")
     return live.filter((i) => i < 2 !== ally);
-  return [ally ? scene.target : scene.actors[attackerIndex].target || 0];
+  const selected = ally ? scene.target : scene.actors[attackerIndex].target || 0;
+  if (
+    scene.mode === "double" &&
+    move.type === "Electric" &&
+    !["Mold Breaker", "Stalwart"].includes(abilityOf(scene.actors[attackerIndex]))
+  ) {
+    const rods = live.filter((i) => abilityOf(scene.actors[i]) === "Lightning Rod");
+    if (rods.length) {
+      rods.sort(
+        (a, b) =>
+          speedOf(scene.actors[b], scene, catalog, b) -
+            speedOf(scene.actors[a], scene, catalog, a) || a - b,
+      );
+      return [rods[0]];
+    }
+  }
+  return [selected];
 }
 export function summarize(values, maxHP, currentHP) {
   const d =
@@ -80,22 +126,71 @@ function distribution(damage) {
 }
 export function damageFor(attacker, defender, moveId, scene, catalog) {
   const invalid = [
-    ...validateBuild(attacker, catalog),
-    ...validateBuild(defender, catalog),
+    ...(attacker.transformed ? [] : validateBuild(attacker, catalog)),
+    ...(defender.transformed ? [] : validateBuild(defender, catalog)),
   ];
   if (invalid.length) throw new Error(invalid[0]);
   const m = catalog.moves[moveId];
   if (!m) throw new Error("招式失效");
-  const a = makePokemon(attacker, catalog),
-    d = makePokemon(defender, catalog);
+  const ai = scene.actors.findIndex((x) => x.id === attacker.id),
+    di = scene.actors.findIndex((x) => x.id === defender.id);
+  const side = ai >= 2 ? "defender" : "attacker",
+    other = side === "attacker" ? "defender" : "attacker";
+  const active = activeIndices(scene).filter(
+    (i) => scene.actors[i].present && scene.actors[i].hp > 0,
+  );
+  let abilityOn = !!attacker.abilityOn;
+  if (["Plus", "Minus"].includes(abilityOf(attacker)))
+    abilityOn = active.some(
+      (i) =>
+        i !== ai &&
+        i < 2 === ai < 2 &&
+        ["Plus", "Minus"].includes(abilityOf(scene.actors[i])),
+    );
+  if (abilityOf(attacker) === "Analytic") {
+    if (Array.isArray(scene.turnDone)) abilityOn = scene.turnDone.includes(di);
+    else {
+      const defenderMove = catalog.moves[defender.moves?.[defender.selected]];
+      const attackerRank = [priority(attacker, m), speedOf(attacker, scene, catalog, ai)];
+      const defenderRank = defenderMove
+        ? [priority(defender, defenderMove), speedOf(defender, scene, catalog, di)]
+        : [0, 0];
+      abilityOn =
+        attackerRank[0] < defenderRank[0] ||
+        (attackerRank[0] === defenderRank[0] &&
+          (scene.field.trickRoom
+            ? attackerRank[1] > defenderRank[1]
+            : attackerRank[1] < defenderRank[1]));
+    }
+  }
+  const terrainType = {
+    Electric: "Electric",
+    Grassy: "Grass",
+    Psychic: "Psychic",
+    Misty: "Fairy",
+  }[scene.field.terrain];
+  const prepare = (build) =>
+    abilityOf(build) === "Mimicry" && terrainType
+      ? { ...build, battleTypes: [terrainType] }
+      : build;
+  let attackingBuild = prepare(
+    attacker.species === "aegislash" &&
+    abilityOf(attacker) === "Stance Change" &&
+    !attacker.imposterOriginalSpecies &&
+    m.category !== "Status"
+      ? { ...attacker, battleForm: "blade", abilityOn }
+      : { ...attacker, abilityOn },
+  );
+  if (abilityOf(attacker) === "Analytic" && !abilityOn)
+    attackingBuild = { ...attackingBuild, currentAbility: "Inactive Analytic" };
+  const defendingBuild = prepare(defender);
+  const a = makePokemon(attackingBuild, catalog),
+    d = makePokemon(defendingBuild, catalog);
   if (moveId === "expandingforce")
     throw new Error("该招式的动态范围尚未完成适配，请先核对单独案例");
   // Entry stat drops are entered explicitly in the opening stages, not retriggered per hit.
   if (a.ability === "Intimidate") a.ability = "";
   if (d.ability === "Intimidate") d.ability = "";
-  const ai = scene.actors.findIndex((x) => x.id === attacker.id),
-    side = ai >= 2 ? "defender" : "attacker",
-    other = side === "attacker" ? "defender" : "attacker";
   const spread =
     scene.mode === "double" &&
     targets(scene, Math.max(0, ai), m, catalog).length > 1;
@@ -107,16 +202,18 @@ export function damageFor(attacker, defender, moveId, scene, catalog) {
     if (!Number.isInteger(hits) || hits < minimum || hits > m.multihit[1])
       throw new Error(`此招式连续攻击次数需为 ${minimum}–${m.multihit[1]}`);
   }
+  const moveOverrides = {};
+  if (!spread && ["allAdjacent", "allAdjacentFoes"].includes(m.target))
+    moveOverrides.target = "normal";
+  if (moveId === "lastrespects")
+    moveOverrides.basePower = m.power + 50 * faintedAlliesOf(attacker);
   const move = new Move(0, m.name, {
     ability: a.ability,
     item: a.item,
     species: a.name,
     isCrit: attacker.crit,
     hits,
-    overrides:
-      !spread && ["allAdjacent", "allAdjacentFoes"].includes(m.target)
-        ? { target: "normal" }
-        : undefined,
+    overrides: Object.keys(moveOverrides).length ? moveOverrides : undefined,
   });
   const attackerSide = { ...scene.field[side] },
     defenderSide = { ...scene.field[other], isProtected: defender.protected };
@@ -126,20 +223,26 @@ export function damageFor(attacker, defender, moveId, scene, catalog) {
       const partner = scene.actors[i];
       if (!partner.present || partner.hp <= 0) continue;
       if (i !== ai && i < 2 === ai < 2) {
-        if (partner.ability === "Battery") attackerSide.isBattery = true;
-        if (partner.ability === "Power Spot") attackerSide.isPowerSpot = true;
-        if (partner.ability === "Steely Spirit")
+        if (abilityOf(partner) === "Battery") attackerSide.isBattery = true;
+        if (abilityOf(partner) === "Power Spot") attackerSide.isPowerSpot = true;
+        if (abilityOf(partner) === "Steely Spirit")
           attackerSide.isSteelySpirit = true;
       }
-      if (scene.field[other].friendGuardOverride !== false && i !== di && i < 2 === di < 2 && partner.ability === "Friend Guard")
+      if (scene.field[other].friendGuardOverride !== false && i !== di && i < 2 === di < 2 && abilityOf(partner) === "Friend Guard")
         defenderSide.isFriendGuard = true;
     }
   }
+  const weatherSuppressed = active.some(
+    (i) => abilityOf(scene.actors[i]) === "Cloud Nine",
+  );
   const field = new Field({
     gameType: scene.mode === "double" ? "Doubles" : "Singles",
-    weather: scene.field.weather || undefined,
+    weather: weatherSuppressed ? undefined : scene.field.weather || undefined,
     terrain: scene.field.terrain || undefined,
     isGravity: !!scene.field.gravity,
+    isFairyAura: active.some(
+      (i) => abilityOf(scene.actors[i]) === "Fairy Aura",
+    ),
     attackerSide,
     defenderSide,
   });
@@ -189,32 +292,82 @@ export function speedOf(b, scene, catalog, index) {
   let speed = Math.floor(
     raw * (stage >= 0 ? (2 + stage) / 2 : 2 / (2 - stage)),
   );
-  if (b.status === "par" && b.ability !== "Quick Feet")
+  if (b.status === "par" && abilityOf(b) !== "Quick Feet")
     speed = Math.floor(speed / 2);
-  if (b.status && b.ability === "Quick Feet") speed = Math.floor(speed * 1.5);
+  if (b.status && abilityOf(b) === "Quick Feet") speed = Math.floor(speed * 1.5);
   const field = scene.field,
+    weather = weatherOf(scene),
     indexSide = index < 2 ? "attacker" : "defender";
   if (field[indexSide].isTailwind) speed *= 2;
   if (
-    (field.weather === "Sun" && b.ability === "Chlorophyll") ||
-    (field.weather === "Rain" && b.ability === "Swift Swim") ||
-    (field.weather === "Sand" && b.ability === "Sand Rush") ||
-    (field.weather === "Snow" && b.ability === "Slush Rush") ||
-    (field.terrain === "Electric" && b.ability === "Surge Surfer")
+    (weather === "Sun" && abilityOf(b) === "Chlorophyll") ||
+    (weather === "Rain" && abilityOf(b) === "Swift Swim") ||
+    (weather === "Sand" && abilityOf(b) === "Sand Rush") ||
+    (weather === "Snow" && abilityOf(b) === "Slush Rush") ||
+    (field.terrain === "Electric" && abilityOf(b) === "Surge Surfer")
   )
     speed *= 2;
-  if (b.item === "Choice Scarf") speed = Math.floor(speed * 1.5);
+  if (abilityOf(b) === "Unburden" && b.abilityOn) speed *= 2;
+  else if (abilityOf(b) !== "Klutz") {
+    if (b.item === "Choice Scarf") speed = Math.floor(speed * 1.5);
+    if (
+      [
+        "Iron Ball",
+        "Macho Brace",
+        "Power Anklet",
+        "Power Band",
+        "Power Belt",
+        "Power Bracer",
+        "Power Lens",
+        "Power Weight",
+      ].includes(b.item)
+    )
+      speed = Math.floor(speed / 2);
+    if (b.species === "ditto" && b.item === "Quick Powder") speed *= 2;
+  }
   return speed;
 }
 function priority(b, m) {
   return (
     m.priority +
-    (m.category === "Status" && b.ability === "Prankster" ? 1 : 0) +
-    (m.type === "Flying" && b.ability === "Gale Wings" && b.hp === 100
+    (m.category === "Status" && abilityOf(b) === "Prankster" ? 1 : 0) +
+    (m.type === "Flying" && abilityOf(b) === "Gale Wings" && b.hp === 100
       ? 1
       : 0) +
-    (m.heal && b.ability === "Triage" ? 3 : 0)
+    (m.heal && abilityOf(b) === "Triage" ? 3 : 0)
   );
+}
+function priorityBlocker(scene, attackerIndex, move, catalog) {
+  const attacker = scene.actors[attackerIndex];
+  if (
+    abilityOf(attacker) === "Mold Breaker" ||
+    priority(attacker, move) <= 0 ||
+    [
+      "self",
+      "adjacentAlly",
+      "adjacentAllyOrSelf",
+      "allies",
+      "allySide",
+      "allyTeam",
+      "foeSide",
+      "all",
+      "allAdjacent",
+    ].includes(move.target)
+  )
+    return "";
+  const targetIsAttackerSide = attackerIndex >= 2;
+  const blocker = activeIndices(scene).find(
+    (i) =>
+      i < 2 === targetIsAttackerSide &&
+      scene.actors[i].present &&
+      scene.actors[i].hp > 0 &&
+      ["Armor Tail", "Queenly Majesty", "Dazzling"].includes(
+        abilityOf(scene.actors[i]),
+      ),
+  );
+  return blocker === undefined
+    ? ""
+    : abilityName(abilityOf(scene.actors[blocker]), catalog);
 }
 const SIMPLE_STATUS = new Set([
   "protect",
@@ -322,42 +475,22 @@ const COMPLEX_MOVES = new Set([
   "thundercage",
 ]);
 const EVENT_ABILITIES = new Set([
-  "Disguise",
   "Ice Face",
-  "Stance Change",
   "Schooling",
   "Shields Down",
   "Zen Mode",
-  "Battle Bond",
   "Power Construct",
   "Emergency Exit",
   "Wimp Out",
   "Gulp Missile",
-  "Mummy",
   "Lingering Aroma",
-  "Wandering Spirit",
-  "Pickpocket",
-  "Magician",
-  "Symbiosis",
   "Dancer",
-  "Receiver",
   "Power of Alchemy",
   "Anger Shell",
-  "Berserk",
   "Color Change",
   "Cotton Down",
   "Seed Sower",
-  "Sand Spit",
-  "Toxic Debris",
   "Emergency Exit",
-  "Aftermath",
-  "Innards Out",
-  "Parental Bond",
-  "Opportunist",
-  "Mirror Armor",
-  "Cud Chew",
-  "Ripen",
-  "Cheek Pouch",
   "Poison Puppeteer",
 ]);
 export function turnLimits(scene, catalog) {
@@ -368,10 +501,7 @@ export function turnLimits(scene, catalog) {
     if (
       scene.mode === "double" &&
       [
-        "Lightning Rod",
         "Storm Drain",
-        "Armor Tail",
-        "Queenly Majesty",
         "Dazzling",
       ].includes(b.ability)
     )
@@ -388,6 +518,11 @@ export function turnLimits(scene, catalog) {
         `尚未接入回合触发特性：${catalog.abilities.find((a) => a.name === b.ability)?.zh || b.ability}`,
       );
     if (i === 3 || !b.active) continue;
+    if (b.ability === "Imposter") {
+      const opposite=i<2?i+2:i-2;
+      if (scene.actors[opposite]?.present && scene.actors[opposite].hp>0) continue;
+      reasons.push("变身者对面没有可变身目标；未变身时的变身招式暂不进入完整回合");
+    }
     const m = catalog.moves[b.moves[b.selected]];
     if (!m) {
       reasons.push("行动者选中的招式栏为空");
@@ -408,7 +543,8 @@ export function turnLimits(scene, catalog) {
 function statusMove(state, index, m, catalog) {
   const b = state.scene.actors[index],
     side = index < 2 ? "attacker" : "defender",
-    target = state.scene.actors[index < 2 ? state.scene.target : b.target || 0];
+    targetIndex = index < 2 ? state.scene.target : b.target || 0,
+    target = state.scene.actors[targetIndex];
   const log = state.log;
   if (["protect", "detect"].includes(m.id)) b.protected = true;
   else if (m.id === "trickroom")
@@ -445,109 +581,428 @@ function statusMove(state, index, m, catalog) {
     state.hp[index] = Math.min(max, state.hp[index] + heal);
     b.hp = (state.hp[index] / max) * 100;
   } else if (m.boosts) {
-    if(m.target==='self') changeBoost(b,m.boosts);
+    if(m.target==='self') {
+      const raised=changeBoost(b,m.boosts);triggerOpportunist(state,index,raised);
+    }
     else {
-      const recipients=m.target==='allAdjacentFoes'?activeIndices(state.scene).filter(i=>(i<2)!==(index<2)):[state.scene.actors.indexOf(target)];
-      for(const di of recipients)if(state.scene.actors[di].present&&!state.scene.actors[di].protected)
-        applyOpponentBoost(state,index,di,m.boosts,m.zh,true);
+      const recipients=m.target==='allAdjacentFoes'?activeIndices(state.scene).filter(i=>(i<2)!==(index<2)):[targetIndex];
+      for(const di of recipients) {
+        const defender=state.scene.actors[di];
+        if(!defender.present||defender.protected)continue;
+        const opponent=(di<2)!==(index<2),ignored=abilityOf(b)==='Mold Breaker';
+        if(opponent&&abilityOf(b)==='Prankster'&&battleTypesOf(defender,state.scene,catalog).includes('Dark')) {
+          log.push(`${defender.name} 不受恶作剧之心强化的变化招式影响`);continue;
+        }
+        if(opponent&&!ignored&&abilityOf(defender)==='Good as Gold') {
+          log.push(`${defender.name} 黄金之躯挡下 ${m.zh}`);continue;
+        }
+        if(opponent&&!ignored&&m.flags?.sound&&abilityOf(defender)==='Soundproof') {
+          log.push(`${defender.name} 隔音挡下 ${m.zh}`);continue;
+        }
+        if(opponent&&!ignored&&abilityOf(defender)==='Magic Bounce') {
+          log.push(`${defender.name} 魔法镜反弹 ${m.zh}`);
+          applyOpponentBoost(state,di,index,m.boosts,m.zh,true,catalog);
+        } else applyOpponentBoost(state,index,di,m.boosts,m.zh,true,catalog);
+      }
     }
   }
   else if (m.status && !target.protected && !target.status) {
-    const types = catalog.pokemon.find((p) => p.id === target.species).types;
-    if (
-      !(m.status === "brn" && types.includes("Fire")) &&
-      !(m.status === "par" && types.includes("Electric")) &&
-      !(
-        ["psn", "tox"].includes(m.status) &&
-        (types.includes("Poison") || types.includes("Steel"))
-      )
-    )
-      target.status = m.status;
+    const opponent=(targetIndex<2)!==(index<2),ignored=abilityOf(b)==='Mold Breaker';
+    if(opponent&&abilityOf(b)==='Prankster'&&battleTypesOf(target,state.scene,catalog).includes('Dark'))
+      log.push(`${target.name} 不受恶作剧之心强化的变化招式影响`);
+    else if(opponent&&!ignored&&abilityOf(target)==='Good as Gold')
+      log.push(`${target.name} 黄金之躯挡下 ${m.zh}`);
+    else if(opponent&&!ignored&&m.flags?.sound&&abilityOf(target)==='Soundproof')
+      log.push(`${target.name} 隔音挡下 ${m.zh}`);
+    else {
+      let recipientIndex=targetIndex,sourceIndex=index;
+      if(opponent&&!ignored&&abilityOf(target)==='Magic Bounce') {
+        recipientIndex=index;sourceIndex=targetIndex;
+        log.push(`${target.name} 魔法镜反弹 ${m.zh}`);
+      }
+      const recipient=state.scene.actors[recipientIndex];
+      if(!recipient.status&&canReceiveStatus(state,recipientIndex,m.status,catalog,abilityOf(state.scene.actors[sourceIndex]))) {
+        recipient.status=m.status;
+        if(['brn','par','psn','tox'].includes(m.status)&&abilityOf(recipient)==='Synchronize') {
+          const source=state.scene.actors[sourceIndex];
+          if(!source.status&&canReceiveStatus(state,sourceIndex,m.status,catalog,abilityOf(recipient)))source.status=m.status;
+        }
+      }
+    }
   }
   log.push(`${b.name} 使用 ${m.zh}`);
   return state;
 }
+function applyCheekPouch(state, index, pokemon) {
+  if (abilityOf(pokemon) !== "Cheek Pouch" || state.hp[index] <= 0) return;
+  const before = state.hp[index];
+  state.hp[index] = Math.min(
+    state.max[index],
+    state.hp[index] + Math.floor(state.max[index] / 3),
+  );
+  if (state.hp[index] > before) state.log.push(`${pokemon.name} 颊囊回复`);
+}
+function recordConsumedItem(state, index, item) {
+  if (!item) return;
+  state.consumedItems = (state.consumedItems || []).filter(
+    (entry) => entry.index !== index,
+  );
+  state.consumedItems.push({ index, item });
+}
+function recoverConsumedItem(state, entry) {
+  const position = (state.consumedItems || []).findIndex(
+    (candidate) =>
+      candidate.index === entry.index && candidate.item === entry.item,
+  );
+  if (position >= 0) state.consumedItems.splice(position, 1);
+}
+const MUMMY_IMMUNE = new Set([
+  "As One", "Battle Bond", "Comatose", "Commander", "Disguise",
+  "Gulp Missile", "Ice Face", "Lingering Aroma", "Multitype",
+  "Power Construct", "RKS System", "Schooling", "Shields Down",
+  "Stance Change", "Zen Mode", "Zero to Hero", "Mummy",
+]);
+const WANDERING_IMMUNE = new Set([
+  "As One", "Battle Bond", "Comatose", "Commander", "Disguise",
+  "Flower Gift", "Forecast", "Hunger Switch", "Ice Face", "Illusion",
+  "Imposter", "Multitype", "Neutralizing Gas", "Power of Alchemy",
+  "Receiver", "RKS System", "Schooling", "Shields Down", "Stance Change",
+  "Wonder Guard", "Zen Mode", "Zero to Hero",
+]);
+const RECEIVER_IMMUNE = new Set([
+  "Receiver", "Power of Alchemy", "Trace", "Forecast", "Flower Gift",
+  "Multitype", "Illusion", "Wonder Guard", "Zen Mode", "Imposter",
+  "Stance Change", "Power Construct", "Schooling", "Comatose",
+  "Shields Down", "Disguise", "RKS System", "Battle Bond",
+  "Wandering Spirit", "As One", "Zero to Hero", "Commander",
+  "Gulp Missile", "Ice Face",
+]);
+function abilityName(ability, catalog) {
+  return catalog.abilities.find((entry) => entry.name === ability)?.zh || ability;
+}
+function itemName(item, catalog) {
+  return catalog.items.find((entry) => entry.name === item)?.zh || item;
+}
+function updateUnburden(pokemon) {
+  if (abilityOf(pokemon) === "Unburden") pokemon.abilityOn = !pokemon.item;
+}
+function opposingUnnerve(state, index) {
+  return activeIndices(state.scene).some(
+    (i) =>
+      (i < 2) !== (index < 2) &&
+      state.scene.actors[i].present &&
+      state.hp[i] > 0 &&
+      abilityOf(state.scene.actors[i]) === "Unnerve",
+  );
+}
+function battleTypesOf(build, scene, catalog) {
+  if (build.battleTypes) return build.battleTypes;
+  if (abilityOf(build) === "Mimicry") {
+    const type = {
+      Electric: "Electric",
+      Grassy: "Grass",
+      Psychic: "Psychic",
+      Misty: "Fairy",
+    }[scene.field.terrain];
+    if (type) return [type];
+  }
+  return catalog.pokemon.find((entry) => entry.id === build.species)?.types || [];
+}
+function canReceiveStatus(state, index, status, catalog, sourceAbility = "") {
+  const pokemon = state.scene.actors[index], ability = abilityOf(pokemon);
+  const types = battleTypesOf(pokemon, state.scene, catalog);
+  if (ability === "Purifying Salt") return false;
+  if (state.scene.field.weather === "Sun" && ability === "Leaf Guard") return false;
+  if (
+    types.includes("Grass") &&
+    activeIndices(state.scene).some(
+      (i) =>
+        i < 2 === index < 2 &&
+        state.scene.actors[i].present &&
+        state.hp[i] > 0 &&
+        abilityOf(state.scene.actors[i]) === "Flower Veil",
+    )
+  )
+    return false;
+  if (status === "brn")
+    return !types.includes("Fire") && !["Water Bubble"].includes(ability);
+  if (status === "par")
+    return !types.includes("Electric") && ability !== "Limber";
+  if (["psn", "tox"].includes(status))
+    return (
+      (sourceAbility === "Corrosion" ||
+        (!types.includes("Poison") && !types.includes("Steel"))) &&
+      ability !== "Immunity"
+    );
+  if (status === "slp")
+    return !["Insomnia", "Vital Spirit"].includes(ability) &&
+      !activeIndices(state.scene).some(i=>i<2===index<2&&state.scene.actors[i].present&&state.hp[i]>0&&abilityOf(state.scene.actors[i])==='Sweet Veil');
+  return true;
+}
+function partnerIndex(index) {
+  return index < 2 ? 1 - index : 5 - index;
+}
+function applySymbiosis(state, consumerIndex, catalog) {
+  if (state.scene.mode !== "double" || state.scene.actors[consumerIndex].item) return;
+  const donorIndex = partnerIndex(consumerIndex), donor = state.scene.actors[donorIndex];
+  if (!donor?.present || state.hp[donorIndex] <= 0 || abilityOf(donor) !== "Symbiosis" || !donor.item) return;
+  const consumer = state.scene.actors[consumerIndex], item = donor.item;
+  donor.item = ""; consumer.item = item;
+  updateUnburden(consumer);
+  state.log.push(`${donor.name} 共生把${itemName(item, catalog)}交给 ${consumer.name}`);
+}
+function triggerReceiver(state, faintedIndex, catalog) {
+  if (state.scene.mode !== "double") return;
+  const receiverIndex = partnerIndex(faintedIndex), receiver = state.scene.actors[receiverIndex];
+  if (!receiver?.present || state.hp[receiverIndex] <= 0 || !["Receiver", "Power of Alchemy"].includes(abilityOf(receiver))) return;
+  const copied = abilityOf(state.scene.actors[faintedIndex]);
+  if (!copied || RECEIVER_IMMUNE.has(copied)) return;
+  const sourceName = abilityName(abilityOf(receiver), catalog);
+  receiver.currentAbility = copied;
+  state.log.push(`${receiver.name} ${sourceName}获得${abilityName(copied, catalog)}`);
+}
+function contactMade(attacker, move) {
+  return !!move.flags.contact && abilityOf(attacker) !== "Long Reach" && attacker.item !== "Protective Pads";
+}
+function applyContactAbility(state, attackerIndex, defenderIndex, move, catalog) {
+  const attacker = state.scene.actors[attackerIndex], defender = state.scene.actors[defenderIndex];
+  if (!contactMade(attacker, move)) return;
+  const attackingAbility = abilityOf(attacker), defendingAbility = abilityOf(defender);
+  if (defendingAbility === "Mummy" && !MUMMY_IMMUNE.has(attackingAbility)) {
+    attacker.currentAbility = "Mummy";
+    state.log.push(`${attacker.name} 的${abilityName(attackingAbility, catalog)}变为木乃伊`);
+  } else if (
+    defendingAbility === "Wandering Spirit" &&
+    !WANDERING_IMMUNE.has(attackingAbility) &&
+    !WANDERING_IMMUNE.has(defendingAbility)
+  ) {
+    attacker.currentAbility = defendingAbility;
+    defender.currentAbility = attackingAbility;
+    state.log.push(`${defender.name} 游魂与 ${attacker.name} 交换特性：${abilityName(attackingAbility, catalog)} ↔ 游魂`);
+  }
+}
+function transferableItem(state, sourceIndex, item, catalog) {
+  if (!item) return false;
+  const source = state.scene.actors[sourceIndex];
+  if (abilityOf(source) === "Sticky Hold" && state.hp[sourceIndex] > 0) return false;
+  const species = catalog.pokemon.find((entry) => entry.id === source.species);
+  return species?.requiredItem !== item;
+}
+function applyPostMoveItemAbilities(state, attackerIndex, defenderIndices, move, catalog) {
+  const attacker = state.scene.actors[attackerIndex];
+  for (const defenderIndex of defenderIndices) {
+    const defender = state.scene.actors[defenderIndex];
+    if (
+      state.hp[attackerIndex] > 0 &&
+      abilityOf(attacker) === "Magician" &&
+      !attacker.item &&
+      state.dealtThisMove?.[defenderIndex] > 0 &&
+      transferableItem(state, defenderIndex, defender.item, catalog)
+    ) {
+      const item = defender.item; defender.item = ""; attacker.item = item;
+      updateUnburden(defender); updateUnburden(attacker);
+      state.log.push(`${attacker.name} 魔术师夺走 ${defender.name} 的${itemName(item, catalog)}`);
+    }
+    if (
+      state.hp[defenderIndex] > 0 &&
+      abilityOf(defender) === "Pickpocket" &&
+      !defender.item &&
+      contactMade(attacker, move) &&
+      transferableItem(state, attackerIndex, attacker.item, catalog)
+    ) {
+      const item = attacker.item; attacker.item = ""; defender.item = item;
+      updateUnburden(attacker); updateUnburden(defender);
+      state.log.push(`${defender.name} 顺手牵羊偷走 ${attacker.name} 的${itemName(item, catalog)}`);
+    }
+  }
+}
 function afterHit(s, ai, di, m, amount, catalog) {
   const a = s.scene.actors[ai],
     d = s.scene.actors[di];
-  let loss = Math.min(amount, s.hp[di]);
+  const defenderBefore = s.hp[di], attackerBefore = s.hp[ai];
+  const telepathyBlocked =
+    amount > 0 &&
+    (ai < 2) === (di < 2) &&
+    abilityOf(d) === "Telepathy" &&
+    s.actionAbility !== "Mold Breaker";
+  const disguiseBroke =
+    amount > 0 && abilityOf(d) === "Disguise" && abilityOf(a) !== "Mold Breaker";
+  let loss = disguiseBroke || telepathyBlocked ? 0 : Math.min(amount, s.hp[di]);
   if (
     amount >= s.hp[di] &&
     s.hp[di] === s.max[di] &&
     (d.item === "Focus Sash" ||
-      (d.ability === "Sturdy" && a.ability !== "Mold Breaker"))
+      (abilityOf(d) === "Sturdy" && abilityOf(a) !== "Mold Breaker"))
   ) {
     loss = Math.max(0, s.hp[di] - 1);
     if (d.item === "Focus Sash") {
+      recordConsumedItem(s, di, d.item);
       d.item = "";
       s.log.push(`${d.name} 气势披带触发`);
+      applySymbiosis(s, di, catalog);
+      updateUnburden(d);
     }
   }
   s.hp[di] -= loss;
   s.dealt[di] += loss;
+  s.dealtThisMove[di] += loss;
   d.hp = (s.hp[di] / s.max[di]) * 100;
   s.log.push(
     `${a.name} → ${d.name} · ${m.zh} ${((loss / s.max[di]) * 100).toFixed(1)}%${s.hp[di] === 0 ? " · 倒下" : ""}`,
   );
+  if (telepathyBlocked) s.log.push(`${d.name} 心灵感应避开队友的攻击`);
+  const ignoredDefenderAbility = s.actionAbility === "Mold Breaker";
+  if (!d.protected && !ignoredDefenderAbility) {
+    const ability = abilityOf(d), type = m.type;
+    const healAbility =
+      (type === "Water" && ["Water Absorb", "Dry Skin"].includes(ability)) ||
+      (type === "Electric" && ability === "Volt Absorb") ||
+      (type === "Ground" && ability === "Earth Eater");
+    if (healAbility) {
+      const before = s.hp[di];
+      s.hp[di] = Math.min(s.max[di], s.hp[di] + Math.floor(s.max[di] / 4));
+      d.hp = (s.hp[di] / s.max[di]) * 100;
+      s.log.push(`${d.name} ${abilityName(ability, catalog)}吸收招式${s.hp[di] > before ? "并回复最大 HP 的 1/4" : ""}`);
+    }
+    if (type === "Fire" && ability === "Flash Fire") {
+      d.abilityOn = true;
+      s.log.push(`${d.name} 引火被激活`);
+    }
+    if (type === "Grass" && ability === "Sap Sipper") {
+      const raised = changeBoost(d, { atk: 1 }); triggerOpportunist(s, di, raised);
+      s.log.push(`${d.name} 食草吸收招式：攻击 +${d.boosts.atk}`);
+    }
+    if (type === "Electric" && ability === "Motor Drive") {
+      const raised = changeBoost(d, { spe: 1 }); triggerOpportunist(s, di, raised);
+      s.log.push(`${d.name} 电气引擎吸收招式：速度 +${d.boosts.spe}`);
+    }
+  }
+  const lightningRodToken = `${ai}:${di}`;
+  if (
+    m.type === "Electric" &&
+    abilityOf(d) === "Lightning Rod" &&
+    !d.protected &&
+    s.actionAbility !== "Mold Breaker" &&
+    !s.lightningRodTriggers.includes(lightningRodToken)
+  ) {
+    s.lightningRodTriggers.push(lightningRodToken);
+    const raised = changeBoost(d, { spa: 1 });
+    triggerOpportunist(s, di, raised);
+    s.log.push(`${d.name} 避雷针吸收电属性招式：特攻 +${d.boosts.spa}`);
+  }
+  if (disguiseBroke) {
+    const disguiseLoss = Math.min(
+      s.hp[di],
+      Math.max(1, Math.floor(s.max[di] / 8)),
+    );
+    s.hp[di] -= disguiseLoss;
+    d.currentAbility = "";
+    d.hp = (s.hp[di] / s.max[di]) * 100;
+    s.log.push(`${d.name} 画皮挡下第一击，随后损失最大 HP 的 1/8`);
+  }
   const berryType=RESIST_BERRY_TYPES[d.item];
-  if(loss>0&&berryType&&a.ability!=="Unnerve") {
+  if(loss>0&&berryType&&!opposingUnnerve(s,di)) {
     const types=catalog.pokemon.find((p)=>p.id===d.species).types;
     const effective=types.reduce((n,t)=>n*(TYPE_CHART[0][m.type]?.[t]??1),1);
     if((berryType===m.type&&effective>1)||(d.item==="Chilan Berry"&&m.type==="Normal")) {
       const berryName=catalog.items.find((item)=>item.name===d.item)?.zh||d.item;
+      d.consumedBerry=d.item;
+      recordConsumedItem(s,di,d.item);
       d.item="";
-      s.log.push(`${d.name} ${berryName}触发，仅减半本次攻击的第一击`);
+      s.log.push(`${d.name} ${berryName}触发，${abilityOf(d) === "Ripen" ? "熟成后本次第一击降至四分之一" : "仅减半本次攻击的第一击"}`);
+      applySymbiosis(s, di, catalog);
+      updateUnburden(d);
+      applyCheekPouch(s, di, d);
     }
   }
   if (loss > 0) {
     if((ai<2)===(di<2))s.log.push(`${a.name} 的 ${m.zh} 误伤队友 ${d.name}`);
+    if (
+      abilityOf(d) === "Berserk" &&
+      defenderBefore > s.max[di] / 2 &&
+      s.hp[di] > 0 &&
+      s.hp[di] <= s.max[di] / 2 &&
+      !(s.actionAbility === "Sheer Force" && m.secondary)
+    ) d.berserkPending = true;
+    if (abilityOf(d) === "Sand Spit" && s.scene.field.weather !== "Sand") {
+      s.scene.field.weather = "Sand";
+      s.openingWeather = "Sand";
+      s.log.push(`${d.name} 吐沙发动 → 沙暴`);
+    }
+    applyContactAbility(s, ai, di, m, catalog);
     if (m.drain)
       s.hp[ai] = Math.min(
         s.max[ai],
         s.hp[ai] + Math.max(1, Math.floor((loss * m.drain[0]) / m.drain[1])),
       );
-    if (m.recoil && !["Rock Head", "Magic Guard"].includes(a.ability))
+    if (m.recoil && !["Rock Head", "Magic Guard"].includes(abilityOf(a)))
       s.hp[ai] = Math.max(
         0,
         s.hp[ai] - Math.max(1, Math.round((loss * m.recoil[0]) / m.recoil[1])),
       );
-    if(m.recoil&&!["Rock Head","Magic Guard"].includes(a.ability))s.log.push(`${a.name} 承受招式反伤`);
+    if(m.recoil&&!["Rock Head","Magic Guard"].includes(abilityOf(a)))s.log.push(`${a.name} 承受招式反伤`);
     if (
       ["Sitrus Berry", "Oran Berry"].includes(d.item) &&
+      !opposingUnnerve(s,di) &&
       s.hp[di] > 0 &&
       s.hp[di] <= s.max[di] / 2
     ) {
+      const berry = d.item;
+      d.consumedBerry=berry;
+      recordConsumedItem(s,di,berry);
+      const baseHeal = berry === "Oran Berry" ? 10 : Math.floor(s.max[di] / 4);
       s.hp[di] = Math.min(
         s.max[di],
-        s.hp[di] + (d.item === "Oran Berry" ? 10 : Math.floor(s.max[di] / 4)),
+        s.hp[di] + baseHeal * (abilityOf(d) === "Ripen" ? 2 : 1),
       );
       d.item = "";
-      s.log.push(`${d.name} 文柚果回复`);
+      s.log.push(`${d.name} ${berry === "Oran Berry" ? "橙橙果" : "文柚果"}回复${abilityOf(d) === "Ripen" ? "（熟成加倍）" : ""}`);
+      applySymbiosis(s, di, catalog);
+      applyCheekPouch(s, di, d);
     }
-    if (d.ability === "Stamina") changeBoost(d, { def: 1 });
-    if (d.ability === "Weak Armor" && m.category === "Physical")
-      changeBoost(d, { def: -1, spe: 2 });
-    if (d.ability === "Water Compaction" && m.type === "Water")
-      changeBoost(d, { def: 2 });
-    if (
-      m.flags.contact &&
-      a.ability !== "Long Reach" &&
-      a.item !== "Protective Pads"
-    ) {
-      if (["Rough Skin", "Iron Barbs"].includes(d.ability))
+    if (abilityOf(d) === "Stamina") {
+      const raised=changeBoost(d, { def: 1 });triggerOpportunist(s,di,raised);
+    }
+    if (abilityOf(d) === "Weak Armor" && m.category === "Physical") {
+      const raised=changeBoost(d, { def: -1, spe: 2 });triggerOpportunist(s,di,raised);
+    }
+    if (abilityOf(d) === "Water Compaction" && m.type === "Water") {
+      const raised=changeBoost(d, { def: 2 });triggerOpportunist(s,di,raised);
+    }
+    if (abilityOf(d) === "Justified" && m.type === "Dark" && !ignoredDefenderAbility) {
+      const raised=changeBoost(d,{atk:1});triggerOpportunist(s,di,raised);
+      s.log.push(`${d.name} 正义之心：攻击 +${d.boosts.atk}`);
+    }
+    if (abilityOf(d) === "Anger Point" && (a.crit || m.willCrit) && !ignoredDefenderAbility) {
+      const before=d.boosts.atk;d.boosts.atk=6;
+      const raised={atk:6-before};triggerOpportunist(s,di,raised);
+      s.log.push(`${d.name} 愤怒穴位：攻击提升至 +6`);
+    }
+    if (abilityOf(d) === "Electromorphosis" && !ignoredDefenderAbility) {
+      d.abilityOn=true;
+      s.log.push(`${d.name} 电力转换进入充电状态`);
+    }
+    if (abilityOf(d) === "Spicy Spray" && !ignoredDefenderAbility && !a.status && canReceiveStatus(s,ai,"brn",catalog)) {
+      a.status="brn";
+      s.log.push(`${d.name} 辣椒喷发使 ${a.name} 陷入灼伤`);
+    }
+    if (contactMade(a, m)) {
+      if (["Rough Skin", "Iron Barbs"].includes(abilityOf(d)))
         s.hp[ai] = Math.max(0, s.hp[ai] - Math.floor(s.max[ai] / 8));
       if (d.item === "Rocky Helmet")
         s.hp[ai] = Math.max(0, s.hp[ai] - Math.floor(s.max[ai] / 6));
-      if(['Rough Skin','Iron Barbs'].includes(d.ability)||d.item==='Rocky Helmet')s.log.push(`${a.name} 承受 ${d.name} 的接触反伤`);
+      if(['Rough Skin','Iron Barbs'].includes(abilityOf(d))||d.item==='Rocky Helmet')s.log.push(`${a.name} 承受 ${d.name} 的接触反伤`);
     }
     if (
       m.secondary &&
       (m.secondary.chance === 100 || a.secondary) &&
-      a.ability !== "Sheer Force" &&
-      d.ability !== "Shield Dust"
+      s.actionAbility !== "Sheer Force" &&
+      abilityOf(d) !== "Shield Dust"
     ) {
-      if(m.secondary.boosts)applyOpponentBoost(s,ai,di,m.secondary.boosts,m.zh,m.secondary.chance===100);
-      if (m.secondary.self) changeBoost(a, m.secondary.self.boosts);
+      if(m.secondary.boosts)applyOpponentBoost(s,ai,di,m.secondary.boosts,m.zh,m.secondary.chance===100,catalog);
+      if (m.secondary.self) {
+        const raised=changeBoost(a, m.secondary.self.boosts);triggerOpportunist(s,ai,raised);
+      }
       if (m.secondary.status && !d.status) {
         const t = catalog.pokemon.find((p) => p.id === d.species).types;
         if (
@@ -561,10 +1016,41 @@ function afterHit(s, ai, di, m, amount, catalog) {
           d.status = m.secondary.status;
       }
     }
-    if (s.hp[di] === 0 && a.ability === "Moxie") changeBoost(a, { atk: 1 });
+    if (s.hp[di] === 0 && abilityOf(a) === "Moxie") {
+      const raised=changeBoost(a, { atk: 1 });triggerOpportunist(s,ai,raised);
+    }
   }
+  if (attackerBefore > 0 && s.hp[ai] === 0) triggerReceiver(s, ai, catalog);
   a.hp = (s.hp[ai] / s.max[ai]) * 100;
   d.hp = (s.hp[di] / s.max[di]) * 100;
+}
+function finishTarget(state, attackerIndex, defenderIndex, move, hitCount, catalog) {
+  const attacker=state.scene.actors[attackerIndex],defender=state.scene.actors[defenderIndex];
+  if(defender.berserkPending) {
+    if(hitCount===1||state.hp[defenderIndex]<=state.max[defenderIndex]/2) {
+      const raised=changeBoost(defender,{spa:1});triggerOpportunist(state,defenderIndex,raised);
+      state.log.push(`${defender.name} 怒火冲天：特攻 +${defender.boosts.spa}`);
+    }
+    delete defender.berserkPending;
+  }
+  if(state.hp[defenderIndex]===0) {
+    const ability=abilityOf(defender),magicGuard=abilityOf(attacker)==='Magic Guard';
+    if(ability==='Aftermath'&&contactMade(attacker,move)&&!magicGuard) {
+      const damp=activeIndices(state.scene).some((i)=>state.scene.actors[i].present&&state.hp[i]>0&&abilityOf(state.scene.actors[i])==='Damp');
+      if(!damp||abilityOf(attacker)==='Mold Breaker') {
+        state.hp[attackerIndex]=Math.max(0,state.hp[attackerIndex]-Math.floor(state.max[attackerIndex]/4));
+        state.log.push(`${defender.name} 诱爆造成 ${attacker.name} 最大 HP 的 1/4 伤害`);
+      }
+    }
+    if(ability==='Innards Out'&&!magicGuard&&state.dealtThisMove[defenderIndex]>0) {
+      const reflected=Math.min(state.hp[attackerIndex],state.dealtThisMove[defenderIndex]);
+      state.hp[attackerIndex]-=reflected;
+      state.log.push(`${defender.name} 飞出的内在物对 ${attacker.name} 造成等同本次招式损血的伤害`);
+    }
+    triggerReceiver(state,defenderIndex,catalog);
+  }
+  attacker.hp=state.hp[attackerIndex]/state.max[attackerIndex]*100;
+  defender.hp=state.hp[defenderIndex]/state.max[defenderIndex]*100;
 }
 function mergeStates(states) {
   const map = new Map();
@@ -573,8 +1059,25 @@ function mergeStates(states) {
       s.hp,
       s.done,
       s.scene.field,
-      s.scene.actors.map((a) => [a.boosts, a.status, a.item, a.protected]),
+      s.scene.actors.map((a) => [
+        a.boosts,
+        a.status,
+        a.item,
+        a.consumedBerry,
+        a.ability,
+        a.currentAbility,
+        a.abilityOn,
+        a.battleTypes,
+        a.battleForm,
+        a.berserkPending,
+        a.protected,
+      ]),
       s.dealt,
+      s.dealtThisMove,
+      s.actionAbility,
+      s.lightningRodTriggers,
+      s.consumedItems,
+      s.quickDraw,
       s.openingWeather,
       s.didDamage,
     ]);
@@ -594,11 +1097,12 @@ function endTurn(state, catalog) {
     const b = state.scene.actors[i];
     if (!b.present || state.hp[i] <= 0) continue;
     const max = state.max[i],
-      types = catalog.pokemon.find((p) => p.id === b.species).types;
+      types = battleTypesOf(b,state.scene,catalog);
     let hp = state.hp[i];
-    const weather = state.scene.field.weather;
+    const beforeTurnEnd = hp;
+    const weather = weatherOf(state.scene);
     const hurt = (n) => {
-      if (b.ability !== "Magic Guard")
+      if (abilityOf(b) !== "Magic Guard")
         hp = Math.max(0, hp - Math.max(1, Math.floor(max * n)));
     };
     const heal = (n) => {
@@ -613,40 +1117,125 @@ function endTurn(state, catalog) {
         "Sand Rush",
         "Sand Force",
         "Sand Veil",
-      ].includes(b.ability)
+      ].includes(abilityOf(b))
     )
       hurt(1 / 16);
-    if (hp > 0 && weather === "Sun" && b.ability === "Solar Power") hurt(1 / 8);
-    if (hp > 0 && weather === "Rain" && b.ability === "Rain Dish") heal(1 / 16);
-    if (hp > 0 && b.ability === "Dry Skin") {
+    if (hp > 0 && weather === "Sun" && abilityOf(b) === "Solar Power") hurt(1 / 8);
+    if (hp > 0 && weather === "Rain" && abilityOf(b) === "Rain Dish") heal(1 / 16);
+    if (hp > 0 && abilityOf(b) === "Dry Skin") {
       if (weather === "Rain") heal(1 / 8);
       if (weather === "Sun") hurt(1 / 8);
     }
-    if (hp > 0 && weather === "Snow" && b.ability === "Ice Body") heal(1 / 16);
+    if (hp > 0 && weather === "Snow" && abilityOf(b) === "Ice Body") heal(1 / 16);
+    if (hp > 0 && weather === "Rain" && abilityOf(b) === "Hydration" && b.status) {
+      b.status = "";
+      state.log.push(`${b.name} 湿润之躯治愈了异常状态`);
+    }
     if (
       hp > 0 &&
       state.scene.field.terrain === "Grassy" &&
       (state.scene.field.gravity ||
         (!types.includes("Flying") &&
-          !["Levitate", "Eelevate"].includes(b.ability)))
+          !["Levitate", "Eelevate"].includes(abilityOf(b))))
     )
       heal(1 / 16);
     if (hp > 0 && b.item === "Leftovers") heal(1 / 16);
     if (
       hp > 0 &&
-      b.ability === "Poison Heal" &&
+      abilityOf(b) === "Poison Heal" &&
       ["tox", "psn"].includes(b.status)
     )
       heal(1 / 8);
     else if (hp > 0) {
-      if (b.status === "brn") hurt(b.ability === "Heatproof" ? 1 / 32 : 1 / 16);
+      if (b.status === "brn") hurt(abilityOf(b) === "Heatproof" ? 1 / 32 : 1 / 16);
       if (b.status === "psn") hurt(1 / 8);
       if (b.status === "tox") hurt(1 / 16);
     }
     state.hp[i] = hp;
     b.hp = (hp / max) * 100;
+    if(beforeTurnEnd>0&&hp===0)triggerReceiver(state,i,catalog);
   }
   return state;
+}
+function endTurnAbilityBranches(input) {
+  let branches=[input];
+  for(const i of activeIndices(input.scene)) {
+    branches=branches.flatMap(state=>{
+      const pokemon=state.scene.actors[i];
+      if(!pokemon.present||state.hp[i]<=0)return [state];
+      const candidates=[];
+      if(abilityOf(pokemon)==='Shed Skin'&&pokemon.status)candidates.push(i);
+      if(abilityOf(pokemon)==='Healer'&&state.scene.mode==='double') {
+        const pi=partnerIndex(i),partner=state.scene.actors[pi];
+        if(partner?.present&&state.hp[pi]>0&&partner.status)candidates.push(pi);
+      }
+      if(!candidates.length)return [state];
+      const cured=clone(state),notCured=clone(state);
+      cured.p*=0.3;notCured.p*=0.7;
+      for(const ci of candidates)cured.scene.actors[ci].status='';
+      cured.log.push(`${pokemon.name} ${abilityOf(pokemon)==='Shed Skin'?'蜕皮':'治愈之心'}治愈了异常状态`);
+      return [cured,notCured];
+    });
+  }
+  return branches;
+}
+function activateRecoveredBerry(state,index,catalog) {
+  const holder=state.scene.actors[index];
+  if(
+    opposingUnnerve(state,index)||
+    !['Sitrus Berry','Oran Berry'].includes(holder.item)||
+    state.hp[index]>state.max[index]/2
+  )return;
+  const berry=holder.item,base=berry==='Oran Berry'?10:Math.floor(state.max[index]/4);
+  holder.consumedBerry=berry;
+  recordConsumedItem(state,index,berry);
+  state.hp[index]=Math.min(
+    state.max[index],
+    state.hp[index]+base*(abilityOf(holder)==='Ripen'?2:1),
+  );
+  holder.item='';holder.hp=state.hp[index]/state.max[index]*100;
+  state.log.push(`${holder.name} 立即吃掉${itemName(berry,catalog)}并回复${abilityOf(holder)==='Ripen'?'（熟成加倍）':''}`);
+  applyCheekPouch(state,index,holder);
+}
+function itemRecoveryBranches(input,catalog,processed=[]) {
+  const available=activeIndices(input.scene).filter(i=>{
+    const holder=input.scene.actors[i],ability=abilityOf(holder);
+    return !processed.includes(i)&&holder.present&&input.hp[i]>0&&
+      ['Harvest','Pickup'].includes(ability);
+  });
+  if(!available.length)return [input];
+  const fastest=Math.max(...available.map(i=>speedOf(input.scene.actors[i],input.scene,catalog,i)));
+  const tied=available.filter(i=>speedOf(input.scene.actors[i],input.scene,catalog,i)===fastest);
+  return tied.flatMap(i=>{
+    const state=clone(input),holder=state.scene.actors[i],nextProcessed=[...processed,i];
+    state.p/=tied.length;
+    if(holder.item)return itemRecoveryBranches(state,catalog,nextProcessed);
+    const consumed=state.consumedItems||[];
+    if(abilityOf(holder)==='Pickup') {
+      const entry=[...consumed].reverse().find(candidate=>
+        candidate.index!==i&&state.scene.actors[candidate.index]?.present&&state.hp[candidate.index]>0
+      );
+      if(!entry)return itemRecoveryBranches(state,catalog,nextProcessed);
+      holder.item=entry.item;recoverConsumedItem(state,entry);
+      state.log.push(`${holder.name} 捡拾获得${itemName(entry.item,catalog)}`);
+      activateRecoveredBerry(state,i,catalog);
+      return itemRecoveryBranches(state,catalog,nextProcessed);
+    }
+    const own=[...consumed].reverse().find(candidate=>
+      candidate.index===i&&candidate.item.endsWith('Berry')
+    );
+    if(!own)return itemRecoveryBranches(state,catalog,nextProcessed);
+    const chance=weatherOf(state.scene)==='Sun'?1:0.5;
+    const restored=clone(state);
+    restored.scene.actors[i].item=own.item;recoverConsumedItem(restored,own);
+    restored.log.push(`${holder.name} 收获重新获得${itemName(own.item,catalog)}`);
+    activateRecoveredBerry(restored,i,catalog);
+    const success=itemRecoveryBranches(restored,catalog,nextProcessed);
+    if(chance===1)return success;
+    for(const branch of success)branch.p*=chance;
+    const missed=clone(state);missed.p*=1-chance;
+    return [...success,...itemRecoveryBranches(missed,catalog,nextProcessed)];
+  });
 }
 export function simulateTurn(scene, catalog) {
   try {
@@ -657,6 +1246,17 @@ export function simulateTurn(scene, catalog) {
     const max=states[0].max,hp=states[0].hp;
     const opening=states.map(s=>({weather:s.openingWeather,probability:s.p*100,log:s.openingLog,remaining:s.hp.map((v,i)=>v/max[i]*100),boosts:s.scene.actors.map(b=>clone(b.boosts))}));
     states.forEach(s=>{s.log=[];});
+    for (const i of activeIndices(scene)) {
+      if (!scene.actors[i].present || !scene.actors[i].active || abilityOf(scene.actors[i]) !== "Quick Draw") continue;
+      states=states.flatMap(s=>{
+        const active=clone(s),inactive=clone(s);
+        active.p*=0.3;inactive.p*=0.7;
+        active.quickDraw=[...(active.quickDraw||[]),i];
+        inactive.quickDraw=[...(inactive.quickDraw||[])];
+        active.log.push(`${active.scene.actors[i].name} 速击发动`);
+        return [active,inactive];
+      });
+    }
     const timelineMap=new Map();
     function recordAction(before,after,ai,m,step) {
       const key=JSON.stringify([after.openingWeather,after.done]);
@@ -689,15 +1289,26 @@ export function simulateTurn(scene, catalog) {
             s.scene.actors[i],
             catalog.moves[s.scene.actors[i].moves[s.scene.actors[i].selected]],
           ),
+          s.quickDraw?.includes(i)
+            ? 1
+            : abilityOf(s.scene.actors[i]) === "Stall"
+              ? -1
+              : 0,
           speedOf(s.scene.actors[i], s.scene, catalog, i) *
             (s.scene.field.trickRoom ? -1 : 1),
         ];
         available.sort(
-          (a, b) => rank(b)[0] - rank(a)[0] || rank(b)[1] - rank(a)[1],
+          (a, b) =>
+            rank(b)[0] - rank(a)[0] ||
+            rank(b)[1] - rank(a)[1] ||
+            rank(b)[2] - rank(a)[2],
         );
         const best = rank(available[0]),
           ties = available.filter(
-            (i) => rank(i)[0] === best[0] && rank(i)[1] === best[1],
+            (i) =>
+              rank(i)[0] === best[0] &&
+              rank(i)[1] === best[1] &&
+              rank(i)[2] === best[2],
           );
         for (const ai of ties) {
           const state = clone(s);
@@ -705,6 +1316,27 @@ export function simulateTurn(scene, catalog) {
           state.done.push(ai);
           const actor = state.scene.actors[ai],
             m = catalog.moves[actor.moves[actor.selected]];
+          state.dealtThisMove = [0, 0, 0, 0];
+          state.lightningRodTriggers = [];
+          state.actionAbility = abilityOf(actor);
+          state.scene.turnDone = [...state.done];
+          const blockedBy = priorityBlocker(state.scene, ai, m, catalog);
+          if (blockedBy) {
+            state.log.push(`${blockedBy}拦下 ${actor.name} 的${m.zh}`);
+            recordAction(s, state, ai, m, step);
+            out.push(state);
+            continue;
+          }
+          if (
+            m.category !== "Status" &&
+            actor.species === "aegislash" &&
+            abilityOf(actor) === "Stance Change" &&
+            !actor.imposterOriginalSpecies &&
+            actor.battleForm !== "blade"
+          ) {
+            actor.battleForm = "blade";
+            state.log.push(`${actor.name} 战斗切换为刀剑形态`);
+          }
           if (m.category === "Status") {
             const next=statusMove(state,ai,m,catalog);recordAction(s,next,ai,m,step);out.push(next);
             continue;
@@ -714,6 +1346,16 @@ export function simulateTurn(scene, catalog) {
           const affected = targets(state.scene, ai, m, catalog).filter(
             (i) => state.hp[i] > 0 && state.scene.actors[i].present,
           );
+          const selectedTarget = ai < 2 ? state.scene.target : actor.target || 0;
+          if (
+            m.type === "Electric" &&
+            affected.length === 1 &&
+            affected[0] !== selectedTarget &&
+            abilityOf(state.scene.actors[affected[0]]) === "Lightning Rod"
+          )
+            state.log.push(
+              `${state.scene.actors[affected[0]].name} 避雷针改变攻击目标`,
+            );
           if(m.id==='brickbreak')for(const di of affected){
             const d=state.scene.actors[di];
             if(d.protected)continue;
@@ -736,10 +1378,18 @@ export function simulateTurn(scene, catalog) {
                 catalog,
               );
               let hitBranches=[branch];
-              for(const hitDist of result.hitDists) {
+              for(let hitIndex=0;hitIndex<result.hitDists.length;hitIndex++) {
                 const hitExpanded=[];
                 for(const hitBranch of hitBranches) {
                   if(hitBranch.hp[di]<=0) { hitExpanded.push(hitBranch); continue; }
+                  let hitDist=result.hitDists[hitIndex];
+                  if(hitIndex>0) {
+                    const dynamicAttacker=hitBranch.actionAbility==='Parental Bond'
+                      ? {...hitBranch.scene.actors[ai],currentAbility:'Parental Bond'}
+                      : hitBranch.scene.actors[ai];
+                    const refreshed=damageFor(dynamicAttacker,hitBranch.scene.actors[di],m.id,hitBranch.scene,catalog);
+                    hitDist=refreshed.hitDists[Math.min(hitIndex,refreshed.hitDists.length-1)];
+                  }
                   for(const roll of hitDist) {
                     const next=clone(hitBranch);
                     next.p*=roll.p;
@@ -750,17 +1400,30 @@ export function simulateTurn(scene, catalog) {
                 }
                 hitBranches=mergeStates(hitExpanded);
               }
+              for (const hitBranch of hitBranches)
+                finishTarget(
+                  hitBranch,
+                  ai,
+                  di,
+                  m,
+                  result.hitDists.length,
+                  catalog,
+                );
               expanded.push(...hitBranches);
             }
             branches = mergeStates(expanded);
           }
           for (const branch of branches) {
             const a = branch.scene.actors[ai];
-            if (branch.didDamage) changeBoost(a, m.self?.boosts);
+            if (branch.didDamage) {
+              const raised = changeBoost(a, m.self?.boosts);
+              triggerOpportunist(branch, ai, raised);
+            }
+            const beforeLifeOrb = branch.hp[ai];
             if (
               a.item === "Life Orb" &&
-              a.ability !== "Magic Guard" &&
-              !(a.ability === "Sheer Force" && m.secondary) &&
+              abilityOf(a) !== "Magic Guard" &&
+              !(branch.actionAbility === "Sheer Force" && m.secondary) &&
               branch.didDamage
             ) {
               branch.hp[ai] = Math.max(
@@ -770,6 +1433,11 @@ export function simulateTurn(scene, catalog) {
               a.hp = (branch.hp[ai] / branch.max[ai]) * 100;
               branch.log.push(`${a.name} 生命宝珠反伤`);
             }
+            if (beforeLifeOrb > 0 && branch.hp[ai] === 0)
+              triggerReceiver(branch, ai, catalog);
+            applyPostMoveItemAbilities(branch, ai, affected, m, catalog);
+            if (branch.actionAbility === "Electromorphosis" && m.type === "Electric")
+              a.abilityOn = false;
             recordAction(s,branch,ai,m,step);
           }
           out.push(...branches);
@@ -794,8 +1462,13 @@ export function simulateTurn(scene, catalog) {
         (states.reduce((sum, s) => sum + s.hp[i] * s.p, 0) / total / max[i]) *
         100,
     }));
+    states = mergeStates(
+      states
+        .flatMap(endTurnAbilityBranches)
+        .map((s) => endTurn(s, catalog))
+        .flatMap((s) => itemRecoveryBranches(s,catalog)),
+    );
     const representative = states.reduce((a, b) => (a.p > b.p ? a : b)).log;
-    states = states.map((s) => endTurn(s, catalog));
     const afterEnd = scene.actors.map((_, i) => ({
       min: (Math.min(...states.map((s) => s.hp[i])) / max[i]) * 100,
       max: (Math.max(...states.map((s) => s.hp[i])) / max[i]) * 100,

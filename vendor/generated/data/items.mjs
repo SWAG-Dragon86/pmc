@@ -7827,7 +7827,7 @@ const Items = {
     },
     onResidualOrder: 10,
     onResidual(pokemon) {
-      if (pokemon.hp <= pokemon.maxhp / 2) {
+      if (pokemon.hp < pokemon.maxhp / 2) {
         pokemon.eatItem();
       }
     },
@@ -7912,7 +7912,7 @@ const Items = {
     },
     onResidualOrder: 10,
     onResidual(pokemon) {
-      if (pokemon.hp <= pokemon.maxhp / 2) {
+      if (pokemon.hp < pokemon.maxhp / 2) {
         pokemon.eatItem();
       }
     },

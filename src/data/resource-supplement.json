@@ -7,6 +7,39 @@
     "https://gamewith.ai/pokemon-champions/zh-hans/pokemon"
   ],
   "translations": {
+    "Aura Guard": "波导守护",
+    "Court Change": "换场",
+    "Double Shock": "电光双击",
+    "Drum Beating": "鼓击",
+    "Glaive Rush": "巨剑突击",
+    "Jaw Lock": "紧咬不放",
+    "Meteor Assault": "流星突击",
+    "Milk Drink": "喝牛奶",
+    "Octolock": "蛸固",
+    "Pyro Ball": "火焰球",
+    "Revival Blessing": "复生祈祷",
+    "Shift Gear": "换档",
+    "Slash": "劈开",
+    "Snipe Shot": "狙击",
+    "Zing Zap": "麻麻刺刺",
+    "Leek": "大葱",
+    "Rocky Helmet": "凸凸头盔",
+    "Air Balloon": "气球",
+    "Red Card": "红牌",
+    "Binding Band": "紧绑束带",
+    "Eject Button": "逃脱按键",
+    "Normal Gem": "一般宝石",
+    "Terrain Extender": "大地膜",
+    "Electric Seed": "电气种子",
+    "Psychic Seed": "精神种子",
+    "Misty Seed": "薄雾种子",
+    "Grassy Seed": "青草种子",
+    "Absolite Z": "阿勃梭鲁进化石Z",
+    "Salamencite": "暴飞龙进化石",
+    "Garchompite Z": "烈咬陆鲨进化石Z",
+    "Lucarionite Z": "路卡利欧进化石Z",
+    "Golisopite": "具甲武者进化石",
+    "Baxcalibrite": "戟脊龙进化石",
     "Bright Powder": "光粉",
     "White Herb": "白色香草",
     "Quick Claw": "先制之爪",
@@ -471,6 +504,31 @@
     "Fire Mane": "火焰鬃毛"
   },
   "images": {
+    "absolmegaz": {
+      "name": "Absol-Mega-Z",
+      "page": "https://www.serebii.net/pokedex-champions/absol/",
+      "url": "https://www.serebii.net/legendsz-a/pokemon/359-mz.png"
+    },
+    "garchompmegaz": {
+      "name": "Garchomp-Mega-Z",
+      "page": "https://www.serebii.net/pokedex-champions/garchomp/",
+      "url": "https://www.serebii.net/legendsz-a/pokemon/445-mz.png"
+    },
+    "lucariomegaz": {
+      "name": "Lucario-Mega-Z",
+      "page": "https://www.serebii.net/pokedex-champions/lucario/",
+      "url": "https://www.serebii.net/legendsz-a/pokemon/448-mz.png"
+    },
+    "golisopodmega": {
+      "name": "Golisopod-Mega",
+      "page": "https://www.serebii.net/pokedex-champions/golisopod/",
+      "url": "https://www.serebii.net/legendsz-a/pokemon/768-m.png"
+    },
+    "baxcaliburmega": {
+      "name": "Baxcalibur-Mega",
+      "page": "https://www.serebii.net/pokedex-champions/baxcalibur/",
+      "url": "https://www.serebii.net/legendsz-a/pokemon/998-m.png"
+    },
     "venusaur": {
       "url": "https://img.gamewith.jp/article_tools/pokemon-champions/gacha/003.png",
       "name": "Venusaur",

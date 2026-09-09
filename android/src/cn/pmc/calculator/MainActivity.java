@@ -60,7 +60,7 @@ public final class MainActivity extends Activity {
         settings.setSupportMultipleWindows(false);
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " PMCAndroid/1.1.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " PMCAndroid/1.2.0");
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
         WebView.setWebContentsDebuggingEnabled(false);
         web.addJavascriptInterface(new ExportBridge(), "PMCAndroid");

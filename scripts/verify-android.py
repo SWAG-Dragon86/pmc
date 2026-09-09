@@ -6,6 +6,7 @@ from zipfile import ZipFile
 
 root = Path(__file__).resolve().parent.parent
 info = json.loads((root / "output/android/build-info.json").read_text(encoding="utf-8"))
+catalog = json.loads((root / "src/data/catalog.json").read_text(encoding="utf-8"))
 apk = Path(info["apk"])
 checks = []
 with ZipFile(apk) as bundle:
@@ -25,8 +26,8 @@ with ZipFile(apk) as bundle:
             key = "assets/www/" + file.relative_to(stage).as_posix()
             assert bundle.read(key) == file.read_bytes(), key
     sprites = [n for n in names if n.startswith("assets/www/sprites/") and n.endswith(".png")]
-    assert len(sprites) == 315, len(sprites)
-    checks.append("Every web asset matches the build; all 315 sprites are packaged")
+    assert len(sprites) == len(catalog["pokemon"]), len(sprites)
+    checks.append(f"Every web asset matches the build; all {len(sprites)} sprites are packaged")
 assert hashlib.sha256(apk.read_bytes()).hexdigest() == info["sha256"]
 checks.append("APK SHA-256 matches delivery checksum")
 report = {"checks": checks, "apk_bytes": apk.stat().st_size}

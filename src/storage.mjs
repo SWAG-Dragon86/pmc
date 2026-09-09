@@ -47,6 +47,10 @@ function shapeBuild(b) {
     typeof b.hp === "number" &&
     typeof b.selected === "number" &&
     typeof b.status === "string" &&
+    (b.faintedAllies === undefined ||
+      (Number.isInteger(b.faintedAllies) &&
+        b.faintedAllies >= 0 &&
+        b.faintedAllies <= 5)) &&
     Number.isInteger(b.hits) &&
     b.hits >= 1 &&
     b.hits <= 10 &&
@@ -105,6 +109,9 @@ export function parseImport(text) {
     )
   )
     throw new Error("场景字段不完整");
+  for (const build of data.builds) build.faintedAllies ??= 0;
+  for (const scene of data.scenes)
+    for (const build of scene.actors) build.faintedAllies ??= 0;
   return data;
 }
 export function mergeRecords(existing, incoming, policy = "ask") {
@@ -146,8 +153,13 @@ export function readWorkspace() {
   try {
     const d = JSON.parse(text);
     safeObject(d);
-    parseImport(JSON.stringify(exportPayload(d.builds || [], d.scenes || [])));
-    if (d.scene) parseImport(JSON.stringify(exportPayload([], [d.scene])));
+    const records = parseImport(
+      JSON.stringify(exportPayload(d.builds || [], d.scenes || [])),
+    );
+    d.builds = records.builds;
+    d.scenes = records.scenes;
+    if (d.scene)
+      d.scene = parseImport(JSON.stringify(exportPayload([], [d.scene]))).scenes[0];
     return d;
   } catch {
     throw new Error("本地记录无法读取，原始数据未删除。请先导出原始备份。");
