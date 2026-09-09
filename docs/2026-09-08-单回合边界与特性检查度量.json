@@ -1,0 +1,13 @@
+{
+  "task": "PMC 单回合边界明确与不可计算特性检查",
+  "status": "ability_rules_updated_release_deferred",
+  "validation_clock": "2026-09-09T13:45:12+09:00",
+  "measured_minutes_to_validation": 356,
+  "user_rework_count": 0,
+  "documented_internal_corrections": 69,
+  "tests_passed": 94,
+  "current_blocked_selectable_abilities": 0,
+  "release_generated": false,
+  "release_published": false,
+  "measurement_note": "本轮只修改源码、说明与测试；按用户要求未生成或发布新版网页及 APK。"
+}

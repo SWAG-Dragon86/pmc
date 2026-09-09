@@ -5437,6 +5437,20 @@ const CHAMPIONS_LIST = [
   'Yawn',
   'Zap Cannon',
   'Zen Headbutt',
+  'Court Change',
+  'Double Shock',
+  'Drum Beating',
+  'Glaive Rush',
+  'Jaw Lock',
+  'Meteor Assault',
+  'Milk Drink',
+  'Octolock',
+  'Pyro Ball',
+  'Revival Blessing',
+  'Shift Gear',
+  'Slash',
+  'Snipe Shot',
+  'Zing Zap',
 ];
 
 const CHAMPIONS_PATCH: {[name: string]: DeepPartial<MoveData>} = {

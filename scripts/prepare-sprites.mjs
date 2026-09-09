@@ -9,6 +9,7 @@ const aliases = {
   taurospaldeaaqua: "tauros-paldeaaqua",
   meowsticfmega: "meowstic-fmega",
   meowsticmmega: "meowstic-mmega",
+  toxtricitylowkey: "toxtricity-lowkey",
   kommoo: "kommoo",
 };
 let provenance = {};

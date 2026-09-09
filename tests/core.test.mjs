@@ -6,6 +6,7 @@ import {
   createBuild,
   defaultScene,
   validateBuild,
+  needsFaintedAlliesInput,
 } from "../src/model.mjs";
 import { parseImport, mergeRecords, exportPayload } from "../src/storage.mjs";
 import {
@@ -46,6 +47,33 @@ test("malformed target and nonnumeric SP imports are rejected without mutation",
   const b = createBuild(catalog);
   b.points.hp = "wrong";
   assert.throws(() => parseImport(JSON.stringify(exportPayload([b], []))));
+});
+test("fainted ally count defaults to zero, survives backups, and rejects invalid values", () => {
+  const b = createBuild(catalog, "kingambit");
+  assert.equal(b.faintedAllies, 0);
+  b.faintedAllies = 5;
+  const imported = parseImport(JSON.stringify(exportPayload([b], [])));
+  assert.equal(imported.builds[0].faintedAllies, 5);
+  delete b.faintedAllies;
+  const legacy = parseImport(JSON.stringify(exportPayload([b], [])));
+  assert.equal(legacy.builds[0].faintedAllies, 0);
+  b.faintedAllies = 6;
+  assert.throws(
+    () => parseImport(JSON.stringify(exportPayload([b], []))),
+    /字段不完整/,
+  );
+});
+test("fainted ally input appears only for Supreme Overlord or selected Last Respects", () => {
+  const b = createBuild(catalog, "kingambit");
+  assert.equal(needsFaintedAlliesInput(b), false);
+  b.ability = "Supreme Overlord";
+  assert.equal(needsFaintedAlliesInput(b), true);
+  const houndstone = createBuild(catalog, "houndstone");
+  houndstone.moves = ["lastrespects", "protect", "", ""];
+  houndstone.selected = 1;
+  assert.equal(needsFaintedAlliesInput(houndstone), false);
+  houndstone.selected = 0;
+  assert.equal(needsFaintedAlliesInput(houndstone), true);
 });
 test("Skill Link forces maximum hits and illegal counts do not produce numbers", () => {
   const s = defaultScene(catalog);

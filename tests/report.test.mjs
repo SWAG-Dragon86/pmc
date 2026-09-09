@@ -11,6 +11,7 @@ test('Report keeps configuration and per-action HP, omits zero/default clutter',
  const r=simulateTurn(s,c);assert.equal(r.error,undefined);
  const text=buildReport(s,r,c).map(x=>x.text).join('\n');
  assert.match(text,/集火过程/);assert.match(text,/目标剩余/);assert.match(text,/其它宝可梦/);assert.match(text,/能力点/);
+ assert.match(text,/只计算当前一回合/);
  assert(!text.includes('攻击0'));assert(!text.includes('非随机要害'));assert(!text.includes('开局触发请手动设置'));
  assert.match(buildReport(s,r,c,{details:true}).map(x=>x.text).join('\n'),/路径 我方/);
 });
@@ -41,4 +42,10 @@ test('Android manifest, settings and share report advertise the same release',()
  const version=manifest.match(/android:versionName="([^"]+)"/)[1];
  assert(app.includes(`安卓离线版 ${version}`));assert(app.includes(`当前版本 ${version}`));
  const s=defaultScene(c);assert(buildReport(s,simulateTurn(s,c),c).some(r=>r.text.includes(`PMC ${version}`)));
+});
+
+test('Calculator clearly states its one-turn boundary',()=>{
+ const app=readFileSync('src/App.jsx','utf8');
+ assert(app.includes('只计算当前一回合'));
+ assert(app.includes('不继承上一回合状态，也不模拟下一回合触发'));
 });

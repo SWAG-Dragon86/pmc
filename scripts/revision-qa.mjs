@@ -67,7 +67,7 @@ try {
     },
   );
   await check(
-    "All 315 choices can be browsed without the old 150-entry cutoff",
+    `All ${catalog.pokemon.length} choices can be browsed without the old 150-entry cutoff`,
     async () => {
       await page
         .getByRole("button", { name: "选择进攻宝可梦 1", exact: true })
@@ -103,7 +103,7 @@ try {
       );
     },
   );
-  await check("All 315 images decode successfully in the browser", async () => {
+  await check(`All ${catalog.pokemon.length} images decode successfully in the browser`, async () => {
     const failures = await page.evaluate(
       async (ids) => {
         const out = [];

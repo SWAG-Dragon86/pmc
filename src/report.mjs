@@ -60,7 +60,7 @@ export function buildReport(scene,result,catalog,{details=false}={}) {
     const b=scene.actors[i],species=catalog.pokemon.find(p=>p.id===b.species);
     add(`${slot(i)} ${b.name}${b.name!==species?.zh?`（${species?.zh||b.species}）`:''} · 初始 ${percent(b.hp)}`,'heading');
     add(`${natureLabel(catalog.natures.find(n=>n.name===b.nature))} / ${named(catalog.abilities,b.ability)} / ${named(catalog.items,b.item)}`,'muted');
-    add(`能力点 HP/攻/防/特攻/特防/速：${STAT_KEYS.map(k=>b.points[k]).join('/')}；${i===3?'被动席位':`招式：${catalog.moves[b.moves[b.selected]]?.zh||'空'}`}`,'muted');
+    add(`能力点 HP/攻/防/特攻/特防/速：${STAT_KEYS.map(k=>b.points[k]).join('/')}；${i===3?'被动席位':`招式：${catalog.moves[b.moves[b.selected]]?.zh||'空'}`}${b.ability==='Supreme Overlord'||b.moves[b.selected]==='lastrespects'?`；已倒下队友：${b.faintedAllies??0}`:''}`,'muted');
     const flags=Object.entries(b.boosts).filter(([k,v])=>k!=='hp'&&v!==0).map(([k,v])=>`${STAT_NAMES[k]} ${v>0?'+':''}${v}`);
     if(b.protected)flags.push('守住');if(b.crit)flags.push('要害');
     if(b.status)flags.push({brn:'灼伤',par:'麻痹',psn:'中毒',tox:'剧毒首回合',slp:'睡眠（仍出招）',frz:'冰冻（仍出招）'}[b.status]);
@@ -78,8 +78,9 @@ export function buildReport(scene,result,catalog,{details=false}={}) {
     else if(!f.isFriendGuard&&scene.mode==='double'&&scene.actors.some((b,i)=>(i<2)===(side==='attacker')&&b.present&&b.hp>0&&b.ability==='Friend Guard'))active.push('友情防守：队友特性自动生效');
     if(active.length)add(`${label}条件：${active.join('、')}`,'muted');
   }
+  add('计算边界：只计算当前一回合；不继承上一回合状态，也不模拟下一回合触发。','footer');
   add('计算假设：命中；突袭满足成功条件；不计状态性无法行动。','footer');
   add('不服输/好胜仅响应出招前的必定降能力；未适配机制仍需核验。','footer');
-  add(`PMC 1.1.0 · 社区规则试算，非官方工具 · 数据 ${catalog.meta.source.showdown.commit.slice(0,8)}`,'footer');
+  add(`PMC 1.2.0 · Champions ${catalog.meta.gameVersion} / ${catalog.meta.regulation} · 非官方工具 · 数据 ${catalog.meta.source.showdown.commit.slice(0,8)}`,'footer');
   return rows;
 }

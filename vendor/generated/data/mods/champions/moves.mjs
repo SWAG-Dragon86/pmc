@@ -198,6 +198,18 @@ const Moves = {
       }
     }
   },
+  disable: {
+    inherit: true,
+    condition: {
+      inherit: true,
+      onBeforeMove(attacker, defender, move) {
+        if (!(move.isZ && move.isZOrMaxPowered) && move.id === this.effectState.move && !move.flags["cantusetwice"]) {
+          this.add("cant", attacker, "Disable", move);
+          return false;
+        }
+      }
+    }
+  },
   disarmingvoice: {
     inherit: true,
     isNonstandard: "Past"

@@ -2229,7 +2229,7 @@ const Moves = {
     priority: 0,
     flags: { contact: 1, protect: 1, mirror: 1, metronome: 1, slicing: 1 },
     onAfterHit(target, source, move) {
-      if (!move.hasSheerForce && source.hp) {
+      if (!move.hasSheerForce) {
         for (const side of source.side.foeSidesWithConditions()) {
           side.addSideCondition("spikes");
         }
@@ -7891,9 +7891,7 @@ const Moves = {
     priority: 0,
     flags: { snatch: 1, metronome: 1 },
     onModifyMove(move, pokemon) {
-      if (pokemon.hasAbility("megasol") && !this.field.isWeather("sunnyday")) {
-        delete move.boosts;
-      } else if (["sunnyday", "desolateland"].includes(pokemon.effectiveWeather())) {
+      if (["sunnyday", "desolateland"].includes(pokemon.effectiveWeather())) {
         move.boosts = { atk: 2, spa: 2 };
       }
     },
@@ -18076,7 +18074,7 @@ const Moves = {
     priority: 0,
     flags: { contact: 1, protect: 1, mirror: 1, metronome: 1, slicing: 1 },
     onAfterHit(target, source, move) {
-      if (!move.hasSheerForce && source.hp) {
+      if (!move.hasSheerForce) {
         for (const side of source.side.foeSidesWithConditions()) {
           side.addSideCondition("stealthrock");
         }

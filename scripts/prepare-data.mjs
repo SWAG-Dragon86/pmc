@@ -50,25 +50,31 @@ async function source(key, path) {
   await save(location, s);
   return s;
 }
-const tree = JSON.parse(
-  await get(
-    `https://api.github.com/repos/${repos.calc}/git/trees/${versions.calc.commit}?recursive=1`,
-  ),
-).tree;
-const calcFiles = tree.filter(
-  (x) =>
-    x.path.startsWith("calc/src/") &&
-    x.path.endsWith(".ts") &&
-    !/test|benchmark/.test(x.path),
-);
-for (let i = 0; i < calcFiles.length; i += 8)
-  await Promise.all(
-    calcFiles.slice(i, i + 8).map((x) => source("calc", x.path)),
+try {
+  await readFile(resolve("vendor/calc/calc/src/index.ts"));
+  console.log("Using pinned local damage-calc snapshot");
+} catch {
+  const tree = JSON.parse(
+    await get(
+      `https://api.github.com/repos/${repos.calc}/git/trees/${versions.calc.commit}?recursive=1`,
+    ),
+  ).tree;
+  const calcFiles = tree.filter(
+    (x) =>
+      x.path.startsWith("calc/src/") &&
+      x.path.endsWith(".ts") &&
+      !/test|benchmark/.test(x.path),
   );
+  for (let i = 0; i < calcFiles.length; i += 8)
+    await Promise.all(
+      calcFiles.slice(i, i + 8).map((x) => source("calc", x.path)),
+    );
+}
 await source("calc", "LICENSE");
 await source("showdown", "LICENSE");
 await build({
-  entryPoints: ["vendor/calc/calc/src/index.ts"],
+  absWorkingDir: root,
+  entryPoints: [resolve("vendor/calc/calc/src/index.ts")],
   bundle: true,
   format: "esm",
   platform: "browser",
@@ -142,9 +148,35 @@ const audit = JSON.parse(await readFile("src/data/roster-audit.json", "utf8"));
 const supplement = JSON.parse(
   await readFile("src/data/resource-supplement.json", "utf8"),
 );
+const mc = JSON.parse(await readFile("src/data/mc-manifest.json", "utf8"));
+const mcDex = JSON.parse(
+  await readFile("src/data/champions-dex-mc.json", "utf8"),
+);
+const mcDexSpecial = JSON.parse(
+  await readFile("src/data/champions-dex-mc-special.json", "utf8"),
+);
+Object.assign(mcDex.pokemon, mcDexSpecial.pokemon);
 Object.assign(dictionaries, supplement.translations);
 // Formats-data is a mod patch, not a complete roster: inherited entries may be absent.
 for (const p of audit.roster) if (!formats[p.id]) formats[p.id] = {};
+// M-C went live before upstream Showdown had flipped these entries from Past/Illegal.
+// The legal list and each move pool below come from the current Champions pages.
+for (const entry of mc.pokemon) {
+  const page = mcDex.pokemon[entry.dexSlug];
+  if (!page?.moves?.length)
+    throw new Error(`M-C move pool unavailable for ${entry.calcName}`);
+  formats[entry.id] = {};
+  learnsets[entry.id] = {
+    learnset: Object.fromEntries(page.moves.map((move) => [id(move), ["9M"]])),
+  };
+}
+const mcById = Object.fromEntries(mc.pokemon.map((entry) => [entry.id, entry]));
+const roster = [...audit.roster, ...mc.pokemon];
+const mcMoveIds = new Set(
+  mc.pokemon.flatMap((entry) =>
+    mcDex.pokemon[entry.dexSlug].moves.map((move) => id(move)),
+  ),
+);
 const pokemon = [];
 const missing = [];
 const stateNames = {
@@ -175,13 +207,15 @@ for (const [key, format] of Object.entries(formats)) {
   }
   const moves = Object.keys(learned).filter(
     (m) =>
-      generation.moves.get(m) && moveBase[m] && !movePatch[m]?.isNonstandard,
+      generation.moves.get(m) &&
+      moveBase[m] &&
+      (!movePatch[m]?.isNonstandard || mcMoveIds.has(m)),
   );
   if (!moves.length) {
     missing.push(key);
     continue;
   }
-  let zh = audit.roster.find((p) => p.id === key)?.zh || nameOf(raw.name);
+  let zh = roster.find((p) => p.id === key)?.zh || nameOf(raw.name);
   const isMega = /(?:^|-)Mega(?:-|$)/.test(raw.forme || "");
   if (isMega) {
     const suffix = raw.forme.match(/Mega-([XY])/)?.[1] || "";
@@ -203,6 +237,7 @@ for (const [key, format] of Object.entries(formats)) {
     zh = `${nameOf(raw.baseSpecies)} ${form}`;
   }
   zh = stateNames[key] || zh;
+  zh = mcById[key]?.zh || zh;
   pokemon.push({
     id: key,
     name: species.name,
@@ -216,7 +251,7 @@ for (const [key, format] of Object.entries(formats)) {
     num: raw.num,
     base,
     mega: isMega,
-    requiredItem: raw.requiredItem || "",
+    requiredItem: mcById[key]?.requiredItem || raw.requiredItem || "",
     sprite: raw.name
       .toLowerCase()
       .replace(/-mega-/g, "-mega")
@@ -260,8 +295,13 @@ for (const key of moveIds) {
   };
 }
 const items = [{ id: "", name: "", zh: "不携带道具" }];
+const mcItems = new Set(mc.items.map(id));
 for (const [key, rawItem] of Object.entries(itemBase)) {
-  if (itemPatch[key]?.isNonstandard || !generation.items.get(key)) continue;
+  if (
+    (itemPatch[key]?.isNonstandard && !mcItems.has(key)) ||
+    !generation.items.get(key)
+  )
+    continue;
   items.push({
     id: key,
     name: itemBase[key].name,
@@ -280,11 +320,19 @@ const natures = [...generation.natures].map((n) => ({
 }));
 const catalog = {
   meta: {
-    label: "Champions 社区数据预览",
-    status: "community-unverified",
-    gameVersion: null,
+    label: `Champions ${mc.gameVersion} · 排位规则 ${mc.regulation}`,
+    status: "live-regulation",
+    gameVersion: mc.gameVersion,
+    regulation: mc.regulation,
+    season: mc.season,
+    effectiveFrom: mc.effectiveFrom,
+    effectiveTo: mc.effectiveTo,
     builtAt: new Date().toISOString(),
     source: versions,
+    officialAnnouncement: mc.announcement,
+    rosterSource: mc.rosterSource,
+    dexSource: mc.dexSource,
+    itemsSource: mc.itemsSource,
     missing,
   },
   pokemon,
@@ -298,9 +346,11 @@ await save(lockPath, JSON.stringify(versions, null, 2));
 await save(
   "public/data-version.json",
   JSON.stringify({
-    version: versions.showdown.commit.slice(0, 8),
+    version: `mc-${mc.gameVersion}-${versions.calc.commit.slice(0, 8)}`,
     status: catalog.meta.status,
-    gameVersion: null,
+    gameVersion: mc.gameVersion,
+    regulation: mc.regulation,
+    season: mc.season,
   }),
 );
 console.log(

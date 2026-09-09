@@ -39,20 +39,20 @@
 
 | 范围 | 当前状态 |
 | --- | --- |
-| 全量冠军游戏数据与官方补丁版本 | 尚未逐项核实。使用固定提交的社区冠军分支，页面持续提醒 |
-| 当前候选目录 | 315 个形态、495 个关联招式、148 个道具；这些是构建覆盖数，不是官方公布数量。当前 M-B 官方参赛名单 235 项已逐项匹配 |
+| 当前游戏版本与排位规则 | 适用于《宝可梦冠军》1.2.0、M-C（M-6）；规则有效期为 2026-09-09 02:00 UTC 至 2026-12-02 01:59 UTC |
+| 当前目录 | 350 个可配置形态、509 个关联招式、166 个可携带道具。M-B 名单继续有效，M-C 新增 24 种宝可梦和 6 种超级进化，并展开性别、地区及影响特性的外观形态 |
 | 单招伤害 | 使用 Smogon 冠军专用模式（generation 0），没有用第九世代模式替代 |
 | 动态范围招式 | 广域战力暂不输出单招结果，避免动态目标适配不完整时误算 |
-| 回合计算 | 已实现有限事件集和精确分支枚举，不是完整的游戏对战模拟器 |
+| 回合计算 | 只计算用户设定的当前一回合，到回合末结算为止；不继承上一回合状态，也不模拟下一回合触发。已实现有限事件集和精确分支枚举，不是完整的游戏对战模拟器 |
 | 复杂连续攻击、替身、变身、换人、部分引招与特性连锁 | 双光束已按两击顺序结算；其余复杂连续攻击尚未完整实现，部分已识别组合会阻止完整回合结果 |
 | 开局特性 | 已自动结算天气特性、威吓、甘露之蜜、隐形岩、撒菱和黏黏网；不模拟换入换出 |
 | 回合末效果 | 已覆盖部分天气、场地、状态和回复，尚未覆盖完整规则；剧毒按首回合处理 |
 | 结果概率 | 只在当前支持的事件范围内枚举；不代表已通过游戏实测的击倒概率 |
 | 分支过多 | 超过内部精确展开上限时停止并提示，不用抽样数替代 |
-| 形态图片 | 315 张本地 PNG 均已通过浏览器解码，旧版 17 张缺图及新增雌性超能妙喵图片已补齐；公开分发许可仍待确认 |
+| 形态图片 | 350 张本地 PNG 已补齐；公开分发许可仍待确认 |
 | 中文词条 | 道具、特性和宝可梦形态均有中文显示名；英文原名保留为搜索别名。部分词条由社区资料补充，不冒充官方完整文本包 |
 | 真机兼容性 | 已做 Chromium 桌面/手机尺寸测试；未在真实 iPhone、安卓手机安装验证 |
-| 对外发布 | 尚未部署。公开分发前还需确认素材许可和源码分发方式 |
+| 对外发布 | GitLab Pages 公开版已部署；APK 为离线安装包。素材和商标权仍归各权利人 |
 
 原始需求保留在 `PMC需求确认清单.md`。以上限制是尚未完成的工作，不代表删除原要求。
 
@@ -99,8 +99,8 @@ node scripts/glass-logo-qa.mjs
 
 - `src/data/sources.json` 固定本次取数的上游提交。
 - `scripts/prepare-data.mjs` 从固定提交生成候选目录和冠军计算代码，不运行用户导入文件中的代码。
-- `scripts/audit-resources.mjs` 对照 M-5/M-B 官方中英文名单并抓取中文补充与图片标识。赛季改变时需维护者先核实并更新官方链接，不能将旧赛季核对视为新赛季完成。
-- `src/data/roster-audit.json` 保存官方 235 项逐项对照；`src/data/resource-supplement.json` 保存中文补充与图片来源。名单核对不等于完整数值和机制核验。
+- `src/data/roster-audit.json` 保留 M-B 的 235 项基线；`src/data/mc-manifest.json` 保存 M-C 的版本、日期、新增配置项和道具清单。
+- `src/data/regulation-m-c.json` 与 `src/data/champions-dex-mc*.json` 保存 2026-09-09 维护结束后的规则、数值与招式快照；`src/data/resource-supplement.json` 保存中文补充与图片来源。
 - `scripts/prepare-sprites.mjs` 缓存对应形态小图。
 - `src/vendor/calc.mjs` 是从保留的上游源码生成的 ESM 包；构建时加入 CommonJS 兼容变量，没有改动冠军公式。
 - `vendor/` 保留上游源码和许可，方便核对。请勿把修改提交号当作已经完成游戏验证。
@@ -111,7 +111,7 @@ node scripts/glass-logo-qa.mjs
 - [Smogon damage-calc](https://github.com/smogon/damage-calc)：MIT，固定提交见来源清单。
 - [Pokémon Showdown 冠军分支](https://github.com/smogon/pokemon-showdown/tree/master/data/mods/champions)：MIT。
 - [中文词条来源](https://github.com/professorsidon/VGC-Damage-Calculator-Chinese)：所读取的翻译目录包含 GPL-3.0 许可，原文件保存在 `vendor/chinese/script_res/translate/LICENSE`。公开分发前需确定符合该许可的源码提供方式；未擅自为用户的新项目确定整体开源许可。
-- [M-5 赛季官方公告](https://champions-news.pokemon-home.com/ja/page/803.html)及其[中文参赛名单](https://web-view.app.pokemonchampions.jp/battle/pages/events/rs178402365238qpefxb/sc/pokemon.html)：用于核对 M-B 参赛条目和名称。
+- [M-C 官方公告](https://champions-news.pokemon-home.com/en/page/816.html)：用于确认规则版本、有效时间和新增范围；[Serebii M-C 规则页](https://www.serebii.net/pokemonchampions/rankedbattle/regulationm-c.shtml)及[Champions 图鉴](https://www.serebii.net/pokedex-champions/)用于逐项抓取维护后的名单、数值、特性、招式和道具。
 - [GameWith 中文道具资料](https://gamewith.ai/pokemon-champions/zh-hans/items)及[宝可梦资料](https://gamewith.ai/pokemon-champions/zh-hans/pokemon)：补充名称和缺失形态图片的对应关系，不作为全量官方数据声明。
 - 宝可梦小图来自 Pokémon Showdown 静态资源及 GameWith 图片资源；新增图片逐项来源记录在 `src/data/sprites.json`。角色图像及名称相关权利不因代码使用 MIT 而转移。
 - 默认背景由用户提供，保留原图；其公开分发许可尚未核实。

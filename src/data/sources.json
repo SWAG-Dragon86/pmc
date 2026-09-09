@@ -1,11 +1,11 @@
 {
   "calc": {
     "repo": "smogon/damage-calc",
-    "commit": "2c50a89d9e369289965b1448a6f5c1b7d41520c7"
+    "commit": "111407c919c2c886688db704ae97376e768b72e4"
   },
   "showdown": {
     "repo": "smogon/pokemon-showdown",
-    "commit": "2f5b273925862ac242b419086c1e7a8868b51da1"
+    "commit": "81c39fb3facd0c82bc6753295b2b079190fa3e6f"
   },
   "chinese": {
     "repo": "professorsidon/VGC-Damage-Calculator-Chinese",
