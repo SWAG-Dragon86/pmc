@@ -88,7 +88,7 @@ export function createBuild(catalog, species = "charizard") {
     nature: "Serious",
     ability: p.abilities[0],
     item: p.requiredItem || "",
-    points: { hp: 2, atk: 0, def: 0, spa: 32, spd: 0, spe: 32 },
+    points: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
     boosts: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0, evasion: 0 },
     moves,
     selected: 0,
@@ -109,7 +109,8 @@ export function defaultScene(catalog) {
     b = createBuild(catalog, "garchomp"),
     c = createBuild(catalog, "pikachu"),
     d = createBuild(catalog, "eevee");
-  b.points = { hp: 2, atk: 32, def: 0, spa: 0, spd: 0, spe: 32 };
+  c.moves = ["", "", "", ""];
+  d.moves = ["", "", "", ""];
   c.active = true;
   d.active = false;
   return {
@@ -122,11 +123,25 @@ export function defaultScene(catalog) {
       weather: "",
       weatherMode: "auto",
       terrain: "",
+      terrainMode: "auto",
       trickRoom: false,
       gravity: false,
       attacker: {},
       defender: {},
     },
+    target: 2,
+  };
+}
+export function resetBattleState(scene, catalog) {
+  const persistent = ["id", "originId", "publicSource", "name", "species", "nature", "ability", "item", "points", "moves", "present"];
+  return {
+    ...scene,
+    actors: scene.actors.map((old) => {
+      const fresh = createBuild(catalog, old.species);
+      for (const key of persistent) if (old[key] !== undefined) fresh[key] = clone(old[key]);
+      return fresh;
+    }),
+    field: defaultScene(catalog).field,
     target: 2,
   };
 }
@@ -159,7 +174,7 @@ export function duplicateSpeciesIssues(scene, catalog) {
 export function withMandatoryActions(scene) {
   const next = clone(scene);
   next.actors.forEach((actor, index) => {
-    actor.active = index !== 3;
+    actor.active = index !== 3 && (index !== 2 || !!actor.moves[actor.selected]);
   });
   return next;
 }

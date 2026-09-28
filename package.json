@@ -1,11 +1,11 @@
 {
   "name": "pmc-champions-calculator",
-  "version": "0.1.0",
+  "version": "1.3.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "vite build && node scripts/build-sw.mjs",
+    "build": "node scripts/prepare-live-teams.mjs && vite build && node scripts/build-sw.mjs",
     "data:teams": "node scripts/update-open-teams.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --test tests/*.test.mjs"
@@ -13,6 +13,7 @@
   "dependencies": {
     "@smogon/calc": "0.11.0",
     "lucide-react": "^0.468.0",
+    "opencc-js": "1.4.2",
     "pinyin-pro": "^3.27.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

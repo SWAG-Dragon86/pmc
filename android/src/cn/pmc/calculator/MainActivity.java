@@ -13,6 +13,8 @@ import android.webkit.*;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 import java.io.*;
+import java.net.URL;
+import javax.net.ssl.HttpsURLConnection;
 import java.util.*;
 
 /** Only packaged assets run inside this WebView. External links leave the app. */
@@ -60,7 +62,7 @@ public final class MainActivity extends Activity {
         settings.setSupportMultipleWindows(false);
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " PMCAndroid/1.2.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " PMCAndroid/1.3.0");
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
         WebView.setWebContentsDebuggingEnabled(false);
         web.addJavascriptInterface(new ExportBridge(), "PMCAndroid");
@@ -117,7 +119,7 @@ public final class MainActivity extends Activity {
     private void applyScreenMode(String mode) {
         int orientation = mode.equals("portrait") ? android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 : mode.equals("landscape") ? android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                : android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR;
+                : android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_USER;
         setRequestedOrientation(orientation);
     }
 
@@ -131,6 +133,7 @@ public final class MainActivity extends Activity {
             return errorResponse(403, "Forbidden");
         if (path.equals("/")) path = "/index.html";
         if (path.equals("/sw.js")) return errorResponse(404, "Not Found");
+        if (path.equals("/live-teams.json")) return onlineTeamsResponse();
         try {
             InputStream stream = getAssets().open("www" + path);
             String extension = MimeTypeMap.getFileExtensionFromUrl(path);
@@ -145,6 +148,35 @@ public final class MainActivity extends Activity {
             headers.put("Content-Security-Policy", "default-src 'self' blob: data:; script-src 'self'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'");
             return new WebResourceResponse(mime, "UTF-8", 200, "OK", headers, stream);
         } catch (IOException ex) { return errorResponse(404, "Not Found"); }
+    }
+
+    private WebResourceResponse onlineTeamsResponse() {
+        try (InputStream config = getAssets().open("www/team-feed-url.txt")) {
+            byte[] configured = new byte[512];
+            int length = config.read(configured);
+            if (length <= 0) throw new IOException("No team feed URL");
+            URL url = new URL(new String(configured, 0, length, "UTF-8").trim());
+            if (!"https".equals(url.getProtocol()) || url.getUserInfo() != null || url.getHost().isEmpty())
+                throw new IOException("Invalid team feed URL");
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(15000);
+            connection.setInstanceFollowRedirects(false);
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Cache-Control", "no-cache");
+            if (connection.getResponseCode() != 200 || connection.getContentLengthLong() > 10 * 1024 * 1024) {
+                connection.disconnect();return errorResponse(503, "Feed Unavailable");
+            }
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Cache-Control", "no-store");
+            headers.put("X-Content-Type-Options", "nosniff");
+            return new WebResourceResponse("application/json", "UTF-8", 200, "OK", headers, new FilterInputStream(connection.getInputStream()) {
+                long count = 0;
+                @Override public int read() throws IOException { int value = super.read();if (value >= 0 && ++count > 10 * 1024 * 1024) throw new IOException("Feed too large");return value; }
+                @Override public int read(byte[] data, int offset, int length) throws IOException { int n = super.read(data, offset, length);if (n > 0 && (count += n) > 10 * 1024 * 1024) throw new IOException("Feed too large");return n; }
+                @Override public void close() throws IOException { super.close();connection.disconnect(); }
+            });
+        } catch (IOException | SecurityException ex) { return errorResponse(503, "Feed Unavailable"); }
     }
 
     private WebResourceResponse errorResponse(int code, String reason) {

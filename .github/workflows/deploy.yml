@@ -4,6 +4,8 @@ on:
   push:
     branches: [main, master]
   workflow_dispatch:
+  schedule:
+    - cron: '17 2 * * *'
 
 permissions:
   contents: read
@@ -27,6 +29,7 @@ jobs:
           pnpm install --frozen-lockfile
       - name: Test and build
         run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then pnpm data:teams; fi
           pnpm test
           pnpm run build
       - uses: actions/configure-pages@v5

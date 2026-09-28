@@ -1,13 +1,14 @@
 import { uid, clone, STAT_KEYS } from "./model.mjs";
 import { saveBlob } from "./platform.mjs";
 export const STORAGE_KEY = "pmc.workspace.v1";
-export function exportPayload(builds, scenes) {
+export function exportPayload(builds, scenes, teams = []) {
   return {
     format: "PMC",
     schema: 1,
     exportedAt: new Date().toISOString(),
     builds: clone(builds),
     scenes: clone(scenes),
+    teams: clone(teams),
   };
 }
 function safeObject(value) {
@@ -73,6 +74,7 @@ export function parseImport(text) {
   if(Array.isArray(data.scenes))for(const s of data.scenes) {
     if(!s||typeof s!=='object')throw new Error('场景字段不完整');
     if(s.field?.weatherMode!==undefined&&!['auto','manual'].includes(s.field.weatherMode))throw new Error('天气模式无效');
+    if(s.field?.terrainMode!==undefined&&!['auto','manual'].includes(s.field.terrainMode))throw new Error('场地模式无效');
     for(const side of ['attacker','defender']){
       const f=s.field?.[side];if(!f)continue;
       if(f.spikes!==undefined&&(!Number.isInteger(f.spikes)||f.spikes<0||f.spikes>3))throw new Error('撒菱层数必须是 0 至 3');
@@ -84,10 +86,12 @@ export function parseImport(text) {
   if (
     !Array.isArray(data.builds) ||
     !Array.isArray(data.scenes) ||
-    data.builds.length + data.scenes.length > 10000
+    data.builds.length + data.scenes.length + (data.teams?.length || 0) > 10000
   )
     throw new Error("备份记录格式或数量无效");
   if (!data.builds.every(shapeBuild)) throw new Error("宝可梦配置字段不完整");
+  if (data.teams !== undefined && (!Array.isArray(data.teams) || !data.teams.every(team=>team&&typeof team.id==='string'&&typeof team.name==='string'&&team.name.length<=100&&Array.isArray(team.members)&&team.members.length===6&&team.members.every(shapeBuild)))) throw new Error('我的队伍字段不完整');
+  data.teams ??= [];
   if (
     !data.scenes.every(
       (s) =>
@@ -154,10 +158,11 @@ export function readWorkspace() {
     const d = JSON.parse(text);
     safeObject(d);
     const records = parseImport(
-      JSON.stringify(exportPayload(d.builds || [], d.scenes || [])),
+      JSON.stringify(exportPayload(d.builds || [], d.scenes || [], d.teams || [])),
     );
     d.builds = records.builds;
     d.scenes = records.scenes;
+    d.teams = records.teams;
     if (d.scene)
       d.scene = parseImport(JSON.stringify(exportPayload([], [d.scene]))).scenes[0];
     return d;

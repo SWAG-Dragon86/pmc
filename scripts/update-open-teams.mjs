@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { teamSaveability } from "../src/open-teams.mjs";
 
 const SHEET_ID = "1axlwmzPA49rYkqXh7zHvAtSP-TKbM0ijGYBPRflLSWw";
-const SHEET_NAME = "Champions M-B";
+const SHEET_NAME = "Champions M-C";
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
 const REPOSITORY_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/`;
 const MUNCHSTATS_URL = "https://munchstats.com/teams/";
@@ -150,7 +150,7 @@ function toTeam(row, members) {
     section:isOfficialEvent(row) ? "official" : "community",
     player, handle:row.owner && row.owner !== player ? row.owner : "",
     event:row.event || row.description || "公开队伍",
-    date:row.date || "2026-01-01", placing:row.rank || "未公开", record:"未公开", format:"M-B",
+    date:row.date || "2026-01-01", placing:row.rank || "未公开", record:"未公开", format:"M-C",
     rentalCode:row.rentalCode, sourceLabel:"VGCPastes 公开队伍库",
     sourceUrl:row.sourceUrl || row.pokepaste || REPOSITORY_URL,
     pasteUrl:row.pokepaste, reportUrl:row.reportUrl, description:row.description,
@@ -187,16 +187,17 @@ const generated = [
   ...officialHydrated.filter(Boolean).slice(0, OFFICIAL_LIMIT),
   ...communityHydrated.filter(Boolean).slice(0, COMMUNITY_LIMIT),
 ];
-const manual = current.teams.filter(team => team.managedBy !== "vgcpastes-snapshot" && team.id !== "worlds-2026-takuma-yamazaki");
-const manualCodes = new Set(manual.map(team => team.rentalCode).filter(Boolean));
-const teams = [...generated.filter(team => !manualCodes.has(team.rentalCode)), ...manual]
+if (!generated.length) throw new Error("M-C 公开队伍源没有返回可用的完整阵容；保留上次已发布的数据");
+const existing = current.teams.filter(team => !generated.some(fresh => fresh.id === team.id));
+const existingCodes = new Set(existing.map(team => team.rentalCode).filter(Boolean));
+const teams = [...generated.filter(team => !team.rentalCode || !existingCodes.has(team.rentalCode)), ...existing]
   .sort((a,b) => b.date.localeCompare(a.date));
 
 const output = {
   meta: {
     updatedAt:new Date().toISOString().slice(0,10),
     policy:"只内置可追溯且能通过当前《宝可梦冠军》目录校验的阵容；完整66点配置可保存和载入。",
-    snapshot:{ repository:"Champions M-B", totalRows:rows.length, embeddedTeams:teams.length, generatedTeams:generated.length },
+    snapshot:{ repository:SHEET_NAME, totalRows:rows.length, embeddedTeams:teams.length, generatedTeams:generated.length },
     sources:[
       { name:"MunchStats", url:MUNCHSTATS_URL, role:"赛事、使用率与队伍检索入口" },
       { name:"VGCPastes Repository", url:REPOSITORY_URL, role:"公开六人阵容、Poképaste 与租借码" },

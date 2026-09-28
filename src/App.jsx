@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   Swords,
   Library,
@@ -30,6 +30,7 @@ import {
   RotateCcw,
   CheckCircle2,
   Trophy,
+  Globe2,
 } from "lucide-react";
 import { pinyin } from "pinyin-pro";
 import catalog from "./data/catalog.json";
@@ -37,10 +38,12 @@ import spriteInfo from "./data/sprites.json";
 import rosterAudit from "./data/roster-audit.json";
 import mcManifest from "./data/mc-manifest.json";
 import openTeams from "./data/open-teams.json";
+import { validateTeamFeed, TEAM_FEED_STORAGE_KEY } from "./team-feed.mjs";
 import {
   createBuild,
   defaultScene,
   withMandatoryActions,
+  resetBattleState,
   validateBuild,
   validatePoints,
   STAT_KEYS,
@@ -53,7 +56,7 @@ import {
 } from "./model.mjs";
 import { statsOf, previewDamage, speedOf } from "./engine.mjs";
 import { natureOptions } from './natures.mjs';
-import { WEATHER_NAMES, openingBranches, OPENING_RULES, hasFriendGuard } from './opening.mjs';
+import { WEATHER_NAMES, TERRAIN_NAMES, openingBranches, OPENING_RULES, hasFriendGuard } from './opening.mjs';
 import {
   readWorkspace,
   writeWorkspace,
@@ -67,9 +70,11 @@ import { getBackground, setBackground } from "./background.mjs";
 import { exportResultImage } from "./share.mjs";
 import { isAndroidApp } from "./platform.mjs";
 import { publicMemberBuild, savePublicMembers, teamSaveability } from "./open-teams.mjs";
+import { analyzeTeam } from "./team-analysis.mjs";
+import { LANGUAGES, LANGUAGE_KEY, localizeDom, localizedName, prepareLanguage } from "./localization.mjs";
 
 const pct = (n) => `${Math.max(0, n || 0).toFixed(1)}%`;
-const APP_VERSION = "1.2.0";
+const APP_VERSION = "1.3.0";
 const range = (r) => `${pct(r.min)} – ${pct(r.max)}`;
 const TYPES_COLOR = {
   Fire: "#ce5841",
@@ -92,8 +97,16 @@ const TYPES_COLOR = {
   Normal: "#8a8c84",
 };
 const pMap = Object.fromEntries(catalog.pokemon.map((p) => [p.id, p]));
+const AliasContext = createContext({});
+function readAliases() {
+  try {
+    const raw=JSON.parse(localStorage.getItem('pmc.aliases.v1')||'{}'),valid={};
+    for(const [id,values] of Object.entries(raw||{}))if((pMap[id]||catalog.moves[id])&&Array.isArray(values))valid[id]=values.filter(value=>typeof value==='string'&&value.length<=32).slice(0,12);
+    return valid;
+  } catch { return {}; }
+}
 const searchCache = new Map();
-function matches(option, query) {
+function matches(option, query, aliases = {}) {
   const q = query.toLowerCase().replace(/[\s'-]/g, "");
   if (!q) return true;
   const key = `${option.id}:${option.zh}`;
@@ -105,6 +118,7 @@ function matches(option, query) {
         zh,
         option.name || "",
         option.id,
+        ...['zhHant','ja','ko'].flatMap(language=>[localizedName('pokemon',option.id,language)||localizedName('moves',option.id,language)||'']),
         pinyin(zh, { toneType: "none" }),
         pinyin(zh, { pattern: "first", toneType: "none" }),
       ]
@@ -113,7 +127,7 @@ function matches(option, query) {
         .replace(/[\s'-]/g, ""),
     );
   }
-  return searchCache.get(key).includes(q);
+  return searchCache.get(key).includes(q) || (aliases[option.id] || []).some(alias=>alias.toLowerCase().replace(/[\s'-]/g, "").includes(q));
 }
 function Sprite({ species, small = false }) {
   const p = pMap[species];
@@ -173,12 +187,13 @@ function SelectSearch({
   species = false,
   compact = false,
 }) {
+  const aliases=useContext(AliasContext);
   const [open, setOpen] = useState(false),
     [query, setQuery] = useState("");
   const selected = options.find((o) => o.id === value);
   const filtered = useMemo(
-    () => options.filter((o) => matches(o, query)),
-    [options, query],
+    () => options.filter((o) => matches(o, query, aliases)),
+    [options, query, aliases],
   );
   return (
     <>
@@ -365,6 +380,7 @@ function PokemonCard({
             onChange={(id) =>
               onChange({
                 ...createBuild(catalog, id),
+                ...(index >= 2 ? { moves: ["", "", "", ""] } : {}),
                 id: build.id,
                 active: build.active,
                 present: build.present,
@@ -466,17 +482,11 @@ function PokemonCard({
                 onChange={(e) =>
                   update("points", {
                     ...build.points,
-                    [k]: Number(e.target.value),
+                    [k]: Math.max(0, Math.min(32, Number(e.target.value) || 0)),
                   })
                 }
               />
-              <span className="stat-track">
-                <i
-                  style={{
-                    width: `${Math.min(100, (build.points[k] / 32) * 100)}%`,
-                  }}
-                />
-              </span>
+              <input className="stat-range" type="range" min="0" max="32" value={build.points[k]} style={{'--fill':`${build.points[k]/32*100}%`}} aria-label={`${index + 1}号${STAT_NAMES[k]}能力点滑块`} onChange={(e)=>update("points",{...build.points,[k]:Number(e.target.value)})}/>
             </label>
             <strong>{stats[k] ?? "—"}</strong>
           </div>
@@ -682,7 +692,8 @@ function PokemonCard({
 function Battlefield({ scene, onChange }) {
   const field = scene.field;
   let openingWeather='配置待核对';
-  try { openingWeather=openingBranches(scene,catalog).map(w=>WEATHER_NAMES[w.openingWeather]).join(' / '); } catch { /* Invalid edits retain the controls and show validation in the result panel. */ }
+  let openingTerrain='配置待核对';
+  try { const branches=openingBranches(scene,catalog);openingWeather=[...new Set(branches.map(w=>WEATHER_NAMES[w.openingWeather]))].join(' / ');openingTerrain=[...new Set(branches.map(w=>TERRAIN_NAMES[w.scene.field.terrain]))].join(' / '); } catch { /* Invalid edits retain the controls and show validation in the result panel. */ }
   const set = (k, v) => onChange({ ...scene, field: { ...field, [k]: v } });
   return (
     <section className="battlefield panel">
@@ -706,9 +717,10 @@ function Battlefield({ scene, onChange }) {
         />
         <FieldSelect
           label="场地"
-          value={field.terrain}
-          onChange={(v) => set("terrain", v)}
+          value={field.terrainMode==='auto'||(!field.terrainMode&&!field.terrain)?'auto':field.terrain}
+          onChange={(v) => onChange({...scene,field:{...field,terrainMode:v==='auto'?'auto':'manual',terrain:v==='auto'?'':v}})}
           options={[
+            ['auto','自动：按开场场地特性'],
             ["", "无场地"],
             ["Electric", "电气场地"],
             ["Grassy", "青草场地"],
@@ -727,7 +739,7 @@ function Battlefield({ scene, onChange }) {
           onChange={(v) => set("gravity", v)}
         />
       </div>
-      <p className="hint weather-readout">{field.weatherMode==='manual'||(!field.weatherMode&&field.weather)?`手动天气：${WEATHER_NAMES[field.weather]}`:`自动天气：${openingWeather}`}。开局只比较性格、能力点及道具后的速度。</p>
+      <p className="hint weather-readout">{field.weatherMode==='manual'||(!field.weatherMode&&field.weather)?`手动天气：${WEATHER_NAMES[field.weather]}`:`自动天气：${openingWeather}`}；{field.terrainMode==='manual'||(!field.terrainMode&&field.terrain)?`手动场地：${TERRAIN_NAMES[field.terrain]}`:`自动场地：${openingTerrain}`}。开局只比较性格、能力点及道具后的速度。</p>
       <details className="field-details hazard-options">
         <summary>入场钉子（当前 HP 为吃钉前） <ChevronDown size={15}/></summary>
         <div className="side-options">{[['attacker','我方'],['defender','对方']].map(([side,label])=><div key={side}>
@@ -777,12 +789,16 @@ function Battlefield({ scene, onChange }) {
   );
 }
 
-function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify }) {
+function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, feed, updateFeed, feedUpdating, feedMessage }) {
   const [section,setSection]=useState("official"),[teamQuery,setTeamQuery]=useState(""),[picked,setPicked]=useState([]);
-  const teams=useMemo(()=>openTeams.teams
+  const aliases=useContext(AliasContext);
+  const [format,setFormat]=useState('all');
+  const formats=[...new Set(feed.teams.map(team=>team.format))].sort().reverse();
+  const teams=useMemo(()=>feed.teams
     .filter(team=>team.section===section)
-    .filter(team=>matches({id:team.id,name:`${team.player} ${team.handle}`,zh:`${team.player} ${team.event} ${team.members.map(member=>pMap[member.species]?.zh||member.species).join(" ")}`},teamQuery))
-    .sort((a,b)=>b.date.localeCompare(a.date)),[section,teamQuery]);
+    .filter(team=>format==='all'||team.format===format)
+    .filter(team=>matches({id:team.id,name:`${team.player} ${team.handle}`,zh:`${team.player} ${team.event} ${team.members.map(member=>`${pMap[member.species]?.zh||member.species} ${(aliases[member.species]||[]).join(' ')}`).join(" ")}`},teamQuery,aliases))
+    .sort((a,b)=>b.date.localeCompare(a.date)),[feed,section,format,teamQuery,aliases]);
   const togglePick=(key)=>setPicked(values=>values.includes(key)?values.filter(value=>value!==key):[...values,key]);
   const saveMembers=(team,indices)=>{
     try {
@@ -806,14 +822,17 @@ function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify }) 
   return <>
     <div className="page-heading open-teams-heading">
       <div><p className="eyebrow">OPEN TEAMS</p><h1>公开阵容</h1><p>只收录《宝可梦冠军》赛制；内置完整66点配置，可离线查看、保存和载入。</p></div>
-      <div className="open-team-count"><b>{openTeams.teams.length}</b><span>内置阵容 · 离线可看</span></div>
+      <div className="open-team-count"><b>{feed.teams.length}</b><span>公开阵容 · 离线可看</span></div>
     </div>
     <section className="panel open-team-toolbar">
       <div className="segmented" aria-label="阵容来源">
-        {[["official","官方比赛"],["community","社区比赛"]].map(([id,label])=><button key={id} className={section===id?"active":""} onClick={()=>{setSection(id);setPicked([])}}>{label} · {openTeams.teams.filter(team=>team.section===id).length}</button>)}
+        {[["official","官方比赛"],["community","社区比赛"]].map(([id,label])=><button key={id} className={section===id?"active":""} onClick={()=>{setSection(id);setPicked([])}}>{label} · {feed.teams.filter(team=>team.section===id).length}</button>)}
       </div>
+      <select className="open-team-format" aria-label="按赛制筛选" value={format} onChange={e=>setFormat(e.target.value)}><option value="all">全部赛制</option>{formats.map(value=><option key={value} value={value}>{value}</option>)}</select>
       <label className="open-team-search"><Search size={16}/><input value={teamQuery} onChange={event=>setTeamQuery(event.target.value)} placeholder="搜索选手、比赛、宝可梦或拼音"/></label>
+      <button className="button open-team-refresh" disabled={feedUpdating} onClick={updateFeed}><RefreshCw size={15}/>{feedUpdating?'更新中…':'更新队伍'}</button>
     </section>
+    {feedMessage&&<p className="open-team-feed-message" role="status">{feedMessage}</p>}
     <div className="open-team-list">
       {teams.map(team=>{
         const status=teamSaveability(team,catalog),teamPicked=team.members.map((_,index)=>`${team.id}:${index}`).filter(key=>picked.includes(key));
@@ -849,8 +868,38 @@ function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify }) 
       })}
       {!teams.length&&<section className="panel empty-state"><Trophy size={30}/><h2>没有找到阵容</h2><p>换一个选手、比赛名称或宝可梦名称试试。</p></section>}
     </div>
-    <section className="panel open-team-sources"><div><b>数据来源</b><span>本次快照 {openTeams.meta.updatedAt} · 来源互相核对后内置，不在使用时联网。</span></div><div>{openTeams.meta.sources?.map(source=><a key={source.name} href={source.url} target="_blank" rel="noopener noreferrer" title={source.role}>{source.name}<ArrowUpRight size={12}/></a>)}</div></section>
-    <p className="open-team-footnote">阵容随版本内置更新，不依赖服务器。若来源修改或租借码失效，计算器内已保存的快照不会被静默改写。</p>
+    <section className="panel open-team-sources"><div><b>数据来源</b><span>队伍快照 {feed.meta.updatedAt} · 每天检查公开来源；打开 PMC 时自动检查，也可手动更新。</span></div><div>{feed.meta.sources?.map(source=><a key={source.name} href={source.url} target="_blank" rel="noopener noreferrer" title={source.role}>{source.name}<ArrowUpRight size={12}/></a>)}</div></section>
+    <p className="open-team-footnote">只收录《宝可梦冠军》已实装、配置完整且可校验的队伍。断网仍可查看已有阵容；已保存的配置不会被更新覆盖。</p>
+  </>;
+}
+
+function freshTeam() {
+  return {id:uid(),name:'我的队伍',members:['venusaur','charizard','blastoise','garchomp','pikachu','dragonite'].map(id=>createBuild(catalog,id))};
+}
+function TeamBuilderPage({draft,setDraft,builds,savedTeams,setSavedTeams,threats,setThreats,notify}) {
+  const firstMemberRef=useRef(null);
+  useEffect(()=>{if(firstMemberRef.current)firstMemberRef.current.open=true;},[]);
+  const setMember=(index,next)=>{setDraft(current=>({...current,members:current.members.map((member,i)=>i===index?next:member)}));setThreats(null);};
+  const check=()=>{try{const result=analyzeTeam(draft.members,catalog);setThreats(result);return result;}catch(error){notify(error.message);return null;}};
+  return <>
+    <div className="page-heading"><div><p className="eyebrow">TEAM WORKSPACE</p><h1>我的队伍</h1><p>配置六只宝可梦，查看可能难处理的已实装对手。</p></div><button className="button" onClick={()=>{setDraft(freshTeam());setThreats(null);}}><Plus size={16}/>新队伍</button></div>
+    <section className="panel team-builder-head"><label>队伍名称<input maxLength={80} value={draft.name} onChange={event=>setDraft(current=>({...current,name:event.target.value}))}/></label><div className="team-builder-actions"><button className="button" onClick={()=>{const result=check();if(result)notify(`已分析 ${catalog.pokemon.length} 个已实装形态`);}}><Target size={16}/>分析弱点</button><button className="button primary" onClick={()=>{if(!check())return;const saved={...clone(draft),name:draft.name.trim()||'我的队伍'};setSavedTeams(current=>current.some(team=>team.id===saved.id)?current.map(team=>team.id===saved.id?saved:team):[...current,saved]);notify('我的队伍已保存到本机');}}><Save size={16}/>保存队伍</button></div></section>
+    <div className="team-member-grid">{draft.members.map((member,index)=>{
+      const pokemon=pMap[member.species],points=Object.values(member.points).reduce((sum,value)=>sum+value,0);
+      const update=(key,value)=>setMember(index,{...member,[key]:value});
+      return <details className="panel team-member-card" key={index} ref={index===0?firstMemberRef:undefined}><summary><span className="team-slot">{String(index+1).padStart(2,'0')}</span><Sprite species={member.species} small/><span><b>{pokemon?.zh||member.species}</b><small>{member.name}</small></span><ChevronDown size={18}/></summary>
+        <div className="team-member-fields"><SelectSearch label={`第${index+1}只宝可梦`} options={catalog.pokemon} value={member.species} onChange={id=>setMember(index,createBuild(catalog,id))} species/>
+          <label className="team-library-select">从配置库载入<select value="" onChange={event=>{const saved=builds.find(build=>build.id===event.target.value);if(saved)setMember(index,{...clone(saved),id:uid(),originId:saved.id});}}><option value="">选择已保存配置…</option>{builds.map(build=><option key={build.id} value={build.id}>{build.name} · {pMap[build.species]?.zh}</option>)}</select></label>
+          <FieldSelect label="特性" value={member.ability} onChange={value=>update('ability',value)} options={pokemon.abilities.map(name=>[name,catalog.abilities.find(a=>a.name===name)?.zh||name])}/>
+          <FieldSelect label="道具" value={member.item} onChange={value=>update('item',value)} options={catalog.items.map(item=>[item.name,item.zh||item.name||'无道具'])}/>
+          <FieldSelect label="性格" value={member.nature} onChange={value=>update('nature',value)} options={natureOptions(catalog.natures)}/>
+          <div className="team-moves"><b>招式</b>{member.moves.map((id,moveIndex)=><SelectSearch key={moveIndex} label={`第${index+1}只第${moveIndex+1}招`} options={[{id:'',zh:'空招式栏',name:''},...pokemon.moves.map(move=>catalog.moves[move])]} value={id} onChange={value=>update('moves',member.moves.map((move,i)=>i===moveIndex?value:move))} compact/>)}</div>
+          <div className="team-points"><b>能力点 {points}/66</b>{STAT_KEYS.map(key=><label key={key}><span>{STAT_NAMES[key]}</span><input type="number" min="0" max="32" aria-label={`第${index+1}只${STAT_NAMES[key]}能力点`} value={member.points[key]} onChange={event=>update('points',{...member.points,[key]:Math.max(0,Math.min(32,Number(event.target.value)||0))})}/><input type="range" min="0" max="32" aria-label={`第${index+1}只${STAT_NAMES[key]}能力点滑块`} value={member.points[key]} onChange={event=>update('points',{...member.points,[key]:Number(event.target.value)})}/></label>)}</div>
+        </div>
+      </details>;
+    })}</div>
+    {threats&&<section className="panel team-threat-section"><div className="section-title"><h2>潜在难处理的宝可梦</h2><span>对手配置未知 · 按可能风险排序</span></div><p className="hint">综合你队伍的招式、属性、特性、道具和速度，以及对手可学招式分析。对手实际配招与努力值可能改变结果。</p><div className="team-threat-list">{threats.length?threats.map(row=><article key={row.id}><Sprite species={row.id} small/><div><h3>{row.name}</h3>{row.reasons.map(reason=><p key={reason}>{reason}</p>)}</div></article>):<p className="hint">没有发现达到当前提示阈值的明显风险；这不代表没有不利对局。</p>}</div></section>}
+    <section className="panel team-saved-section"><div className="section-title"><h2>已保存队伍</h2><span>{savedTeams.length} 支 · 存在本机，可随完整备份导出</span></div>{savedTeams.length===0?<p className="hint">保存后可在这里载入队伍继续编辑。</p>:<div className="team-saved-list">{savedTeams.map(team=><div key={team.id}><span><b>{team.name}</b><small>{team.members.map(member=>pMap[member.species]?.zh||member.species).join(' · ')}</small></span><button className="button" onClick={()=>{setDraft(clone(team));setThreats(null);}}>载入</button><button className="icon-button" aria-label={`删除${team.name}`} onClick={()=>{if(confirm(`删除队伍“${team.name}”？`))setSavedTeams(current=>current.filter(value=>value.id!==team.id));}}><Trash2 size={16}/></button></div>)}</div>}</section>
   </>;
 }
 
@@ -979,8 +1028,30 @@ import {
 } from "./preferences.mjs";
 
 export default function App() {
+  const [language,setLanguage]=useState(()=>{try{const saved=localStorage.getItem(LANGUAGE_KEY);return LANGUAGES.some(([id])=>id===saved)?saved:'zhHans';}catch{return 'zhHans';}});
+  useEffect(()=>{
+    try{localStorage.setItem(LANGUAGE_KEY,language);}catch{}
+    document.documentElement.lang={zhHans:'zh-CN',zhHant:'zh-TW',ja:'ja',ko:'ko'}[language];
+    const root=document.querySelector('.app-shell');if(!root)return;
+    let frame=0;
+    const translate=()=>{frame=0;localizeDom(root,language);};
+    translate();
+    let active=true;
+    prepareLanguage(language).then(()=>{if(active)translate();}).catch(()=>{});
+    const observer=new MutationObserver(()=>{if(!frame)frame=requestAnimationFrame(translate);});
+    observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['aria-label','title','placeholder','alt']});
+    return ()=>{active=false;observer.disconnect();if(frame)cancelAnimationFrame(frame);};
+  },[language]);
+  const [aliases,setAliases]=useState(readAliases);
+  const [aliasType,setAliasType]=useState('pokemon'),[aliasTarget,setAliasTarget]=useState(''),[aliasText,setAliasText]=useState('');
+  useEffect(()=>{try {localStorage.setItem('pmc.aliases.v1',JSON.stringify(aliases));} catch {notify('别称保存失败，请检查本机存储空间');}},[aliases]);
   const [screenMode,setScreenMode]=useState(()=>isAndroidApp?(globalThis.PMCAndroid?.getScreenMode?.()||'auto'):'auto');
   const [initial] = useState(() => readWorkspace());
+  const [teamDraft,setTeamDraft]=useState(()=>{const saved=initial?.teamDraft;return saved&&Array.isArray(saved.members)&&saved.members.length===6&&saved.members.every(member=>!validateBuild(member,catalog).length)?saved:freshTeam();});
+  const [savedTeams,setSavedTeams]=useState(()=>initial?.teams||[]);
+  const [teamThreats,setTeamThreats]=useState(null);
+  const [teamFeed,setTeamFeed]=useState(()=>{try{return validateTeamFeed(openTeams,JSON.parse(localStorage.getItem(TEAM_FEED_STORAGE_KEY)),catalog);}catch{return openTeams;}});
+  const [teamFeedUpdating,setTeamFeedUpdating]=useState(false),[teamFeedMessage,setTeamFeedMessage]=useState('');
   const [heading, setHeading] = useState(() =>
     normalizeHeading(initial?.heading),
   );
@@ -1025,6 +1096,19 @@ export default function App() {
     backgroundUrls[isPortrait ? "portrait" : "landscape"] ||
     backgroundUrls[isPortrait ? "landscape" : "portrait"];
   const notify = (text) => setMessage(text);
+  const updateTeamFeed=async()=>{
+    setTeamFeedUpdating(true);
+    try {
+      const response=await fetch(new URL('live-teams.json',document.baseURI),{cache:'no-store',signal:AbortSignal.timeout(15000)});
+      if(!response.ok)throw new Error(`服务器返回 ${response.status}`);
+      const fresh=validateTeamFeed(openTeams,await response.json(),catalog);
+      setTeamFeed(fresh);
+      try {localStorage.setItem(TEAM_FEED_STORAGE_KEY,JSON.stringify(fresh));} catch {setTeamFeedMessage('新队伍已显示，但本机空间不足，无法保留离线副本。');return;}
+      setTeamFeedMessage(`已检查更新：${fresh.meta.updatedAt} · ${fresh.teams.length} 支队伍`);
+    } catch(error) {setTeamFeedMessage(`联网更新失败：${error.message}；继续使用本机队伍。`);}
+    finally {setTeamFeedUpdating(false);}
+  };
+  useEffect(()=>{updateTeamFeed();},[]);
   useEffect(() => {
     if (!message) return;
     const t = setTimeout(() => setMessage(""), 5000);
@@ -1044,12 +1128,12 @@ export default function App() {
     const t = setTimeout(
       () =>
         setStorageError(
-          writeWorkspace({ scene, builds, scenes, theme, selected, heading }),
+          writeWorkspace({ scene, builds, scenes, teams:savedTeams, teamDraft, theme, selected, heading }),
         ),
       300,
     );
     return () => clearTimeout(t);
-  }, [scene, builds, scenes, theme, selected, heading]);
+  }, [scene, builds, scenes, savedTeams, teamDraft, theme, selected, heading]);
   useEffect(() => {
     let cancelled = false;
     Promise.all(
@@ -1166,10 +1250,10 @@ export default function App() {
   };
   const exportAll = () => {
     downloadFile(
-      JSON.stringify(exportPayload(builds, scenes), null, 2),
+      JSON.stringify(exportPayload(builds, scenes, savedTeams), null, 2),
       "PMC-完整备份.json",
     );
-    notify(isAndroidApp ? `已准备 ${builds.length} 个配置和 ${scenes.length} 个场景，请选择保存位置` : `已导出 ${builds.length} 个配置和 ${scenes.length} 个场景`);
+    notify(isAndroidApp ? `已准备 ${builds.length} 个配置、${scenes.length} 个场景和 ${savedTeams.length} 支队伍，请选择保存位置` : `已导出 ${builds.length} 个配置、${scenes.length} 个场景和 ${savedTeams.length} 支队伍`);
   };
   const importFile = async (file) => {
     if (!file) return;
@@ -1177,12 +1261,12 @@ export default function App() {
       if (file.size > 10 * 1024 * 1024) throw new Error("文件不能超过 10 MB");
       const data = parseImport(await file.text());
       const b = mergeRecords(builds, data.builds),
-        s = mergeRecords(scenes, data.scenes);
+        s = mergeRecords(scenes, data.scenes),t=mergeRecords(savedTeams,data.teams);
       setModal({
         type: "import",
         data,
-        conflicts: b.conflicts.length + s.conflicts.length,
-        skipped: b.skipped + s.skipped,
+        conflicts: b.conflicts.length + s.conflicts.length+t.conflicts.length,
+        skipped: b.skipped + s.skipped+t.skipped,
       });
     } catch (e) {
       notify(e.message);
@@ -1193,6 +1277,7 @@ export default function App() {
   const applyImport = (policy) => {
     setBuilds(mergeRecords(builds, modal.data.builds, policy).records);
     setScenes(mergeRecords(scenes, modal.data.scenes, policy).records);
+    setSavedTeams(mergeRecords(savedTeams,modal.data.teams,policy).records);
     setModal(null);
     notify("导入完成，原有记录已保留");
   };
@@ -1239,19 +1324,20 @@ export default function App() {
         name: b.name,
         zh: `${b.name} ${pMap[b.species]?.zh || b.species}`,
       },
-      query,
+      query,aliases,
     ),
   );
   const nav = [
     ["calc", Swords, "伤害计算"],
     ["openTeams", Trophy, "公开阵容"],
+    ["teamBuilder", Shield, "我的队伍"],
     ["library", Library, "配置库"],
     ["scenes", Layers, "已存场景"],
     ["settings", Settings, "设置"],
   ];
   const sourceVersion = catalog.meta.source.showdown.commit.slice(0, 8);
   return (
-    <>
+    <AliasContext.Provider value={aliases}>
       <div
         className="fixed-background"
         style={
@@ -1311,6 +1397,12 @@ export default function App() {
               {online ? (offlineReady ? "离线已就绪" : "本地预览") : "离线模式"}
             </span>
           </div>
+          <label className="language-control">
+            <Globe2 size={15} aria-hidden="true" />
+            <select aria-label={{zhHans:'界面语言',zhHant:'介面語言',ja:'表示言語',ko:'표시 언어'}[language]} value={language} onChange={event=>setLanguage(event.target.value)}>
+              {LANGUAGES.map(([id,label])=><option key={id} value={id}>{label}</option>)}
+            </select>
+          </label>
         </header>
         <div className="data-notice">
           <Info size={16} />
@@ -1341,6 +1433,8 @@ export default function App() {
                   scene,
                   builds,
                   scenes,
+                  teams: savedTeams,
+                  teamDraft,
                   theme,
                   selected,
                   heading,
@@ -1380,6 +1474,7 @@ export default function App() {
                   <p>调整配置，比较伤害，找到你这一回合的选择。</p>
                 </div>
                 <div className="page-actions">
+                  <button className="button" onClick={() => {setScene(s=>resetBattleState(s,catalog));notify("场上临时状态已重置，宝可梦配置已保留");}}><RotateCcw size={16}/>重置</button>
                   <button className="button" onClick={reset}>
                     <Plus size={16} />
                     新建计算
@@ -1541,7 +1636,8 @@ export default function App() {
               )}
             </>
           )}
-          {page === "openTeams" && <OpenTeamsPage builds={builds} setBuilds={setBuilds} scene={scene} setScene={setScene} setPage={setPage} notify={notify}/>} 
+          {page === "openTeams" && <OpenTeamsPage builds={builds} setBuilds={setBuilds} scene={scene} setScene={setScene} setPage={setPage} notify={notify} feed={teamFeed} updateFeed={updateTeamFeed} feedUpdating={teamFeedUpdating} feedMessage={teamFeedMessage}/>}
+          {page === "teamBuilder" && <TeamBuilderPage draft={teamDraft} setDraft={setTeamDraft} builds={builds} savedTeams={savedTeams} setSavedTeams={setSavedTeams} threats={teamThreats} setThreats={setTeamThreats} notify={notify}/>}
           {page === "library" && (
             <>
               <div className="page-heading">
@@ -1848,6 +1944,16 @@ export default function App() {
                   <p>外观和数据保存在本机，不需要账号。</p>
                 </div>
               </div>
+              <section className="panel settings-card alias-settings">
+                <h2>自定义搜索别称</h2><p>给宝可梦或招式添加熟悉的叫法，搜索时使用，正式名称保持不变。</p>
+                <div className="alias-form">
+                  <FieldSelect label="类型" value={aliasType} onChange={v=>{setAliasType(v);setAliasTarget('');}} options={[["pokemon","宝可梦"],["move","招式"]]}/>
+                  <SelectSearch label="选择要绑定别称的对象" options={aliasType==='pokemon'?catalog.pokemon:Object.values(catalog.moves)} value={aliasTarget} onChange={setAliasTarget} species={aliasType==='pokemon'}/>
+                  <input aria-label="输入搜索别称" maxLength={32} value={aliasText} onChange={e=>setAliasText(e.target.value)} placeholder="例如：地龙"/>
+                  <button className="button primary" disabled={!aliasTarget||!aliasText.trim()} onClick={()=>{const value=aliasText.trim();setAliases(current=>({...current,[aliasTarget]:[...new Set([...(current[aliasTarget]||[]),value])].slice(0,12)}));setAliasText('');}}>添加别称</button>
+                </div>
+                <div className="alias-list">{Object.entries(aliases).flatMap(([id,values])=>values.map(value=><div className="alias-row" key={`${id}:${value}`}><span><b>{pMap[id]?.zh||catalog.moves[id]?.zh||id}</b><small>{value}</small></span><button className="icon-button" aria-label={`删除${value}别称`} onClick={()=>setAliases(current=>{const next={...current},rest=next[id].filter(x=>x!==value);if(rest.length)next[id]=rest;else delete next[id];return next;})}><X size={16}/></button></div>))}</div>
+              </section>
               <div className="settings-grid">
                 <section className="panel settings-card heading-settings">
                   <h2>首页文字</h2>
@@ -2006,7 +2112,7 @@ export default function App() {
                 </section>
                 <section className="panel settings-card">
                   <h2>安装与备份</h2>
-                  <p>{isAndroidApp ? "安卓离线版 1.2.0 · 数据与图片已内置。网页版记录请先导出，再在这里导入。" : "本地数据不会自动同步到其他设备。"}</p>
+                  <p>{isAndroidApp ? "安卓离线版 1.3.0 · 数据与图片已内置。网页版记录请先导出，再在这里导入。" : "本地数据不会自动同步到其他设备。"}</p>
                   <div className="status-line">
                     <span>离线资源</span>
                     <b>
@@ -2093,9 +2199,13 @@ export default function App() {
                     </b>
                   </div>
                   <p className="hint">
-                    M-B 的 {rosterAudit.roster.length} 个参赛条目继续有效；M-C 新增
-                    24 种宝可梦和 6 种超级进化，并按性别、地区及可影响对战的外观形态展开为{" "}
-                    {mcManifest.pokemon.length} 个配置项。{spriteInfo.count} 张形态图片已缓存。
+                    {language==='ja'
+                      ? `M-Bの${rosterAudit.roster.length}件は引き続き有効です。M-Cではポケモン24種とメガシンカ6種が追加され、性別・地域・対戦に影響するフォルムを含めて${mcManifest.pokemon.length}件の設定が増えました。${spriteInfo.count}枚のフォルム画像をキャッシュ済みです。`
+                      : language==='ko'
+                        ? `M-B의 참가 항목 ${rosterAudit.roster.length}개는 계속 유효합니다. M-C에는 포켓몬 24종과 메가진화 6종이 추가되었고 성별·지역·배틀에 영향을 주는 모습까지 ${mcManifest.pokemon.length}개 설정이 늘었습니다. 모습 이미지 ${spriteInfo.count}장을 캐시했습니다.`
+                        : language==='zhHant'
+                          ? `M-B 的 ${rosterAudit.roster.length} 個參賽項目仍有效；M-C 新增 24 種寶可夢與 6 種超級進化，依性別、地區及影響對戰的外觀形態展開為 ${mcManifest.pokemon.length} 個配置項。${spriteInfo.count} 張形態圖片已快取。`
+                          : <>M-B 的 {rosterAudit.roster.length} 个参赛条目继续有效；M-C 新增 24 种宝可梦和 6 种超级进化，并按性别、地区及可影响对战的外观形态展开为 {mcManifest.pokemon.length} 个配置项。{spriteInfo.count} 张形态图片已缓存。</>}
                   </p>
                   <p className="hint">
                     本计算器只计算当前一回合，不继承上一回合状态，也不模拟下一回合触发。单招试算使用冠军专用引擎。回合计算尚未覆盖全部特殊招式、特性、道具、开局触发与回合末效果；复杂场景会提示限制。剧毒当前按第一回合处理。请勿据此认定游戏内击倒概率。
@@ -2111,7 +2221,7 @@ export default function App() {
                       className="button"
                       onClick={async () => {
                         if (isAndroidApp) {
-                          notify("安卓版通过新版 APK 更新。请从原发布者获取，先导出备份，再直接覆盖安装；不要先卸载。当前版本 1.2.0。");
+                          notify("安卓版通过新版 APK 更新。请从原发布者获取，先导出备份，再直接覆盖安装；不要先卸载。当前版本 1.3.0。");
                           return;
                         }
                         if (!online) {
@@ -2431,7 +2541,7 @@ export default function App() {
             <>
               <p>
                 文件包含 {modal.data.builds.length} 个配置、
-                {modal.data.scenes.length} 个场景。
+                {modal.data.scenes.length} 个场景、{modal.data.teams.length} 支已保存队伍。
               </p>
               <p className="hint">
                 将跳过 {modal.skipped} 条完全重复的记录。发现 {modal.conflicts}{" "}
@@ -2489,6 +2599,6 @@ export default function App() {
           )}
         </Dialog>
       )}
-    </>
+    </AliasContext.Provider>
   );
 }
