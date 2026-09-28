@@ -416,7 +416,6 @@ const COMPLEX_MOVES = new Set([
   "endeavor",
   "superfang",
   "naturesmadness",
-  "finalgambit",
   "fling",
   "naturalgift",
   "present",
@@ -450,7 +449,6 @@ const COMPLEX_MOVES = new Set([
   "solarblade",
   "razorwind",
   "geomancy",
-  "knockoff",
   "incinerate",
   "thief",
   "covet",
@@ -916,6 +914,10 @@ function afterHit(s, ai, di, m, amount, catalog) {
     }
   }
   if (loss > 0) {
+    if(m.id==='knockoff'&&transferableItem(s,di,d.item,catalog)) {
+      const removed=d.item;d.item='';updateUnburden(d);
+      s.log.push(`${a.name} 拍落了 ${d.name} 的${itemName(removed,catalog)}`);
+    }
     if((ai<2)===(di<2))s.log.push(`${a.name} 的 ${m.zh} 误伤队友 ${d.name}`);
     if (
       abilityOf(d) === "Berserk" &&
@@ -1415,6 +1417,12 @@ export function simulateTurn(scene, catalog) {
           }
           for (const branch of branches) {
             const a = branch.scene.actors[ai];
+            if (branch.didDamage && m.id === 'steelroller' && branch.scene.field.terrain) {
+              branch.scene.field.terrain='';branch.log.push(`${a.name} 铁滚轮清除了场地`);
+            }
+            if (branch.didDamage && m.id === 'finalgambit' && branch.hp[ai] > 0) {
+              branch.hp[ai]=0;a.hp=0;branch.log.push(`${a.name} 使用搏命后倒下`);triggerReceiver(branch,ai,catalog);
+            }
             if (branch.didDamage) {
               const raised = changeBoost(a, m.self?.boosts);
               triggerOpportunist(branch, ai, raised);

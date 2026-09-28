@@ -168,3 +168,10 @@ GitHub 绑定自定义域名后，默认 github.io 地址可能重定向到该�
 
 证据：output/pages-audit/static-results.json、output/pages-audit/browser-results.json。本次网页/业务内部修改 0 次；部署配置按官方 Action 版本核对修订 1 次，测试步骤修正 1 次。所有结论仅对应本次本机检查，不代表已上线。
 
+# 比赛队伍每日更新（1.3.0）
+
+GitLab Pages 的普通推送会构建并发布当前随仓库保存的队伍快照。要每天自动检查新队伍，在项目中打开 **Build → Pipeline schedules → New schedule**，目标分支选 `main`，时区选 UTC，cron 填 `17 2 * * *`，保存并保持启用。定时流水线会执行 `pnpm data:teams`，再发布 `live-teams.json`；网页和 Android 端打开公开阵容时会检查这一同站点快照，也可以点“更新队伍”。没有新队伍时保留已有快照。
+
+GitHub 备用站的 `.github/workflows/deploy.yml` 已含相同的 UTC 每日计划任务；仓库启用 GitHub Pages 的 GitHub Actions 发布来源后生效。两站使用同一份源码。浏览器访问使用相对路径；Android 安装包的队伍地址可在构建时通过 `PMC_TEAM_FEED_URL` 指向未来的统一域名。当前默认地址为 GitLab Pages 的公开站点地址。
+
+这些定时任务使用平台免费额度，不引入强制付费服务。若平台暂停定时任务或免费额度耗尽，网页与安装包仍可查看已打包及已缓存的队伍，但不会获得新快照。

@@ -93,6 +93,7 @@ test("Skill Link forces maximum hits and illegal counts do not produce numbers",
 test("paralysis modifies speed but never adds a failed-action branch", () => {
   const s = defaultScene(catalog),
     a = s.actors[0];
+  a.points = { hp: 2, atk: 0, def: 0, spa: 32, spd: 0, spe: 32 };
   const normal = speedOf(a, s, catalog, 0);
   a.status = "par";
   assert.equal(speedOf(a, s, catalog, 0), Math.floor(normal / 2));
@@ -177,7 +178,7 @@ test("roundtrip, duplicate names, conflict copy, malicious input", () => {
 test("scenario snapshot does not link to library", () => {
   const original = defaultScene(catalog);
   const snapshot = structuredClone(original);
-  original.actors[0].points.spa = 0;
+  original.actors[0].points.spa = 32;
   assert.notEqual(original.actors[0].points.spa, snapshot.actors[0].points.spa);
 });
 test("illegal learned move is preserved but rejected", () => {
@@ -251,6 +252,7 @@ test("spread friendly fire removes a fainted ally from later actions", () => {
 });
 test("Focus Sash survival is conditional on starting at full HP", () => {
   const s = defaultScene(catalog);
+  s.actors[0].points = { hp: 2, atk: 0, def: 0, spa: 32, spd: 0, spe: 32 };
   s.actors[2].item = "Focus Sash";
   let r = simulateTurn(s, catalog);
   assert.equal(r.error, undefined);

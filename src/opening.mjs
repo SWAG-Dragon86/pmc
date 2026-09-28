@@ -2,7 +2,9 @@ import { Pokemon, TYPE_CHART } from './vendor/calc.mjs';
 import { activeIndices, clone, STAT_NAMES, OPENING_RULES_VERSION } from './model.mjs';
 
 export const WEATHER_NAMES = { '': '无天气', Sun: '晴天', Rain: '雨天', Sand: '沙暴', Snow: '雪天' };
+export const TERRAIN_NAMES = { '': '无场地', Electric: '电气场地', Grassy: '青草场地', Misty: '薄雾场地', Psychic: '精神场地' };
 const WEATHER_ABILITIES = { Drought: 'Sun', Drizzle: 'Rain', 'Sand Stream': 'Sand', 'Snow Warning': 'Snow' };
+const TERRAIN_ABILITIES = { 'Electric Surge': 'Electric', 'Grassy Surge': 'Grassy', 'Psychic Surge': 'Psychic' };
 const abilityOf = (b) => b.currentAbility !== undefined ? b.currentAbility : b.ability;
 const RECEIVER_UNCOPYABLE = new Set([
   'Receiver','Power of Alchemy','Trace','Forecast','Flower Gift','Multitype',
@@ -134,6 +136,16 @@ export function weatherCandidates(scene,catalog,indices=activeIndices(scene).fil
   }
   return [...groups.values()].map(g=>({...g,source:`自动天气：${g.source}${groups.size>1?'（同速天气分支）':''}`}));
 }
+export function terrainCandidates(scene,catalog,indices=activeIndices(scene).filter(i=>scene.actors[i].present&&scene.actors[i].hp>0)) {
+  if(scene.field.terrainMode==='manual'||(!scene.field.terrainMode&&scene.field.terrain))
+    return [{terrain:scene.field.terrain||'',p:1,source:'手动场地'}];
+  const setters=indices.filter(i=>TERRAIN_ABILITIES[abilityOf(scene.actors[i])]);
+  if(!setters.length)return [{terrain:'',p:1,source:'自动场地：没有开场场地特性'}];
+  const slowest=Math.min(...setters.map(i=>entrySpeed(scene.actors[i],catalog)));
+  const tied=setters.filter(i=>entrySpeed(scene.actors[i],catalog)===slowest),groups=new Map();
+  for(const i of tied){const terrain=TERRAIN_ABILITIES[abilityOf(scene.actors[i])];const group=groups.get(terrain)||{terrain,p:0,source:''};group.p+=1/tied.length;group.source+=(group.source?'、':'')+scene.actors[i].name;groups.set(terrain,group);}
+  return [...groups.values()].map(group=>({...group,source:`自动场地：${group.source}${groups.size>1?'（同速场地分支）':''}`}));
+}
 export function openingBranches(input,catalog) {
   const scene=clone(input),max=scene.actors.map(b=>rawPokemon(b,catalog).maxHP());
   const hp=scene.actors.map((b,i)=>Math.floor(max[i]*b.hp/100+1e-9));
@@ -196,12 +208,9 @@ export function openingBranches(input,catalog) {
     const currentScene=current.scene,currentHP=current.hp;
     const currentLive=activeIndices(currentScene).filter(i=>currentScene.actors[i].present&&currentHP[i]>0);
     const weather=weatherCandidates(currentScene,catalog,currentLive);
+    const terrain=terrainCandidates(currentScene,catalog,currentLive);
     for(const ai of [...currentLive].sort((a,b)=>entrySpeed(currentScene.actors[b],catalog)-entrySpeed(currentScene.actors[a],catalog))) {
       const ability=abilityOf(currentScene.actors[ai]);
-      if(ability==='Electric Surge') {
-        currentScene.field.terrain='Electric';
-        current.log.push(`${currentScene.actors[ai].name} 电气制造者 → 电气场地`);
-      }
       if(ability==='Screen Cleaner') {
         for(const side of ['attacker','defender']) {
           currentScene.field[side].isReflect=false;
@@ -231,11 +240,12 @@ export function openingBranches(input,catalog) {
         for(const di of currentLive)if((ai<2)!==(di<2))applyOpponentBoost(current,ai,di,changes,label,true,catalog);
       }
     }
-    return weather.map(w=>{
-      const result=clone(current);result.p=current.p*w.p;result.scene.field.weather=w.weather;
+    return weather.flatMap(w=>terrain.map(t=>{
+      const result=clone(current);result.p=current.p*w.p*t.p;result.scene.field.weather=w.weather;result.scene.field.terrain=t.terrain;
       result.scene.field.openingApplied=true;result.openingWeather=w.weather;
+      result.log.unshift(`${t.source} → ${TERRAIN_NAMES[t.terrain]}`);
       result.log.unshift(`${w.source} → ${WEATHER_NAMES[w.weather]}`);
       result.openingLog=[...result.log];return result;
-    });
+    }));
   });
 }
