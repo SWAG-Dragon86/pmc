@@ -7,10 +7,22 @@ import { damageFor, simulateTurn } from '../src/engine.mjs';
 import { analyzeTeam } from '../src/team-analysis.mjs';
 import { validateTeamFeed } from '../src/team-feed.mjs';
 import { exportPayload, parseImport } from '../src/storage.mjs';
+import { initialLanguage } from '../src/language-preference.mjs';
 
 const catalog=JSON.parse(readFileSync(new URL('../src/data/catalog.json',import.meta.url)));
 const bundled=JSON.parse(readFileSync(new URL('../src/data/open-teams.json',import.meta.url)));
 const localeNames=JSON.parse(readFileSync(new URL('../src/data/locale-names.json',import.meta.url)));
+
+test('first visit follows device language and later keeps the saved choice',()=>{
+  assert.equal(initialLanguage(null,'zh-TW'),'zhHant');
+  assert.equal(initialLanguage(null,'zh-HK'),'zhHant');
+  assert.equal(initialLanguage(null,'zh-Hant-CN'),'zhHant');
+  assert.equal(initialLanguage(null,'zh-Hans-TW'),'zhHans');
+  assert.equal(initialLanguage(null,'ja-JP'),'ja');
+  assert.equal(initialLanguage(null,'ko-KR'),'ko');
+  assert.equal(initialLanguage(null,'en-US'),'zhHans');
+  assert.equal(initialLanguage('ja','ko-KR'),'ja');
+});
 
 test('new configurations start at zero, empty defender moves are passive, and reset keeps the chosen set',()=>{
   const scene=defaultScene(catalog);

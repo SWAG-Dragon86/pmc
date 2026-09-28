@@ -72,6 +72,7 @@ import { isAndroidApp } from "./platform.mjs";
 import { publicMemberBuild, savePublicMembers, teamSaveability } from "./open-teams.mjs";
 import { analyzeTeam } from "./team-analysis.mjs";
 import { LANGUAGES, LANGUAGE_KEY, localizeDom, localizedName, prepareLanguage } from "./localization.mjs";
+import { initialLanguage } from "./language-preference.mjs";
 
 const pct = (n) => `${Math.max(0, n || 0).toFixed(1)}%`;
 const APP_VERSION = "1.3.0";
@@ -1028,7 +1029,7 @@ import {
 } from "./preferences.mjs";
 
 export default function App() {
-  const [language,setLanguage]=useState(()=>{try{const saved=localStorage.getItem(LANGUAGE_KEY);return LANGUAGES.some(([id])=>id===saved)?saved:'zhHans';}catch{return 'zhHans';}});
+  const [language,setLanguage]=useState(()=>{let saved;try{saved=localStorage.getItem(LANGUAGE_KEY);}catch{}return initialLanguage(saved,globalThis.navigator?.language);});
   useEffect(()=>{
     try{localStorage.setItem(LANGUAGE_KEY,language);}catch{}
     document.documentElement.lang={zhHans:'zh-CN',zhHant:'zh-TW',ja:'ja',ko:'ko'}[language];
@@ -1949,7 +1950,7 @@ export default function App() {
                 <div className="alias-form">
                   <FieldSelect label="类型" value={aliasType} onChange={v=>{setAliasType(v);setAliasTarget('');}} options={[["pokemon","宝可梦"],["move","招式"]]}/>
                   <SelectSearch label="选择要绑定别称的对象" options={aliasType==='pokemon'?catalog.pokemon:Object.values(catalog.moves)} value={aliasTarget} onChange={setAliasTarget} species={aliasType==='pokemon'}/>
-                  <input aria-label="输入搜索别称" maxLength={32} value={aliasText} onChange={e=>setAliasText(e.target.value)} placeholder="例如：地龙"/>
+                  <input aria-label="输入搜索别称" maxLength={32} value={aliasText} onChange={e=>setAliasText(e.target.value)}/>
                   <button className="button primary" disabled={!aliasTarget||!aliasText.trim()} onClick={()=>{const value=aliasText.trim();setAliases(current=>({...current,[aliasTarget]:[...new Set([...(current[aliasTarget]||[]),value])].slice(0,12)}));setAliasText('');}}>添加别称</button>
                 </div>
                 <div className="alias-list">{Object.entries(aliases).flatMap(([id,values])=>values.map(value=><div className="alias-row" key={`${id}:${value}`}><span><b>{pMap[id]?.zh||catalog.moves[id]?.zh||id}</b><small>{value}</small></span><button className="icon-button" aria-label={`删除${value}别称`} onClick={()=>setAliases(current=>{const next={...current},rest=next[id].filter(x=>x!==value);if(rest.length)next[id]=rest;else delete next[id];return next;})}><X size={16}/></button></div>))}</div>
