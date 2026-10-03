@@ -152,30 +152,38 @@ public final class MainActivity extends Activity {
 
     private WebResourceResponse onlineTeamsResponse() {
         try (InputStream config = getAssets().open("www/team-feed-url.txt")) {
-            byte[] configured = new byte[512];
+            byte[] configured = new byte[1024];
             int length = config.read(configured);
             if (length <= 0) throw new IOException("No team feed URL");
-            URL url = new URL(new String(configured, 0, length, "UTF-8").trim());
-            if (!"https".equals(url.getProtocol()) || url.getUserInfo() != null || url.getHost().isEmpty())
-                throw new IOException("Invalid team feed URL");
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-            connection.setConnectTimeout(10000);
-            connection.setReadTimeout(15000);
-            connection.setInstanceFollowRedirects(false);
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setRequestProperty("Cache-Control", "no-cache");
-            if (connection.getResponseCode() != 200 || connection.getContentLengthLong() > 10 * 1024 * 1024) {
-                connection.disconnect();return errorResponse(503, "Feed Unavailable");
+            for (String address : new String(configured, 0, length, "UTF-8").trim().split("\\r?\\n")) {
+                HttpsURLConnection connection = null;
+                try {
+                    URL url = new URL(address.trim());
+                    if (!"https".equals(url.getProtocol()) || url.getUserInfo() != null || url.getHost().isEmpty()) continue;
+                    connection = (HttpsURLConnection) url.openConnection();
+                    connection.setConnectTimeout(10000);
+                    connection.setReadTimeout(15000);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestProperty("Accept", "application/json");
+                    connection.setRequestProperty("Cache-Control", "no-cache");
+                    if (connection.getResponseCode() != 200 || connection.getContentLengthLong() > 10 * 1024 * 1024) continue;
+                    InputStream body = connection.getInputStream();
+                    final HttpsURLConnection active = connection;
+                    connection = null;
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("Cache-Control", "no-store");
+                    headers.put("X-Content-Type-Options", "nosniff");
+                    return new WebResourceResponse("application/json", "UTF-8", 200, "OK", headers, new FilterInputStream(body) {
+                        long count = 0;
+                        @Override public int read() throws IOException { int value = super.read();if (value >= 0 && ++count > 10 * 1024 * 1024) throw new IOException("Feed too large");return value; }
+                        @Override public int read(byte[] data, int offset, int length) throws IOException { int n = super.read(data, offset, length);if (n > 0 && (count += n) > 10 * 1024 * 1024) throw new IOException("Feed too large");return n; }
+                        @Override public void close() throws IOException { super.close();active.disconnect(); }
+                    });
+                } catch (IOException | SecurityException ex) {
+                    // Try the next free Pages mirror; the embedded team snapshot remains available.
+                } finally { if (connection != null) connection.disconnect(); }
             }
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Cache-Control", "no-store");
-            headers.put("X-Content-Type-Options", "nosniff");
-            return new WebResourceResponse("application/json", "UTF-8", 200, "OK", headers, new FilterInputStream(connection.getInputStream()) {
-                long count = 0;
-                @Override public int read() throws IOException { int value = super.read();if (value >= 0 && ++count > 10 * 1024 * 1024) throw new IOException("Feed too large");return value; }
-                @Override public int read(byte[] data, int offset, int length) throws IOException { int n = super.read(data, offset, length);if (n > 0 && (count += n) > 10 * 1024 * 1024) throw new IOException("Feed too large");return n; }
-                @Override public void close() throws IOException { super.close();connection.disconnect(); }
-            });
+            return errorResponse(503, "Feed Unavailable");
         } catch (IOException | SecurityException ex) { return errorResponse(503, "Feed Unavailable"); }
     }
 
