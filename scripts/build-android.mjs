@@ -37,8 +37,10 @@ run(process.execPath, ["node_modules/vite/bin/vite.js", "build", "--outDir", joi
   env: { ...process.env, VITE_PMC_ANDROID: "true" },
 });
 const teamFeedUrl = process.env.PMC_TEAM_FEED_URL || "https://pmc-babb04.gitlab.io/live-teams.json";
-if (!/^https:\/\/[^\s]+\/live-teams\.json$/.test(teamFeedUrl)) throw new Error("PMC_TEAM_FEED_URL must be an HTTPS live-teams.json address");
-writeFileSync(join(stage, "assets/www/team-feed-url.txt"), teamFeedUrl + "\n");
+const teamFeedFallbackUrl = process.env.PMC_TEAM_FEED_FALLBACK_URL || "https://swag-dragon86.github.io/pmc/live-teams.json";
+for (const url of [teamFeedUrl, teamFeedFallbackUrl])
+  if (!/^https:\/\/[^\s]+\/live-teams\.json$/.test(url)) throw new Error("PMC team feeds must be HTTPS live-teams.json addresses");
+writeFileSync(join(stage, "assets/www/team-feed-url.txt"), [...new Set([teamFeedUrl, teamFeedFallbackUrl])].join("\n") + "\n");
 cpSync(join(root, "android/res"), join(stage, "res"), { recursive: true });
 copyFileSync(join(root, "public/rotom-maskable-512.png"), join(stage, "res/mipmap-nodpi/ic_launcher.png"));
 run(aapt, ["compile", "--dir", join(stage, "res"), "-o", join(stage, "resources.zip")]);
