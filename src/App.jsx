@@ -31,9 +31,11 @@ import {
   CheckCircle2,
   Trophy,
   Globe2,
+  Lock,
+  LockOpen,
 } from "lucide-react";
 import { pinyin } from "pinyin-pro";
-import catalog from "./data/catalog.json";
+import catalog from "./data/catalog.json" with { type: 'json' };
 import spriteInfo from "./data/sprites.json";
 import rosterAudit from "./data/roster-audit.json";
 import mcManifest from "./data/mc-manifest.json";
@@ -46,6 +48,7 @@ import {
   resetBattleState,
   validateBuild,
   validatePoints,
+  setPointWithinLimit,
   STAT_KEYS,
   STAT_NAMES,
   hasSameDexPartner,
@@ -54,7 +57,7 @@ import {
   clone,
   needsFaintedAlliesInput,
 } from "./model.mjs";
-import { statsOf, previewDamage, speedOf } from "./engine.mjs";
+import { statsOf, previewDamage, speedOf, RESIST_BERRY_TYPES } from "./engine.mjs";
 import { natureOptions } from './natures.mjs';
 import { WEATHER_NAMES, TERRAIN_NAMES, openingBranches, OPENING_RULES, hasFriendGuard } from './opening.mjs';
 import {
@@ -71,11 +74,12 @@ import { exportResultImage } from "./share.mjs";
 import { isAndroidApp } from "./platform.mjs";
 import { publicMemberBuild, savePublicMembers, teamSaveability } from "./open-teams.mjs";
 import { analyzeTeam } from "./team-analysis.mjs";
-import { LANGUAGES, LANGUAGE_KEY, localizeDom, localizedName, prepareLanguage } from "./localization.mjs";
+import { LANGUAGES, LANGUAGE_KEY, localizeDom, localizedName, prepareLanguage, translateText } from "./localization.mjs";
 import { initialLanguage } from "./language-preference.mjs";
+import TeamImageImport from './TeamImageImport.jsx';
 
 const pct = (n) => `${Math.max(0, n || 0).toFixed(1)}%`;
-const APP_VERSION = "1.3.0";
+const APP_VERSION = "1.3.1";
 const range = (r) => `${pct(r.min)} – ${pct(r.max)}`;
 const TYPES_COLOR = {
   Fire: "#ce5841",
@@ -98,11 +102,30 @@ const TYPES_COLOR = {
   Normal: "#8a8c84",
 };
 const pMap = Object.fromEntries(catalog.pokemon.map((p) => [p.id, p]));
+function itemSearchOptions(language) {
+  return catalog.items.map(item=>{
+    const type=RESIST_BERRY_TYPES[item.name],base=!item.name?({zhHans:'不携带道具',zhHant:'不攜帶道具',ja:'もちものなし',ko:'도구 없음',en:'No item'}[language]||'No item'):localizedName('items',item.id,language)||(language==='en'?item.name:item.zh)||item.zh;
+    if(!type)return {...item,id:item.name,zh:base};
+    const typeName=language==='en'?type:translateText(TYPES[type],language);
+    const suffix=language==='ja'?`耐性：${typeName}`:language==='ko'?`저항 ${typeName}`:language==='en'?`Resists ${typeName}`:`抵抗${typeName}`;
+    return {...item,id:item.name,zh:language==='en'?`${base} (${suffix})`:`${base}（${suffix}）`,searchTerms:`抗${TYPES[type]} 抵抗${TYPES[type]}`};
+  });
+}
+function lockLabel(language,locked,index) {
+  const number=index+1;
+  return ({
+    zhHans:`${locked?'解锁':'锁定'}第${number}只固定配置`,
+    zhHant:`${locked?'解鎖':'鎖定'}第${number}隻固定配置`,
+    ja:`${number}匹目の固定設定を${locked?'解除':'ロック'}`,
+    ko:`${number}번째 고정 설정 ${locked?'잠금 해제':'잠그기'}`,
+    en:`${locked?'Unlock':'Lock'} fixed build ${number}`,
+  })[language]||`${locked?'Unlock':'Lock'} fixed build ${number}`;
+}
 const AliasContext = createContext({});
 function readAliases() {
   try {
     const raw=JSON.parse(localStorage.getItem('pmc.aliases.v1')||'{}'),valid={};
-    for(const [id,values] of Object.entries(raw||{}))if((pMap[id]||catalog.moves[id])&&Array.isArray(values))valid[id]=values.filter(value=>typeof value==='string'&&value.length<=32).slice(0,12);
+    for(const [id,values] of Object.entries(raw||{}))if((pMap[id]||catalog.moves[id]||catalog.items.some(item=>item.name===id))&&Array.isArray(values))valid[id]=values.filter(value=>typeof value==='string'&&value.length<=32).slice(0,12);
     return valid;
   } catch { return {}; }
 }
@@ -119,7 +142,8 @@ function matches(option, query, aliases = {}) {
         zh,
         option.name || "",
         option.id,
-        ...['zhHant','ja','ko'].flatMap(language=>[localizedName('pokemon',option.id,language)||localizedName('moves',option.id,language)||'']),
+        option.searchTerms || "",
+        ...['zhHant','ja','ko','en'].flatMap(language=>[localizedName('pokemon',option.id,language)||localizedName('moves',option.id,language)||localizedName('items',option.id,language)||'']),
         pinyin(zh, { toneType: "none" }),
         pinyin(zh, { pattern: "first", toneType: "none" }),
       ]
@@ -187,6 +211,7 @@ function SelectSearch({
   label,
   species = false,
   compact = false,
+  disabled = false,
 }) {
   const aliases=useContext(AliasContext);
   const [open, setOpen] = useState(false),
@@ -202,6 +227,7 @@ function SelectSearch({
         type="button"
         className={`search-select ${compact ? "compact" : ""}`}
         aria-label={label}
+        disabled={disabled}
         onClick={() => {
           setQuery("");
           setOpen(true);
@@ -261,13 +287,14 @@ function SelectSearch({
     </>
   );
 }
-function FieldSelect({ label, value, onChange, options }) {
+function FieldSelect({ label, value, onChange, options, disabled = false }) {
   return (
     <label className="field-select">
       <span>{label}</span>
       <select
         aria-label={label}
         value={value}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
       >
         {options.map(([v, l]) => (
@@ -307,6 +334,9 @@ function PokemonCard({
   onSave,
   onLoad,
   preview,
+  locked,
+  onToggleLock,
+  language,
 }) {
   const p = pMap[build.species],
     issues = validateBuild(build, catalog),
@@ -329,7 +359,7 @@ function PokemonCard({
   try {
     stats = statsOf(build, catalog);
   } catch {}
-  const update = (key, value) => onChange({ ...build, [key]: value });
+  const update = (key, value) => {if(locked&&['species','nature','ability','item','points','moves'].includes(key))return;onChange({ ...build, [key]: value });};
   const sum = Object.values(build.points).reduce((s, n) => s + n, 0);
   const isSecondary = index === 3;
   const selectedMoveId = build.moves[build.selected];
@@ -353,9 +383,11 @@ function PokemonCard({
             title="从配置库载入"
             aria-label={`载入${index + 1}号配置`}
             onClick={onLoad}
+            disabled={locked}
           >
             <Library size={16} />
           </button>
+          <button className={`icon-button ${locked?'active':''}`} title={lockLabel(language,locked,index)} aria-label={lockLabel(language,locked,index)} aria-pressed={locked} onClick={onToggleLock}>{locked?<Lock size={16}/>:<LockOpen size={16}/>}</button>
           <button
             className="icon-button"
             title="保存此配置"
@@ -378,6 +410,7 @@ function PokemonCard({
             options={catalog.pokemon}
             value={build.species}
             species
+            disabled={locked}
             onChange={(id) =>
               onChange({
                 ...createBuild(catalog, id),
@@ -401,12 +434,14 @@ function PokemonCard({
         <FieldSelect
           label={`性格 ${index + 1}`}
           value={build.nature}
+          disabled={locked}
           onChange={(v) => update("nature", v)}
           options={natureOptions(catalog.natures)}
         />
         <FieldSelect
           label={`特性 ${index + 1}`}
           value={build.ability}
+          disabled={locked}
           onChange={(v) => update("ability", v)}
           options={(p?.abilities || [build.ability]).map((a) => [
             a,
@@ -417,8 +452,9 @@ function PokemonCard({
           <span>道具</span>
           <SelectSearch
             label={`选择道具 ${index + 1}`}
-            options={catalog.items.map((i) => ({ ...i, id: i.name }))}
+            options={itemSearchOptions(language)}
             value={build.item}
+            disabled={locked}
             onChange={(v) => update("item", v)}
             compact
           />
@@ -480,14 +516,12 @@ function PokemonCard({
                 min="0"
                 max="32"
                 value={build.points[k]}
+                disabled={locked}
                 onChange={(e) =>
-                  update("points", {
-                    ...build.points,
-                    [k]: Math.max(0, Math.min(32, Number(e.target.value) || 0)),
-                  })
+                  update("points", setPointWithinLimit(build.points, k, e.target.value))
                 }
               />
-              <input className="stat-range" type="range" min="0" max="32" value={build.points[k]} style={{'--fill':`${build.points[k]/32*100}%`}} aria-label={`${index + 1}号${STAT_NAMES[k]}能力点滑块`} onChange={(e)=>update("points",{...build.points,[k]:Number(e.target.value)})}/>
+              <input className="stat-range" type="range" min="0" max="32" disabled={locked} value={build.points[k]} style={{'--fill':`${build.points[k]/32*100}%`}} aria-label={`${index + 1}号${STAT_NAMES[k]}能力点滑块`} onChange={(e)=>update("points",setPointWithinLimit(build.points,k,e.target.value))}/>
             </label>
             <strong>{stats[k] ?? "—"}</strong>
           </div>
@@ -575,6 +609,7 @@ function PokemonCard({
                         ...(p?.moves || []).map((m) => catalog.moves[m]),
                       ]}
                       value={id}
+                      disabled={locked}
                       onChange={(v) =>
                         update(
                           "moves",
@@ -790,7 +825,7 @@ function Battlefield({ scene, onChange }) {
   );
 }
 
-function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, feed, updateFeed, feedUpdating, feedMessage }) {
+function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, feed, updateFeed, feedUpdating, feedMessage, language, actorLocks }) {
   const [section,setSection]=useState("official"),[teamQuery,setTeamQuery]=useState(""),[picked,setPicked]=useState([]);
   const aliases=useContext(AliasContext);
   const [format,setFormat]=useState('all');
@@ -812,6 +847,7 @@ function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, fe
     if(slot==="")return;
     try {
       const index=Number(slot),build=publicMemberBuild(team,memberIndex,catalog);
+      if(actorLocks[index]) { notify('请先解锁该位置的固定配置'); return; }
       const candidate={...scene,mode:[1,3].includes(index)?"double":scene.mode};
       if(hasSameDexPartner(candidate,index,build,catalog)) {
         notify("同一方不能同时使用图鉴编号相同的宝可梦");return;
@@ -853,10 +889,10 @@ function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, fe
               let stats=null;
               if(status.saveable)try{stats=statsOf(publicMemberBuild(team,index,catalog),catalog)}catch{}
               return <article className="open-team-member" key={key}>
-                <div className="member-title"><Sprite species={member.species}/><div><h3>{pokemon?.zh||member.species}</h3><p>{catalog.items.find(item=>item.name===member.item)?.zh||member.item||"道具未公开"}</p></div>{status.saveable&&<input type="checkbox" aria-label={`选择${pokemon?.zh}`} checked={picked.includes(key)} onChange={()=>togglePick(key)}/>}</div>
+                <div className="member-title"><Sprite species={member.species}/><div><h3>{pokemon?.zh||member.species}</h3><p>{itemSearchOptions(language).find(item=>item.name===member.item)?.zh||member.item||"道具未公开"}</p></div>{status.saveable&&<input type="checkbox" aria-label={`选择${pokemon?.zh}`} checked={picked.includes(key)} onChange={()=>togglePick(key)}/>}</div>
                 <dl><div><dt>特性</dt><dd>{catalog.abilities.find(ability=>ability.name===member.ability)?.zh||member.ability||"未公开"}</dd></div><div><dt>性格</dt><dd>{natureOptions(catalog.natures).find(([name])=>name===member.nature)?.[1]||member.nature||"未公开"}</dd></div><div><dt>能力点</dt><dd>{member.points?STAT_KEYS.map(stat=>member.points[stat]).join(" / "):"未公开"}</dd></div>{stats&&<div><dt>实际值</dt><dd>{STAT_KEYS.map(stat=>stats[stat]).join(" / ")}</dd></div>}</dl>
                 <ul>{member.moves.map(move=><li key={move}>{catalog.moves[move]?.zh||move}</li>)}</ul>
-                <select aria-label={`载入${pokemon?.zh}到计算位置`} defaultValue="" disabled={!status.saveable} onChange={event=>{loadMember(team,index,event.target.value);event.target.value=""}}><option value="">载入到计算位置…</option><option value="0">进攻方 A</option><option value="1">进攻方 B</option><option value="2">防守方 A</option><option value="3">防守方 B</option></select>
+                <select aria-label={`载入${pokemon?.zh}到计算位置`} defaultValue="" disabled={!status.saveable} onChange={event=>{loadMember(team,index,event.target.value);event.target.value=""}}><option value="">载入到计算位置…</option><option value="0" disabled={actorLocks[0]}>进攻方 A</option><option value="1" disabled={actorLocks[1]}>进攻方 B</option><option value="2" disabled={actorLocks[2]}>防守方 A</option><option value="3" disabled={actorLocks[3]}>防守方 B</option></select>
               </article>;
             })}
           </div>
@@ -877,30 +913,31 @@ function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, fe
 function freshTeam() {
   return {id:uid(),name:'我的队伍',members:['venusaur','charizard','blastoise','garchomp','pikachu','dragonite'].map(id=>createBuild(catalog,id))};
 }
-function TeamBuilderPage({draft,setDraft,builds,savedTeams,setSavedTeams,threats,setThreats,notify}) {
+function TeamBuilderPage({draft,setDraft,builds,savedTeams,setSavedTeams,threats,setThreats,notify,language,locks,setLocks}) {
   const firstMemberRef=useRef(null);
   useEffect(()=>{if(firstMemberRef.current)firstMemberRef.current.open=true;},[]);
-  const setMember=(index,next)=>{setDraft(current=>({...current,members:current.members.map((member,i)=>i===index?next:member)}));setThreats(null);};
+  const setMember=(index,next)=>{if(locks[index])return;setDraft(current=>({...current,members:current.members.map((member,i)=>i===index?next:member)}));setThreats(null);};
   const check=()=>{try{const result=analyzeTeam(draft.members,catalog);setThreats(result);return result;}catch(error){notify(error.message);return null;}};
   return <>
-    <div className="page-heading"><div><p className="eyebrow">TEAM WORKSPACE</p><h1>我的队伍</h1><p>配置六只宝可梦，查看可能难处理的已实装对手。</p></div><button className="button" onClick={()=>{setDraft(freshTeam());setThreats(null);}}><Plus size={16}/>新队伍</button></div>
+    <div className="page-heading"><div><p className="eyebrow">TEAM WORKSPACE</p><h1>我的队伍</h1><p>配置六只宝可梦，查看可能难处理的已实装对手。</p></div><button className="button" disabled={locks.some(Boolean)} onClick={()=>{setDraft(freshTeam());setThreats(null);}}><Plus size={16}/>新队伍</button></div>
+    <TeamImageImport catalog={catalog} language={language} disabled={locks.some(Boolean)} onImport={members=>{setDraft(current=>({...current,members}));setThreats(null);notify('截图队伍已载入当前编辑区');}}/>
     <section className="panel team-builder-head"><label>队伍名称<input maxLength={80} value={draft.name} onChange={event=>setDraft(current=>({...current,name:event.target.value}))}/></label><div className="team-builder-actions"><button className="button" onClick={()=>{const result=check();if(result)notify(`已分析 ${catalog.pokemon.length} 个已实装形态`);}}><Target size={16}/>分析弱点</button><button className="button primary" onClick={()=>{if(!check())return;const saved={...clone(draft),name:draft.name.trim()||'我的队伍'};setSavedTeams(current=>current.some(team=>team.id===saved.id)?current.map(team=>team.id===saved.id?saved:team):[...current,saved]);notify('我的队伍已保存到本机');}}><Save size={16}/>保存队伍</button></div></section>
     <div className="team-member-grid">{draft.members.map((member,index)=>{
-      const pokemon=pMap[member.species],points=Object.values(member.points).reduce((sum,value)=>sum+value,0);
+      const pokemon=pMap[member.species],points=Object.values(member.points).reduce((sum,value)=>sum+value,0),locked=locks[index];
       const update=(key,value)=>setMember(index,{...member,[key]:value});
       return <details className="panel team-member-card" key={index} ref={index===0?firstMemberRef:undefined}><summary><span className="team-slot">{String(index+1).padStart(2,'0')}</span><Sprite species={member.species} small/><span><b>{pokemon?.zh||member.species}</b><small>{member.name}</small></span><ChevronDown size={18}/></summary>
-        <div className="team-member-fields"><SelectSearch label={`第${index+1}只宝可梦`} options={catalog.pokemon} value={member.species} onChange={id=>setMember(index,createBuild(catalog,id))} species/>
-          <label className="team-library-select">从配置库载入<select value="" onChange={event=>{const saved=builds.find(build=>build.id===event.target.value);if(saved)setMember(index,{...clone(saved),id:uid(),originId:saved.id});}}><option value="">选择已保存配置…</option>{builds.map(build=><option key={build.id} value={build.id}>{build.name} · {pMap[build.species]?.zh}</option>)}</select></label>
-          <FieldSelect label="特性" value={member.ability} onChange={value=>update('ability',value)} options={pokemon.abilities.map(name=>[name,catalog.abilities.find(a=>a.name===name)?.zh||name])}/>
-          <FieldSelect label="道具" value={member.item} onChange={value=>update('item',value)} options={catalog.items.map(item=>[item.name,item.zh||item.name||'无道具'])}/>
-          <FieldSelect label="性格" value={member.nature} onChange={value=>update('nature',value)} options={natureOptions(catalog.natures)}/>
-          <div className="team-moves"><b>招式</b>{member.moves.map((id,moveIndex)=><SelectSearch key={moveIndex} label={`第${index+1}只第${moveIndex+1}招`} options={[{id:'',zh:'空招式栏',name:''},...pokemon.moves.map(move=>catalog.moves[move])]} value={id} onChange={value=>update('moves',member.moves.map((move,i)=>i===moveIndex?value:move))} compact/>)}</div>
-          <div className="team-points"><b>能力点 {points}/66</b>{STAT_KEYS.map(key=><label key={key}><span>{STAT_NAMES[key]}</span><input type="number" min="0" max="32" aria-label={`第${index+1}只${STAT_NAMES[key]}能力点`} value={member.points[key]} onChange={event=>update('points',{...member.points,[key]:Math.max(0,Math.min(32,Number(event.target.value)||0))})}/><input type="range" min="0" max="32" aria-label={`第${index+1}只${STAT_NAMES[key]}能力点滑块`} value={member.points[key]} onChange={event=>update('points',{...member.points,[key]:Number(event.target.value)})}/></label>)}</div>
+        <div className="team-member-fields"><SelectSearch label={`第${index+1}只宝可梦`} options={catalog.pokemon} value={member.species} onChange={id=>setMember(index,createBuild(catalog,id))} species disabled={locked}/>
+          <div className="team-library-lock"><label className="team-library-select">从配置库载入<select value="" disabled={locked} onChange={event=>{const saved=builds.find(build=>build.id===event.target.value);if(saved)setMember(index,{...clone(saved),id:uid(),originId:saved.id});}}><option value="">选择已保存配置…</option>{builds.map(build=><option key={build.id} value={build.id}>{build.name} · {pMap[build.species]?.zh}</option>)}</select></label><button type="button" className={`icon-button team-lock ${locked?'active':''}`} title={lockLabel(language,locked,index)} aria-label={lockLabel(language,locked,index)} aria-pressed={locked} onClick={()=>setLocks(current=>current.map((value,i)=>i===index?!value:value))}>{locked?<Lock size={17}/>:<LockOpen size={17}/>}</button></div>
+          <FieldSelect label="特性" disabled={locked} value={member.ability} onChange={value=>update('ability',value)} options={pokemon.abilities.map(name=>[name,catalog.abilities.find(a=>a.name===name)?.zh||name])}/>
+          <div className="field-select"><span>道具</span><SelectSearch label={`第${index+1}只宝可梦的道具`} disabled={locked} options={itemSearchOptions(language)} value={member.item} onChange={value=>update('item',value)} compact/></div>
+          <FieldSelect label="性格" disabled={locked} value={member.nature} onChange={value=>update('nature',value)} options={natureOptions(catalog.natures)}/>
+          <div className="team-moves"><b>招式</b>{member.moves.map((id,moveIndex)=><SelectSearch key={moveIndex} label={`第${index+1}只第${moveIndex+1}招`} disabled={locked} options={[{id:'',zh:'空招式栏',name:''},...pokemon.moves.map(move=>catalog.moves[move])]} value={id} onChange={value=>update('moves',member.moves.map((move,i)=>i===moveIndex?value:move))} compact/>)}</div>
+          <div className="team-points"><b className={points>66?'error-text':''}>能力点 {points}/66{points>66?' · 请手动修正后保存':''}</b>{STAT_KEYS.map(key=><label key={key}><span>{STAT_NAMES[key]}</span><input type="number" min="0" max="32" disabled={locked} aria-label={`第${index+1}只${STAT_NAMES[key]}能力点`} value={member.points[key]} onChange={event=>update('points',setPointWithinLimit(member.points,key,event.target.value))}/><input type="range" min="0" max="32" disabled={locked} aria-label={`第${index+1}只${STAT_NAMES[key]}能力点滑块`} value={member.points[key]} onChange={event=>update('points',setPointWithinLimit(member.points,key,event.target.value))}/></label>)}</div>
         </div>
       </details>;
     })}</div>
     {threats&&<section className="panel team-threat-section"><div className="section-title"><h2>潜在难处理的宝可梦</h2><span>对手配置未知 · 按可能风险排序</span></div><p className="hint">综合你队伍的招式、属性、特性、道具和速度，以及对手可学招式分析。对手实际配招与努力值可能改变结果。</p><div className="team-threat-list">{threats.length?threats.map(row=><article key={row.id}><Sprite species={row.id} small/><div><h3>{row.name}</h3>{row.reasons.map(reason=><p key={reason}>{reason}</p>)}</div></article>):<p className="hint">没有发现达到当前提示阈值的明显风险；这不代表没有不利对局。</p>}</div></section>}
-    <section className="panel team-saved-section"><div className="section-title"><h2>已保存队伍</h2><span>{savedTeams.length} 支 · 存在本机，可随完整备份导出</span></div>{savedTeams.length===0?<p className="hint">保存后可在这里载入队伍继续编辑。</p>:<div className="team-saved-list">{savedTeams.map(team=><div key={team.id}><span><b>{team.name}</b><small>{team.members.map(member=>pMap[member.species]?.zh||member.species).join(' · ')}</small></span><button className="button" onClick={()=>{setDraft(clone(team));setThreats(null);}}>载入</button><button className="icon-button" aria-label={`删除${team.name}`} onClick={()=>{if(confirm(`删除队伍“${team.name}”？`))setSavedTeams(current=>current.filter(value=>value.id!==team.id));}}><Trash2 size={16}/></button></div>)}</div>}</section>
+    <section className="panel team-saved-section"><div className="section-title"><h2>已保存队伍</h2><span>{savedTeams.length} 支 · 存在本机，可随完整备份导出</span></div>{savedTeams.length===0?<p className="hint">保存后可在这里载入队伍继续编辑。</p>:<div className="team-saved-list">{savedTeams.map(team=><div key={team.id}><span><b>{team.name}</b><small>{team.members.map(member=>pMap[member.species]?.zh||member.species).join(' · ')}</small></span><button className="button" disabled={locks.some(Boolean)} onClick={()=>{setDraft(clone(team));setThreats(null);}}>载入</button><button className="icon-button" aria-label={`删除${team.name}`} onClick={()=>{if(confirm(`删除队伍“${team.name}”？`))setSavedTeams(current=>current.filter(value=>value.id!==team.id));}}><Trash2 size={16}/></button></div>)}</div>}</section>
   </>;
 }
 
@@ -1032,8 +1069,8 @@ export default function App() {
   const [language,setLanguage]=useState(()=>{let saved;try{saved=localStorage.getItem(LANGUAGE_KEY);}catch{}return initialLanguage(saved,globalThis.navigator?.language);});
   useEffect(()=>{
     try{localStorage.setItem(LANGUAGE_KEY,language);}catch{}
-    document.documentElement.lang={zhHans:'zh-CN',zhHant:'zh-TW',ja:'ja',ko:'ko'}[language];
-    const root=document.querySelector('.app-shell');if(!root)return;
+    document.documentElement.lang={zhHans:'zh-CN',zhHant:'zh-TW',ja:'ja',ko:'ko',en:'en'}[language];
+    const root=document.body;if(!root)return;
     let frame=0;
     const translate=()=>{frame=0;localizeDom(root,language);};
     translate();
@@ -1048,7 +1085,9 @@ export default function App() {
   useEffect(()=>{try {localStorage.setItem('pmc.aliases.v1',JSON.stringify(aliases));} catch {notify('别称保存失败，请检查本机存储空间');}},[aliases]);
   const [screenMode,setScreenMode]=useState(()=>isAndroidApp?(globalThis.PMCAndroid?.getScreenMode?.()||'auto'):'auto');
   const [initial] = useState(() => readWorkspace());
-  const [teamDraft,setTeamDraft]=useState(()=>{const saved=initial?.teamDraft;return saved&&Array.isArray(saved.members)&&saved.members.length===6&&saved.members.every(member=>!validateBuild(member,catalog).length)?saved:freshTeam();});
+  const [teamDraft,setTeamDraft]=useState(()=>{const saved=initial?.teamDraft;return saved&&Array.isArray(saved.members)&&saved.members.length===6&&saved.members.every(member=>validateBuild(member,catalog).every(issue=>issue==='能力点总和不能超过 66'))?saved:freshTeam();});
+  const [teamLocks,setTeamLocks]=useState(()=>Array(6).fill(false));
+  const [actorLocks,setActorLocks]=useState(()=>Array(4).fill(false));
   const [savedTeams,setSavedTeams]=useState(()=>initial?.teams||[]);
   const [teamThreats,setTeamThreats]=useState(null);
   const [teamFeed,setTeamFeed]=useState(()=>{try{return validateTeamFeed(openTeams,JSON.parse(localStorage.getItem(TEAM_FEED_STORAGE_KEY)),catalog);}catch{return openTeams;}});
@@ -1063,9 +1102,11 @@ export default function App() {
     [scenes, setScenes] = useState(() => initial?.scenes || []),
     [theme, setTheme] = useState(() => initial?.theme || "system");
   const setScene = (next) =>
-    setSceneState((previous) =>
-      withMandatoryActions(typeof next === "function" ? next(previous) : next),
-    );
+    setSceneState((previous) => {
+      const proposed=withMandatoryActions(typeof next === "function" ? next(previous) : next);
+      if(actorLocks.some((locked,index)=>locked&&['species','nature','ability','item','points','moves'].some(key=>JSON.stringify(previous.actors[index][key])!==JSON.stringify(proposed.actors[index][key]))))return previous;
+      return proposed;
+    });
   const [page, setPage] = useState("calc"),
     [preview, setPreview] = useState(false),
     [result, setResult] = useState(null),
@@ -1228,6 +1269,7 @@ export default function App() {
   }, [scene, preview]);
   const updateActor = (index, value) => {
     const current = scene.actors[index];
+    if(actorLocks[index]&&['species','nature','ability','item','points','moves'].some(key=>JSON.stringify(current[key])!==JSON.stringify(value[key])))return;
     const identityChanged =
       current.species !== value.species || current.present !== value.present;
     if(identityChanged && hasSameDexPartner(scene,index,value,catalog)) {
@@ -1400,7 +1442,7 @@ export default function App() {
           </div>
           <label className="language-control">
             <Globe2 size={15} aria-hidden="true" />
-            <select aria-label={{zhHans:'界面语言',zhHant:'介面語言',ja:'表示言語',ko:'표시 언어'}[language]} value={language} onChange={event=>setLanguage(event.target.value)}>
+            <select aria-label={{zhHans:'界面语言',zhHant:'介面語言',ja:'表示言語',ko:'표시 언어',en:'Interface language'}[language]} value={language} onChange={event=>setLanguage(event.target.value)}>
               {LANGUAGES.map(([id,label])=><option key={id} value={id}>{label}</option>)}
             </select>
           </label>
@@ -1541,6 +1583,9 @@ export default function App() {
                         build={scene.actors[i]}
                         scene={scene}
                         preview={preview}
+                        locked={actorLocks[i]}
+                        onToggleLock={()=>setActorLocks(current=>current.map((value,index)=>index===i?!value:value))}
+                        language={language}
                         onChange={(b) => updateActor(i, b)}
                         onSave={() => saveBuild(i)}
                         onLoad={() => {
@@ -1637,8 +1682,8 @@ export default function App() {
               )}
             </>
           )}
-          {page === "openTeams" && <OpenTeamsPage builds={builds} setBuilds={setBuilds} scene={scene} setScene={setScene} setPage={setPage} notify={notify} feed={teamFeed} updateFeed={updateTeamFeed} feedUpdating={teamFeedUpdating} feedMessage={teamFeedMessage}/>}
-          {page === "teamBuilder" && <TeamBuilderPage draft={teamDraft} setDraft={setTeamDraft} builds={builds} savedTeams={savedTeams} setSavedTeams={setSavedTeams} threats={teamThreats} setThreats={setTeamThreats} notify={notify}/>}
+          {page === "openTeams" && <OpenTeamsPage builds={builds} setBuilds={setBuilds} scene={scene} setScene={setScene} setPage={setPage} notify={notify} feed={teamFeed} updateFeed={updateTeamFeed} feedUpdating={teamFeedUpdating} feedMessage={teamFeedMessage} language={language} actorLocks={actorLocks}/>}
+          {page === "teamBuilder" && <TeamBuilderPage draft={teamDraft} setDraft={setTeamDraft} builds={builds} savedTeams={savedTeams} setSavedTeams={setSavedTeams} threats={teamThreats} setThreats={setTeamThreats} notify={notify} language={language} locks={teamLocks} setLocks={setTeamLocks}/>}
           {page === "library" && (
             <>
               <div className="page-heading">
@@ -1735,7 +1780,7 @@ export default function App() {
                             }
                           </p>
                           <small>
-                            {catalog.items.find((i) => i.name === b.item)?.zh ||
+                            {itemSearchOptions(language).find((i) => i.name === b.item)?.zh ||
                               b.item}
                           </small>
                           <div className="saved-moves">
@@ -1814,7 +1859,7 @@ export default function App() {
                       </button>
                       <button
                         className="button"
-                        disabled={selected.length !== 2}
+                        disabled={selected.length !== 2 || actorLocks[0] || actorLocks[1]}
                         onClick={() => {
                           const pair = builds.filter((b) =>
                             selected.includes(b.id),
@@ -1893,6 +1938,7 @@ export default function App() {
                         <div className="scene-actions">
                           <button
                             className="button primary"
+                            disabled={actorLocks.some(Boolean)}
                             onClick={() => {
                               setScene(clone(s));
                               setPage("calc");
@@ -1946,14 +1992,14 @@ export default function App() {
                 </div>
               </div>
               <section className="panel settings-card alias-settings">
-                <h2>自定义搜索别称</h2><p>给宝可梦或招式添加熟悉的叫法，搜索时使用，正式名称保持不变。</p>
+                <h2>自定义搜索别称</h2><p>给宝可梦、招式或道具添加熟悉的叫法，搜索时使用，正式名称保持不变。</p>
                 <div className="alias-form">
-                  <FieldSelect label="类型" value={aliasType} onChange={v=>{setAliasType(v);setAliasTarget('');}} options={[["pokemon","宝可梦"],["move","招式"]]}/>
-                  <SelectSearch label="选择要绑定别称的对象" options={aliasType==='pokemon'?catalog.pokemon:Object.values(catalog.moves)} value={aliasTarget} onChange={setAliasTarget} species={aliasType==='pokemon'}/>
+                  <FieldSelect label="类型" value={aliasType} onChange={v=>{setAliasType(v);setAliasTarget('');}} options={[["pokemon","宝可梦"],["move","招式"],["item","道具"]]}/>
+                  <SelectSearch label="选择要绑定别称的对象" options={aliasType==='pokemon'?catalog.pokemon:aliasType==='item'?itemSearchOptions(language).filter(item=>item.name):Object.values(catalog.moves)} value={aliasTarget} onChange={setAliasTarget} species={aliasType==='pokemon'}/>
                   <input aria-label="输入搜索别称" maxLength={32} value={aliasText} onChange={e=>setAliasText(e.target.value)}/>
                   <button className="button primary" disabled={!aliasTarget||!aliasText.trim()} onClick={()=>{const value=aliasText.trim();setAliases(current=>({...current,[aliasTarget]:[...new Set([...(current[aliasTarget]||[]),value])].slice(0,12)}));setAliasText('');}}>添加别称</button>
                 </div>
-                <div className="alias-list">{Object.entries(aliases).flatMap(([id,values])=>values.map(value=><div className="alias-row" key={`${id}:${value}`}><span><b>{pMap[id]?.zh||catalog.moves[id]?.zh||id}</b><small>{value}</small></span><button className="icon-button" aria-label={`删除${value}别称`} onClick={()=>setAliases(current=>{const next={...current},rest=next[id].filter(x=>x!==value);if(rest.length)next[id]=rest;else delete next[id];return next;})}><X size={16}/></button></div>))}</div>
+                <div className="alias-list">{Object.entries(aliases).flatMap(([id,values])=>values.map(value=><div className="alias-row" key={`${id}:${value}`}><span><b>{pMap[id]?.zh||catalog.moves[id]?.zh||catalog.items.find(item=>item.name===id)?.zh||id}</b><small>{value}</small></span><button className="icon-button" aria-label={`删除${value}别称`} onClick={()=>setAliases(current=>{const next={...current},rest=next[id].filter(x=>x!==value);if(rest.length)next[id]=rest;else delete next[id];return next;})}><X size={16}/></button></div>))}</div>
               </section>
               <div className="settings-grid">
                 <section className="panel settings-card heading-settings">
@@ -2113,7 +2159,7 @@ export default function App() {
                 </section>
                 <section className="panel settings-card">
                   <h2>安装与备份</h2>
-                  <p>{isAndroidApp ? "安卓离线版 1.3.0 · 数据与图片已内置。网页版记录请先导出，再在这里导入。" : "本地数据不会自动同步到其他设备。"}</p>
+                  <p>{isAndroidApp ? "安卓离线版 1.3.1 · 数据与图片已内置。网页版记录请先导出，再在这里导入。" : "本地数据不会自动同步到其他设备。"}</p>
                   <div className="status-line">
                     <span>离线资源</span>
                     <b>
@@ -2222,7 +2268,7 @@ export default function App() {
                       className="button"
                       onClick={async () => {
                         if (isAndroidApp) {
-                          notify("安卓版通过新版 APK 更新。请从原发布者获取，先导出备份，再直接覆盖安装；不要先卸载。当前版本 1.3.0。");
+                          notify("安卓版通过新版 APK 更新。请从原发布者获取，先导出备份，再直接覆盖安装；不要先卸载。当前版本 1.3.1。");
                           return;
                         }
                         if (!online) {
@@ -2485,6 +2531,7 @@ export default function App() {
                 </button>
                 <button
                   className="button primary"
+                  disabled={actorLocks.some(Boolean)}
                   onClick={() => {
                     setScene(defaultScene(catalog));
                     setModal(null);

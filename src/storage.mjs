@@ -86,7 +86,7 @@ export function parseImport(text) {
   if (
     !Array.isArray(data.builds) ||
     !Array.isArray(data.scenes) ||
-    data.builds.length + data.scenes.length + (data.teams?.length || 0) > 10000
+    data.builds.length + data.scenes.length > 10000
   )
     throw new Error("备份记录格式或数量无效");
   if (!data.builds.every(shapeBuild)) throw new Error("宝可梦配置字段不完整");
