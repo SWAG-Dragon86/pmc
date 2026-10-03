@@ -1,5 +1,5 @@
 export function initialLanguage(saved,deviceLocale){
-  if(['zhHans','zhHant','ja','ko'].includes(saved))return saved;
+  if(['zhHans','zhHant','ja','ko','en'].includes(saved))return saved;
   const locale=String(deviceLocale||'').replaceAll('_','-').toLowerCase();
   if(locale==='ja'||locale.startsWith('ja-'))return 'ja';
   if(locale==='ko'||locale.startsWith('ko-'))return 'ko';
@@ -9,5 +9,5 @@ export function initialLanguage(saved,deviceLocale){
     if(parts.includes('hans'))return 'zhHans';
     return parts.some(part=>['tw','hk','mo'].includes(part))?'zhHant':'zhHans';
   }
-  return 'zhHans';
+  return 'en';
 }

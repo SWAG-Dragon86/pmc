@@ -64,6 +64,12 @@ function weatherOf(scene) {
     ? ""
     : scene.field.weather;
 }
+function groundedOnTerrain(build, scene, catalog) {
+  if (scene.field.gravity || build.item === 'Iron Ball') return true;
+  const pokemon = catalog.pokemon.find(entry => entry.id === build.species);
+  const types = build.battleTypes || (abilityOf(build) === 'Mimicry' && scene.field.terrain === 'Psychic' ? ['Psychic'] : pokemon?.types || []);
+  return !types.includes('Flying') && !['Levitate','Eelevate'].includes(abilityOf(build)) && build.item !== 'Air Balloon';
+}
 function targets(scene, attackerIndex, move, catalog) {
   const ally = attackerIndex < 2;
   const live = activeIndices(scene).filter(
@@ -72,6 +78,8 @@ function targets(scene, attackerIndex, move, catalog) {
   );
   if (move.target === "allAdjacent") return live;
   if (move.target === "allAdjacentFoes")
+    return live.filter((i) => i < 2 !== ally);
+  if (move.id === 'expandingforce' && scene.field.terrain === 'Psychic' && groundedOnTerrain(scene.actors[attackerIndex], scene, catalog))
     return live.filter((i) => i < 2 !== ally);
   const selected = ally ? scene.target : scene.actors[attackerIndex].target || 0;
   if (
@@ -186,8 +194,6 @@ export function damageFor(attacker, defender, moveId, scene, catalog) {
   const defendingBuild = prepare(defender);
   const a = makePokemon(attackingBuild, catalog),
     d = makePokemon(defendingBuild, catalog);
-  if (moveId === "expandingforce")
-    throw new Error("该招式的动态范围尚未完成适配，请先核对单独案例");
   // Entry stat drops are entered explicitly in the opening stages, not retriggered per hit.
   if (a.ability === "Intimidate") a.ability = "";
   if (d.ability === "Intimidate") d.ability = "";
@@ -203,6 +209,8 @@ export function damageFor(attacker, defender, moveId, scene, catalog) {
       throw new Error(`此招式连续攻击次数需为 ${minimum}–${m.multihit[1]}`);
   }
   const moveOverrides = {};
+  if (moveId === 'expandingforce' && scene.field.terrain === 'Psychic' && groundedOnTerrain(attacker, scene, catalog))
+    moveOverrides.target = spread ? 'allAdjacentFoes' : 'normal';
   if (!spread && ["allAdjacent", "allAdjacentFoes"].includes(m.target))
     moveOverrides.target = "normal";
   if (moveId === "lastrespects")
@@ -236,7 +244,7 @@ export function damageFor(attacker, defender, moveId, scene, catalog) {
     (i) => abilityOf(scene.actors[i]) === "Cloud Nine",
   );
   const field = new Field({
-    gameType: scene.mode === "double" ? "Doubles" : "Singles",
+    gameType: scene.mode === "double" && !(moveId === 'expandingforce' && scene.field.terrain === 'Psychic' && groundedOnTerrain(attacker, scene, catalog) && !spread) ? "Doubles" : "Singles",
     weather: weatherSuppressed ? undefined : scene.field.weather || undefined,
     terrain: scene.field.terrain || undefined,
     isGravity: !!scene.field.gravity,

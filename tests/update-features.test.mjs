@@ -8,6 +8,8 @@ import { analyzeTeam } from '../src/team-analysis.mjs';
 import { validateTeamFeed } from '../src/team-feed.mjs';
 import { exportPayload, parseImport } from '../src/storage.mjs';
 import { initialLanguage } from '../src/language-preference.mjs';
+import { ENGLISH_UI } from '../src/english-ui.mjs';
+import { translateText, localizedName } from '../src/localization.mjs';
 
 const catalog=JSON.parse(readFileSync(new URL('../src/data/catalog.json',import.meta.url)));
 const bundled=JSON.parse(readFileSync(new URL('../src/data/open-teams.json',import.meta.url)));
@@ -20,8 +22,22 @@ test('first visit follows device language and later keeps the saved choice',()=>
   assert.equal(initialLanguage(null,'zh-Hans-TW'),'zhHans');
   assert.equal(initialLanguage(null,'ja-JP'),'ja');
   assert.equal(initialLanguage(null,'ko-KR'),'ko');
-  assert.equal(initialLanguage(null,'en-US'),'zhHans');
+  assert.equal(initialLanguage(null,'en-US'),'en');
+  assert.equal(initialLanguage(null,'fr-FR'),'en');
+  assert.equal(initialLanguage('zhHans','fr-FR'),'zhHans');
   assert.equal(initialLanguage('ja','ko-KR'),'ja');
+});
+
+test('English UI text covers every existing phrase without Chinese fallback',()=>{
+  const source=readFileSync(new URL('../src/localization.mjs',import.meta.url),'utf8');
+  const rows=Function(`return [${source.match(/const phrases=\[([\s\S]*?)\];\r?\nif\(phrases.length/)[1]}]`)();
+  assert.equal(ENGLISH_UI.length,rows.length);
+  assert.ok(ENGLISH_UI.every(value=>value&&!/[\u3400-\u9fff]/u.test(value)));
+  assert.equal(translateText('我的队伍','en'),'My Team');
+  assert.equal(translateText('此形态图片待补充','en'),'Image pending for this form');
+  assert.equal(localizedName('pokemon','tyranitar','en'),'Tyranitar');
+  assert.equal(localizedName('moves','expandingforce','en'),'Expanding Force');
+  assert.equal(localizedName('items','tangaberry','en'),'Tanga Berry');
 });
 
 test('new configurations start at zero, empty defender moves are passive, and reset keeps the chosen set',()=>{
@@ -60,6 +76,22 @@ test('Knock Off, Final Gambit, and Steel Roller affect the rest of the turn',()=
   assert.equal(damageFor(roller.actors[0],roller.actors[2],'steelroller',roller,catalog).max,0);
   roller.field.terrainMode='manual';roller.field.terrain='Grassy';
   assert.ok(simulateTurn(roller,catalog).log.some(line=>line.includes('铁滚轮清除了场地')));
+});
+
+test('Expanding Force boosts a grounded user on Psychic Terrain and hits both doubles foes',()=>{
+  const scene=defaultScene(catalog);scene.mode='double';
+  scene.actors[0]=createBuild(catalog,'alakazam');scene.actors[0].moves[0]='expandingforce';
+  scene.actors[2]=createBuild(catalog,'slowbro');scene.actors[3]=createBuild(catalog,'pikachu');scene.actors[3].present=true;
+  const plain=damageFor(scene.actors[0],scene.actors[2],'expandingforce',scene,catalog);
+  scene.field.terrain='Psychic';scene.field.terrainMode='manual';
+  const boosted=damageFor(scene.actors[0],scene.actors[2],'expandingforce',scene,catalog);
+  assert.ok(boosted.mean>plain.mean);
+  assert.equal(boosted.spread,true);
+  assert.equal(simulateTurn(scene,catalog).log.filter(line=>line.includes('广域战力')).length,2);
+  scene.actors[0].item='Air Balloon';
+  assert.equal(damageFor(scene.actors[0],scene.actors[2],'expandingforce',scene,catalog).spread,false);
+  scene.actors[0].item='';scene.actors[3].present=false;
+  assert.equal(damageFor(scene.actors[0],scene.actors[2],'expandingforce',scene,catalog).spread,false);
 });
 
 test('old backups remain importable and six-member teams roundtrip',()=>{

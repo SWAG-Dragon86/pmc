@@ -52,6 +52,15 @@ export function validatePoints(points) {
     ? "能力点总和不能超过 66"
     : "";
 }
+export function setPointWithinLimit(points, key, requested) {
+  const current = Number.isFinite(points?.[key]) ? points[key] : 0;
+  const proposed = Math.max(0, Math.min(32, Math.trunc(Number(requested) || 0)));
+  const total = STAT_KEYS.reduce((sum, stat) => sum + (Number(points?.[stat]) || 0), 0);
+  const remaining = Math.max(0, 66 - (total - current));
+  // Old imports above 66 remain intact until edited; editing cannot increase them.
+  const value = total > 66 ? Math.min(proposed, current) : Math.min(proposed, remaining);
+  return { ...points, [key]: value };
+}
 export function faintedAlliesOf(build) {
   return Number.isInteger(build?.faintedAllies)
     ? Math.min(5, Math.max(0, build.faintedAllies))

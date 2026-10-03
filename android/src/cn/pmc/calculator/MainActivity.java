@@ -62,7 +62,7 @@ public final class MainActivity extends Activity {
         settings.setSupportMultipleWindows(false);
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " PMCAndroid/1.3.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " PMCAndroid/1.3.1");
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
         WebView.setWebContentsDebuggingEnabled(false);
         web.addJavascriptInterface(new ExportBridge(), "PMCAndroid");
@@ -145,7 +145,7 @@ public final class MainActivity extends Activity {
             Map<String, String> headers = new HashMap<>();
             headers.put("Cache-Control", "no-store");
             headers.put("X-Content-Type-Options", "nosniff");
-            headers.put("Content-Security-Policy", "default-src 'self' blob: data:; script-src 'self'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'");
+            headers.put("Content-Security-Policy", "default-src 'self' blob: data:; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'");
             return new WebResourceResponse(mime, "UTF-8", 200, "OK", headers, stream);
         } catch (IOException ex) { return errorResponse(404, "Not Found"); }
     }

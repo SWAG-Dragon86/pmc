@@ -81,6 +81,6 @@ export function buildReport(scene,result,catalog,{details=false}={}) {
   add('计算边界：只计算当前一回合；不继承上一回合状态，也不模拟下一回合触发。','footer');
   add('计算假设：命中；突袭满足成功条件；不计状态性无法行动。','footer');
   add('不服输/好胜仅响应出招前的必定降能力；未适配机制仍需核验。','footer');
-  add(`PMC 1.3.0 · Champions ${catalog.meta.gameVersion} / ${catalog.meta.regulation} · 非官方工具 · 数据 ${catalog.meta.source.showdown.commit.slice(0,8)}`,'footer');
+  add(`PMC 1.3.1 · Champions ${catalog.meta.gameVersion} / ${catalog.meta.regulation} · 非官方工具 · 数据 ${catalog.meta.source.showdown.commit.slice(0,8)}`,'footer');
   return rows;
 }

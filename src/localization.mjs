@@ -1,7 +1,8 @@
-import catalog from './data/catalog.json';
+import catalog from './data/catalog.json' with { type: 'json' };
 import names from './data/locale-names.json' with { type: 'json' };
+import { ENGLISH_UI, ENGLISH_EXTRA } from './english-ui.mjs';
 
-export const LANGUAGES=[['zhHans','简体中文'],['zhHant','繁體中文'],['ja','日本語'],['ko','한국어']];
+export const LANGUAGES=[['zhHans','简体中文'],['zhHant','繁體中文'],['ja','日本語'],['ko','한국어'],['en','English']];
 export const LANGUAGE_KEY='pmc.language.v1';
 const phrases=[
   ['宝可梦冠军计算器','寶可夢冠軍計算器','ポケモンチャンピオンズ計算機','포켓몬 챔피언스 계산기'],
@@ -197,6 +198,7 @@ const phrases=[
   ['回到计算','返回計算','計算に戻る','계산으로 돌아가기'],
   ['外观和数据保存在本机，不需要账号。','外觀與資料儲存在本機，無須帳號。','外観とデータは端末に保存され、アカウントは不要です。','화면 설정과 데이터는 기기에 저장되며 계정이 필요하지 않습니다.'],
   ['给宝可梦或招式添加熟悉的叫法，搜索时使用，正式名称保持不变。','為寶可夢或招式新增熟悉的別稱，供搜尋使用，正式名稱維持不變。','ポケモンやわざに検索用の別名を付けられます。正式名称は変わりません。','포켓몬이나 기술에 검색용 별칭을 지정할 수 있습니다. 공식 이름은 바뀌지 않습니다.'],
+  ['给宝可梦、招式或道具添加熟悉的叫法，搜索时使用，正式名称保持不变。','為寶可夢、招式或道具新增熟悉的別稱，供搜尋使用，正式名稱維持不變。','ポケモン・わざ・もちものに検索用の別名を付けられます。正式名称は変わりません。','포켓몬·기술·도구에 검색용 별칭을 지정할 수 있습니다. 공식 이름은 바뀌지 않습니다.'],
   ['类型','類型','種類','유형'],
   ['修改计算页上方的文字，自动保存在本机。','修改計算頁上方文字，並自動儲存在本機。','計算ページ上部の文字を変更します。端末に自動保存されます。','계산 화면 상단 문구를 변경합니다. 기기에 자동 저장됩니다.'],
   ['颜色跟随主题','顏色跟隨主題','色をテーマに合わせる','테마에 맞춰 색상 변경'],
@@ -315,13 +317,18 @@ const phrases=[
   ['命中且不受状态性行动失败影响','假設命中且不受狀態造成的無法行動影響','命中を仮定し、状態異常による行動不能は考慮しません','명중을 가정하며 상태 이상으로 인한 행동 불가는 고려하지 않습니다'],
   ['所剩血量以目标最大 HP 为分母','剩餘血量以目標最大 HP 為分母','残りHPの割合は対象の最大HPを分母とします','남은 HP 비율은 대상의 최대 HP를 기준으로 합니다'],
 ];
-const languageIndex={zhHant:1,ja:2,ko:3};
+if(phrases.length!==ENGLISH_UI.length)throw new Error('English UI translation count does not match source strings');
+phrases.forEach((row,index)=>row.push(ENGLISH_UI[index]));
+const languageIndex={zhHant:1,ja:2,ko:3,en:4};
 const exact=new Map(phrases.map(row=>[row[0],row]));
 const nameMap=new Map();
-for(const [kind,entries] of Object.entries({pokemon:catalog.pokemon,moves:Object.values(catalog.moves),abilities:catalog.abilities,items:catalog.items,natures:catalog.natures})){
-  for(const entry of entries){if(entry.zh&&entry.zh.length>=2&&names[kind][entry.id])nameMap.set(entry.zh,names[kind][entry.id]);}
+const gameEntries={pokemon:catalog.pokemon,moves:Object.values(catalog.moves),abilities:catalog.abilities,items:catalog.items,natures:catalog.natures};
+const englishNames=Object.fromEntries(Object.entries(gameEntries).map(([kind,entries])=>[kind,new Map(entries.map(entry=>[entry.id,entry.name]))]));
+for(const [kind,entries] of Object.entries(gameEntries)){
+  for(const entry of entries){if(entry.zh&&entry.zh.length>=2&&names[kind][entry.id])nameMap.set(entry.zh,{...names[kind][entry.id],en:entry.name});}
 }
 const replacements=[...phrases].sort((a,b)=>b[0].length-a[0].length);
+const englishReplacements=Object.entries(ENGLISH_EXTRA).sort((a,b)=>b[0].length-a[0].length);
 const nameReplacements=[...nameMap].sort((a,b)=>b[0].length-a[0].length);
 let toTraditional=null;
 export async function prepareLanguage(language){
@@ -331,20 +338,38 @@ export function translateText(value,language){
   if(language==='zhHans'||typeof value!=='string'||!value.trim())return value;
   const index=languageIndex[language];if(!index)return value;
   const leading=value.match(/^\s*/)[0],trailing=value.match(/\s*$/)[0],source=value.trim();
+  if(language==='en'){
+    const patterns=[
+      [/^选择(\d+)号第(\d+)招$/,match=>`Choose move ${match[2]} for slot ${match[1]}`],
+      [/^(\d+)号使用第(\d+)招$/,match=>`Use move ${match[2]} for slot ${match[1]}`],
+      [/^(\d+)号第(\d+)招$/,match=>`Move ${match[2]} for slot ${match[1]}`],
+      [/^第(\d+)只第(\d+)招$/,match=>`Move ${match[2]} for Pokémon ${match[1]}`],
+      [/^第(\d+)只宝可梦的道具$/,match=>`Item for Pokémon ${match[1]}`],
+      [/^第(\d+)只宝可梦$/,match=>`Pokémon ${match[1]}`],
+      [/^第(\d+)只(.+)能力点(滑块)?$/,match=>`${translateText(match[2],'en')} Stat Points for Pokémon ${match[1]}${match[3]?' slider':''}`],
+      [/^(\d+)号(.+)能力点(滑块)?$/,match=>`${translateText(match[2],'en')} Stat Points for slot ${match[1]}${match[3]?' slider':''}`],
+      [/^(\d+)号剩余血量百分比$/,match=>`Remaining HP (%) for slot ${match[1]}`],
+      [/^载入(\d+)号配置$/,match=>`Load build for slot ${match[1]}`],
+      [/^保存(\d+)号配置$/,match=>`Save build for slot ${match[1]}`],
+      [/^载入(.+)到计算位置$/,match=>`Load ${translateText(match[1],'en')} into a battle slot`],
+    ];
+    for(const [pattern,render] of patterns){const match=source.match(pattern);if(match)return leading+render(match)+trailing;}
+  }
   const weakness=source.match(/^它可学的(.+)属性招式可能克制 (\d+)\/6 名队员$/);
   if(weakness){
     const type=exact.get(weakness[1])?.[index]||weakness[1],count=weakness[2];
-    const sentence=language==='ja'?`相手が覚えられる${type}タイプのわざは、味方${count}/6匹の弱点です。`:language==='ko'?`상대가 배울 수 있는 ${type}타입 기술은 팀원 ${count}/6마리의 약점입니다.`:`牠可學的${type}屬性招式可能剋制 ${count}/6 名隊員`;
+    const sentence=language==='ja'?`相手が覚えられる${type}タイプのわざは、味方${count}/6匹の弱点です。`:language==='ko'?`상대가 배울 수 있는 ${type}타입 기술은 팀원 ${count}/6마리의 약점입니다.`:language==='en'?`It can learn ${type}-type moves that threaten ${count}/6 team members.`:`牠可學的${type}屬性招式可能剋制 ${count}/6 名隊員`;
     return leading+sentence+trailing;
   }
-  const direct=exact.get(source)?.[index]||nameMap.get(source)?.[language];
+  const direct=exact.get(source)?.[index]||nameMap.get(source)?.[language]||(language==='en'?ENGLISH_EXTRA[source]:null);
   if(direct)return leading+direct+trailing;
   let output=source;
   for(const row of replacements)if(row[0].length>1&&output.includes(row[0]))output=output.replaceAll(row[0],row[index]);
+  if(language==='en')for(const [from,to] of englishReplacements)if(output.includes(from))output=output.replaceAll(from,to);
   for(const [from,translations] of nameReplacements)if(output.includes(from))output=output.replaceAll(from,translations[language]||from);
   return leading+(language==='zhHant'&&toTraditional?toTraditional(output):output)+trailing;
 }
-export function localizedName(kind,id,language){const entry=names[kind]?.[id];return language==='zhHans'?null:entry?.[language]||null;}
+export function localizedName(kind,id,language){if(language==='en')return englishNames[kind]?.get(id)||null;const entry=names[kind]?.[id];return language==='zhHans'?null:entry?.[language]||null;}
 
 const textOrigins=new WeakMap(),attributeOrigins=new WeakMap();
 const attributes=['aria-label','title','placeholder','alt'];
