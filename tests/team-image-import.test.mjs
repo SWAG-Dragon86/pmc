@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import catalog from '../src/data/catalog.json' with { type: 'json' };
 import { chooseOcrEntry, chooseOcrEntryInBlock, mergeTeamScreenshots, natureFromArrows } from '../src/team-image-import.mjs';
 import { setPointWithinLimit } from '../src/model.mjs';
@@ -57,4 +58,12 @@ test('Stat Points stop at 66 while legacy over-budget values can be lowered', ()
   const legacy={...points,spe:10};
   assert.equal(setPointWithinLimit(legacy,'spe',9).spe,9);
   assert.equal(setPointWithinLimit(legacy,'spe',11).spe,10);
+});
+
+test('Android allows local OCR WebAssembly without enabling JavaScript eval', () => {
+  const java=readFileSync(new URL('../android/src/cn/pmc/calculator/MainActivity.java',import.meta.url),'utf8');
+  const policy=java.match(/headers\.put\("Content-Security-Policy", "([^"]+)"\)/)?.[1];
+  assert.ok(policy);
+  assert.match(policy,/script-src 'self' 'wasm-unsafe-eval'/);
+  assert.ok(!policy.includes(" 'unsafe-eval'"));
 });
