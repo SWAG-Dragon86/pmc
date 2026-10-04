@@ -46,6 +46,14 @@ test('one screenshot uses defaults for missing page and unknown points require r
   assert.ok(rows[0].review.includes('pointsTotal'));
 });
 
+test('a nickname resolved by a unique ability remains marked for review', () => {
+  const ability = members(species);
+  ability[0].inferredFromAbility = true;
+  const rows = mergeTeamScreenshots([{ kind: 'ability', members: ability }], catalog);
+  assert.ok(rows[0].review.includes('species'));
+  assert.ok(!rows[1].review.includes('species'));
+});
+
 test('nature arrow pairing reads stat direction', () => {
   assert.equal(natureFromArrows('atk','spa',catalog),'Adamant');
   assert.equal(natureFromArrows('spe','atk',catalog),'Timid');

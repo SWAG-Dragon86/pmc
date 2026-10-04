@@ -101,6 +101,7 @@ export function mergeTeamScreenshots(scans, catalog) {
     const review = [];
     const ability = byKind.ability?.get(species);
     if (ability) {
+      if (ability.inferredFromAbility) review.push('species');
       build.ability = ability.ability || '';
       build.item = ability.item ?? '';
       build.moves = Array.from({ length: 4 }, (_, index) => ability.moves?.[index] || '');
