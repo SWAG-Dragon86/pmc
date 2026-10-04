@@ -53,7 +53,7 @@ export default function TeamImageImport({ catalog, language, onImport, disabled 
     const suffix=language==='ja'?`耐性：${typeName}`:language==='ko'?`저항 ${typeName}`:language==='en'?`Resists ${typeName}`:`抵抗${typeName}`;
     return language==='en'?`${base} (${suffix})`:`${base}（${suffix}）`;
   };
-  const reviewName = field => field === 'pointsTotal' ? `${words[15]} Σ` : POINT_KEYS.includes(field) ? STAT_LABELS[field] : field.startsWith('move') ? `${words[19]} ${Number(field.slice(4)) + 1}` : ({ability:words[16],item:words[17],nature:words[18]})[field] || field;
+  const reviewName = field => field === 'pointsTotal' ? `${words[15]} Σ` : POINT_KEYS.includes(field) ? STAT_LABELS[field] : field.startsWith('move') ? `${words[19]} ${Number(field.slice(4)) + 1}` : ({ability:words[16],item:words[17],nature:words[18],species:words[20]})[field] || field;
   const update = (index, patch) => setPreview(current => current.map((row, i) => i === index ? { ...row, build: { ...row.build, ...patch } } : row));
 
   async function recognize() {

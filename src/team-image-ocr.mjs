@@ -32,13 +32,19 @@ function crop(source, x, y, width, height, threshold = null) {
   return result;
 }
 
-function kindFromSelector(context) {
-  const selected = x => {
-    const [red, green, blue] = context.getImageData(x, 230, 1, 1).data;
-    return green - blue > 55 && green - red > 15;
+function locateSelector(context) {
+  const greenRows = x => {
+    const rows = [];
+    for (let y = 140; y < 340; y++) {
+      const [red, green, blue] = context.getImageData(x, y, 1, 1).data;
+      if (green - blue > 55 && green - red > 15) rows.push(y);
+    }
+    return rows.length >= 30 ? rows : [];
   };
-  const ability = selected(1100), status = selected(1510);
-  return ability === status ? null : ability ? 'ability' : 'status';
+  // Sample away from the tab labels: their dark outlines made a single pixel unreliable.
+  const ability = greenRows(950), status = greenRows(1400);
+  if (Boolean(ability.length) === Boolean(status.length)) return null;
+  return ability.length ? { kind: 'ability', top: ability[0] } : { kind: 'status', top: status[0] };
 }
 
 function arrowAt(context, x, y) {
@@ -102,12 +108,38 @@ async function newWorker(language) {
   return worker;
 }
 
-async function readNames(worker, source, catalog, language) {
+async function readNames(worker, source, catalog, language, kind) {
   const members = [];
   for (const [x, y] of TEAM_CARD_ORIGINS) {
-    const text = await recognizeLine(worker, source, [x + 80, y + 4, 330, 55]);
-    const match = chooseOcrEntry(text, catalog.pokemon, 'pokemon', language, 0.63);
-    members.push({ species: match?.entry.id || null, rawName: text, score: match?.score || 0 });
+    const rectangle = [x + 80, y + 4, 330, 55];
+    const candidates = [];
+    for (const threshold of [null, 195, 180]) {
+      const text = await recognizeLine(worker, source, rectangle, threshold);
+      const match = chooseOcrEntry(text, catalog.pokemon, 'pokemon', language, 0.63);
+      if (match) candidates.push({ ...match, text });
+      if (match?.score === 1) break;
+    }
+    candidates.sort((a, b) => b.score - a.score);
+    const match = candidates[0];
+    const ambiguous = candidates[1] && match.entry !== candidates[1].entry && match.score - candidates[1].score < 0.08;
+    let species = ambiguous ? null : match?.entry.id || null;
+    let inferredFromAbility = false;
+    if (!species && kind === 'ability') {
+      // A team card may show a nickname instead of the species name.
+      const abilityRectangle = [x + 80, y + 52, 310, 45];
+      for (const threshold of [null, 195, 180]) {
+        const text = await recognizeLine(worker, source, abilityRectangle, threshold);
+        const ability = chooseOcrEntry(text, catalog.abilities, 'abilities', language, 0.85);
+        if (!ability) continue;
+        const possible = catalog.pokemon.filter(pokemon => pokemon.abilities.includes(ability.entry.name));
+        if (possible.length === 1) {
+          species = possible[0].id;
+          inferredFromAbility = true;
+          break;
+        }
+      }
+    }
+    members.push({ species, rawName: match?.text || '', score: ambiguous ? 0 : match?.score || 0, inferredFromAbility });
   }
   return members;
 }
@@ -130,21 +162,28 @@ export async function scanTeamImage(file, catalog, { forcedKind = null, preferre
   const bitmap = await createImageBitmap(file);
   try {
     const ratio = bitmap.width / bitmap.height;
-    if (Math.abs(ratio - SCREENSHOT_WIDTH / SCREENSHOT_HEIGHT) > 0.12)
+    if (ratio < 1.7 || ratio > 2.35)
       throw new Error('截图比例与游戏六人队伍界面不符；请使用完整游戏截图');
     const source = document.createElement('canvas');
     source.width = SCREENSHOT_WIDTH; source.height = SCREENSHOT_HEIGHT;
     const context = source.getContext('2d', { willReadFrequently: true });
-    context.drawImage(bitmap, 0, 0, source.width, source.height);
-    const kind = forcedKind || kindFromSelector(context);
+    const scale = Math.min(source.width / bitmap.width, source.height / bitmap.height);
+    const width = bitmap.width * scale, height = bitmap.height * scale;
+    context.drawImage(bitmap, (source.width - width) / 2, (source.height - height) / 2, width, height);
+    const selector = locateSelector(context);
+    const kind = forcedKind || selector?.kind;
     if (!kind) throw new Error('无法确定这张图是“能力”还是“状态”页；请手动指定类型后重试');
+    const aligned = document.createElement('canvas');
+    aligned.width = source.width; aligned.height = source.height;
+    const alignedContext = aligned.getContext('2d', { willReadFrequently: true });
+    alignedContext.drawImage(source, 0, selector ? 182 - selector.top : 0);
     const languages = [preferredLanguage, ...IMAGE_LANGUAGES.map(([language]) => language)].filter((language, index, all) => all.indexOf(language) === index && LANG_CODE[language]);
     let worker = null, language = null, members = null;
     for (const candidate of languages) {
       onProgress(`正在识别六只宝可梦：${candidate}`);
       const current = await newWorker(candidate);
       try {
-        const found = await readNames(current, source, catalog, candidate);
+        const found = await readNames(current, aligned, catalog, candidate, kind);
         if (found.every(member => member.species) && new Set(found.map(member => member.species)).size === 6) {
           worker = current; language = candidate; members = found; break;
         }
@@ -159,12 +198,12 @@ export async function scanTeamImage(file, catalog, { forcedKind = null, preferre
           const pokemon = catalog.pokemon.find(entry => entry.id === members[index].species);
           const abilities = catalog.abilities.filter(entry => pokemon.abilities.includes(entry.name));
           const moves = pokemon.moves.map(id => catalog.moves[id]);
-          const ability = await recognizeEntry(worker, source, [x + 80, y + 52, 310, 45], abilities, 'abilities', language, 0.55);
-          let item = await recognizeEntry(worker, source, [x + 80, y + 95, 310, 46], catalog.items, 'items', language, 0.62);
+          const ability = await recognizeEntry(worker, aligned, [x + 80, y + 52, 310, 45], abilities, 'abilities', language, 0.55);
+          let item = await recognizeEntry(worker, aligned, [x + 80, y + 95, 310, 46], catalog.items, 'items', language, 0.62);
           if (!item) {
             await worker.setParameters({ tessedit_pageseg_mode: PSM.AUTO });
             try {
-              const reading=await recognizeLine(worker,source,[x+31,y+12,350,175],180);
+              const reading=await recognizeLine(worker,aligned,[x+31,y+12,350,175],180);
               item=chooseOcrEntryInBlock(reading,catalog.items,'items',language)?.entry||null;
             } finally { await worker.setParameters({ tessedit_pageseg_mode: PSM.SINGLE_LINE }); }
           }
@@ -172,7 +211,7 @@ export async function scanTeamImage(file, catalog, { forcedKind = null, preferre
           members[index].item = item?.name ?? null;
           members[index].moves = [];
           for (let move = 0; move < 4; move++) {
-            const found = await recognizeEntry(worker, source, [x + 540, y + 6 + move * 50, 280, 43], moves, 'moves', language, 0.55);
+            const found = await recognizeEntry(worker, aligned, [x + 540, y + 6 + move * 50, 280, 43], moves, 'moves', language, 0.55);
             members[index].moves.push(found?.id || null);
           }
         }
@@ -183,12 +222,12 @@ export async function scanTeamImage(file, catalog, { forcedKind = null, preferre
           for (let index = 0; index < 6; index++) {
             onProgress(`正在读取第 ${index + 1} 只的性格和能力点`);
             const [x, y] = TEAM_CARD_ORIGINS[index];
-            const arrows = arrowsForCard(context, x, y);
+            const arrows = arrowsForCard(alignedContext, x, y);
             members[index].nature = natureFromArrows(arrows.plus, arrows.minus, catalog);
             members[index].points = {};
             for (const [column, offset, keys] of [[0, 326, POINT_KEYS.slice(0, 3)], [1, 711, POINT_KEYS.slice(3)]]) {
               for (let row = 0; row < 3; row++)
-                members[index].points[keys[row]] = await readPoint(numeric, source, [x + offset, y + FIELD_ROWS[row], 110, 42]);
+                members[index].points[keys[row]] = await readPoint(numeric, aligned, [x + offset, y + FIELD_ROWS[row], 110, 42]);
             }
           }
         } finally { if (numeric !== worker) await numeric.terminate(); }
