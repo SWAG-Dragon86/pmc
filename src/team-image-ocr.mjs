@@ -1,11 +1,16 @@
 import { createWorker, PSM } from 'tesseract.js';
 import {
   IMAGE_LANGUAGES, POINT_KEYS, SCREENSHOT_HEIGHT, SCREENSHOT_WIDTH,
-  TEAM_CARD_ORIGINS, chooseOcrEntry, chooseOcrEntryInBlock, natureFromArrows,
+  TEAM_CARD_ORIGINS, chooseOcrEntry, chooseOcrEntryInBlock, localizedImageName,
+  normalizedOcr, natureFromArrows,
 } from './team-image-import.mjs';
 
 const LANG_CODE = Object.fromEntries(IMAGE_LANGUAGES);
 const FIELD_ROWS = [57, 101, 145];
+const GENDER_FORM_PAIRS = [
+  ['indeedee', 'indeedeef'], ['meowstic', 'meowsticf'],
+  ['meowsticmmega', 'meowsticfmega'],
+];
 
 function crop(source, x, y, width, height, threshold = null) {
   const result = document.createElement('canvas');
@@ -74,6 +79,35 @@ function arrowsForCard(context, x, y) {
   };
 }
 
+function genderForCard(context, x, y) {
+  // The badge sits between the name and type icons on every team card.
+  const pixels = context.getImageData(x + 345, y + 5, 45, 55).data;
+  let female = 0, male = 0;
+  for (let offset = 0; offset < pixels.length; offset += 4) {
+    const red = pixels[offset], green = pixels[offset + 1], blue = pixels[offset + 2];
+    if (red > 150 && red > green * 1.5 && red > blue * 1.4) female++;
+    if (red < 100 && green < 180 && blue > 175 && blue > red * 1.6) male++;
+  }
+  if (female > 150) return 'female';
+  if (male > 400) return 'male';
+  return null;
+}
+
+function genderedNameMatch(text, catalog, language, gender) {
+  if (!gender) return null;
+  const aliases = GENDER_FORM_PAIRS.map(([male, female]) => {
+    const first = catalog.pokemon.find(entry => entry.id === male);
+    const second = catalog.pokemon.find(entry => entry.id === female);
+    if (!first || !second) return null;
+    const a = normalizedOcr(localizedImageName('pokemon', first, language));
+    const b = normalizedOcr(localizedImageName('pokemon', second, language));
+    let length = 0;
+    while (length < a.length && length < b.length && a[length] === b[length]) length++;
+    return length >= 3 ? { id: gender === 'female' ? female : male, name: a.slice(0, length) } : null;
+  }).filter(Boolean);
+  return chooseOcrEntry(text, aliases, 'pokemon', 'en', 0.63);
+}
+
 function parsePoint(value) {
   const text = String(value || '').trim();
   if (!/^\d{1,2}$/.test(text)) return null;
@@ -110,14 +144,23 @@ async function newWorker(language) {
 
 async function readNames(worker, source, catalog, language, kind) {
   const members = [];
+  const context = source.getContext('2d', { willReadFrequently: true });
   for (const [x, y] of TEAM_CARD_ORIGINS) {
-    const rectangle = [x + 80, y + 4, 330, 55];
+    const gender = genderForCard(context, x, y);
     const candidates = [];
-    for (const threshold of [null, 195, 180]) {
-      const text = await recognizeLine(worker, source, rectangle, threshold);
-      const match = chooseOcrEntry(text, catalog.pokemon, 'pokemon', language, 0.63);
-      if (match) candidates.push({ ...match, text });
-      if (match?.score === 1) break;
+    const readings = [];
+    for (const width of [260, 330]) {
+      for (const threshold of [null, 195, 180]) {
+        const text = await recognizeLine(worker, source, [x + 80, y + 4, width, 55], threshold);
+        if (text) readings.push(text);
+        const ordinary = chooseOcrEntry(text, catalog.pokemon, 'pokemon', language, 0.63);
+        const gendered = genderedNameMatch(text, catalog, language, gender);
+        const match = gendered && (!ordinary || gendered.score > ordinary.score + 0.08) ?
+          { ...gendered, entry: catalog.pokemon.find(entry => entry.id === gendered.entry.id) } : ordinary;
+        if (match) candidates.push({ ...match, text });
+        if (match?.score === 1) break;
+      }
+      if (candidates.some(candidate => candidate.score >= 0.9)) break;
     }
     candidates.sort((a, b) => b.score - a.score);
     const match = candidates[0];
@@ -137,8 +180,17 @@ async function readNames(worker, source, catalog, language, kind) {
           inferredFromAbility = true;
           break;
         }
+        const narrowed = readings.map(reading => chooseOcrEntry(reading, possible, 'pokemon', language, 0.63))
+          .filter(Boolean).sort((a, b) => b.score - a.score);
+        if (narrowed[0]) {
+          species = narrowed[0].entry.id;
+          inferredFromAbility = true;
+          break;
+        }
       }
     }
+    const pair = GENDER_FORM_PAIRS.find(forms => forms.includes(species));
+    if (pair) species = gender === 'female' ? pair[1] : gender === 'male' ? pair[0] : null;
     members.push({ species, rawName: match?.text || '', score: ambiguous ? 0 : match?.score || 0, inferredFromAbility });
   }
   return members;

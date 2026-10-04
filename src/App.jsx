@@ -79,7 +79,7 @@ import { initialLanguage } from "./language-preference.mjs";
 import TeamImageImport from './TeamImageImport.jsx';
 
 const pct = (n) => `${Math.max(0, n || 0).toFixed(1)}%`;
-const APP_VERSION = "1.3.2";
+const APP_VERSION = "1.3.3";
 const range = (r) => `${pct(r.min)} – ${pct(r.max)}`;
 const TYPES_COLOR = {
   Fire: "#ce5841",
@@ -2159,7 +2159,7 @@ export default function App() {
                 </section>
                 <section className="panel settings-card">
                   <h2>安装与备份</h2>
-                  <p>{isAndroidApp ? "安卓离线版 1.3.2 · 数据与图片已内置。网页版记录请先导出，再在这里导入。" : "本地数据不会自动同步到其他设备。"}</p>
+                  <p>{isAndroidApp ? "安卓离线版 1.3.3 · 数据与图片已内置。网页版记录请先导出，再在这里导入。" : "本地数据不会自动同步到其他设备。"}</p>
                   <div className="status-line">
                     <span>离线资源</span>
                     <b>
@@ -2268,7 +2268,7 @@ export default function App() {
                       className="button"
                       onClick={async () => {
                         if (isAndroidApp) {
-                          notify("安卓版通过新版 APK 更新。请从原发布者获取，先导出备份，再直接覆盖安装；不要先卸载。当前版本 1.3.2。");
+                          notify("安卓版通过新版 APK 更新。请从原发布者获取，先导出备份，再直接覆盖安装；不要先卸载。当前版本 1.3.3。");
                           return;
                         }
                         if (!online) {
