@@ -1,6 +1,6 @@
 {
   "name": "pmc-champions-calculator",
-  "version": "1.3.3",
+  "version": "1.3.2",
   "private": true,
   "type": "module",
   "scripts": {
