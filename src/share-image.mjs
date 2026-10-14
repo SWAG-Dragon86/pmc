@@ -7,6 +7,7 @@ import { battleCards } from './battle-view.mjs';
 import { shareText, gameName, buildName } from './sharing-language.mjs';
 import { translateText, prepareLanguage } from './localization.mjs';
 import { selectedShareBall, ballPalette } from './share-balls.mjs';
+import { typeName } from './move-types.mjs';
 
 const ink='#292a30', muted='#686d78', red='#b83238', line='#e9ebef';
 const font='"PingFang SC","Yu Gothic","Malgun Gothic","Microsoft YaHei",system-ui,sans-serif';
@@ -29,6 +30,7 @@ function text(ctx,value,x,y,size=32,width=1000,color=ink,weight=550) {
   while(output.length&&ctx.measureText(output).width>width) output=output.slice(0,-1);
   if(output!==String(value??'')) output=output.slice(0,-1)+'…';
   ctx.fillText(output,x,y);
+  return output;
 }
 function wrap(ctx,value,width,size=32,weight=500) {
   ctx.font=`${weight} ${size}px ${font}`;const lines=[];let row='';
@@ -77,6 +79,7 @@ async function buildCard(ctx,build,catalog,language,x,y,width,height,large=false
   const accent=ctx.shareTheme.accent;
   const t=key=>shareText(key,language),species=catalog.pokemon.find(p=>p.id===build.species);
   const compact=!large&&height<400,size=large?40:compact?22:26,pad=large?44:24;
+  if(compact)return teamCard(ctx,build,catalog,language,x,y,width,height);
   box(ctx,x,y,width,height,'#fff',large?32:22);
   if(!large){
     text(ctx,buildName(build,catalog,language),x+pad,y+15,32,width-160,accent,750);
@@ -91,6 +94,46 @@ async function buildCard(ctx,build,catalog,language,x,y,width,height,large=false
   text(ctx,`${t('stats')} / ${t('points')}`,right,top+size*1.65,large?28:18,half,muted);
   stats(ctx,build,catalog,language,right,top+(large?150:compact?58:100),half,large?105:compact?22:65,large?38:compact?22:26);
   text(ctx,`${t('points')} ${STAT_KEYS.reduce((sum,key)=>sum+build.points[key],0)}/66`,left,y+height-(large?75:26),large?32:21,half,muted);
+}
+async function teamCard(ctx,build,catalog,language,x,y,width,height) {
+  const t=key=>shareText(key,language),species=catalog.pokemon.find(p=>p.id===build.species);
+  const left=x+24,right=x+width*.52,half=width*.46-24;
+  box(ctx,x,y,width,height,'#fff',24,'#eceef1');
+
+  // Keep the original game symbols inside quiet, aligned type pills.
+  ctx.font=`550 16px ${font}`;
+  const badges=species.types.map(type=>({type,label:typeName(type,language),width:Math.ceil(ctx.measureText(typeName(type,language)).width)+52}));
+  const badgeWidth=badges.reduce((sum,badge)=>sum+badge.width+8,0);
+  const title=text(ctx,buildName(build,catalog,language),left,y+18,30,width-184-badgeWidth,ink,650);
+  let badgeX=left+ctx.measureText(title).width+16;
+  for(const badge of badges){
+    box(ctx,badgeX,y+16,badge.width,32,'#f3f4f6',10,null);
+    ctx.save();ctx.globalAlpha=.9;
+    picture(ctx,images.get(`types/${badge.type.toLowerCase()}.png`),badgeX+7,y+21,22,22);
+    ctx.restore();
+    text(ctx,badge.label,badgeX+36,y+24,16,badge.width-42,'#737983',550);
+    badgeX+=badge.width+8;
+  }
+  picture(ctx,await sprite(build.species),x+width-120,y+10,90,64);
+
+  // Two inset rows use a shared label column, like an iOS grouped settings cell.
+  box(ctx,left,y+66,half,66,'#f5f6f8',12,null);
+  const rows=[
+    [t('ability'),gameName('abilities',catalog.abilities.find(a=>a.name===build.ability),language)],
+    [t('item'),itemLabel(build,catalog,language)],
+  ];
+  rows.forEach(([label,value],index)=>{
+    const top=y+75+index*31;
+    text(ctx,label,left+12,top+2,17,90,'#858a94',500);
+    text(ctx,value,left+112,top,21,half-126,'#42464e',550);
+  });
+  ctx.fillStyle='#e7e9ee';ctx.fillRect(left+112,y+99,half-126,1);
+  build.moves.forEach((id,index)=>moveLine(ctx,catalog.moves[id],language,left+8,y+145+index*27,half-16,22));
+
+  text(ctx,`${t('nature')} · ${gameName('natures',catalog.natures.find(n=>n.name===build.nature),language)}`,right,y+76,22,half,'#535965',550);
+  const total=STAT_KEYS.reduce((sum,key)=>sum+build.points[key],0);
+  text(ctx,`${t('stats')} / ${t('points')} ${total}/66`,right,y+112,18,half,'#858a94',500);
+  stats(ctx,build,catalog,language,right,y+137,half,21,22);
 }
 function moveLine(ctx,move,language,x,y,width,size) {
   let inset=0;
