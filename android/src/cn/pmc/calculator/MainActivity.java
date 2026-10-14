@@ -328,7 +328,9 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onPause() {
         if (web != null) {
-            web.evaluateJavascript("window.dispatchEvent(new Event('pmc-app-background'))", null);
+            // The camera permission dialog briefly pauses this activity; keep its pending capture request alive.
+            if (cameraRequest == null)
+                web.evaluateJavascript("window.dispatchEvent(new Event('pmc-app-background'))", null);
             web.onPause();
         }
         super.onPause();

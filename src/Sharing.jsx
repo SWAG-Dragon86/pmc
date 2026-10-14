@@ -46,7 +46,12 @@ export function SharingImport({catalog,language,onClose,onConfirm}) {
   const [code,setCode]=useState(''),[error,setError]=useState(''),[preview,setPreview]=useState(null),[busy,setBusy]=useState(false),[camera,setCamera]=useState(false);
   function stop(){generation.current++;clearTimeout(timer.current);stream.current?.getTracks().forEach(track=>track.stop());stream.current=null;setCamera(false);}
   useEffect(()=>()=>{generation.current++;clearTimeout(timer.current);stream.current?.getTracks().forEach(track=>track.stop());},[]);
-  useEffect(()=>{const hidden=()=>{if(document.hidden)stop();};document.addEventListener('visibilitychange',hidden);window.addEventListener('pmc-app-background',stop);return()=>{document.removeEventListener('visibilitychange',hidden);window.removeEventListener('pmc-app-background',stop);};},[]);
+  useEffect(()=>{
+    // Permission prompts can hide the app before a camera stream exists.
+    const background=()=>{if(stream.current)stop();},hidden=()=>{if(document.hidden)background();};
+    document.addEventListener('visibilitychange',hidden);window.addEventListener('pmc-app-background',background);
+    return()=>{document.removeEventListener('visibilitychange',hidden);window.removeEventListener('pmc-app-background',background);};
+  },[]);
   function read(value){try{const parsed=decodeShare(value,catalog);setPreview(parsed);setCode(value);setError('');stop();return true;}catch(cause){setError(t(cause.message));setPreview(null);return false;}}
   async function fileChanged(file){if(!file)return;stop();setBusy(true);setPreview(null);setError('');try{const module=await import('./qr-reader.mjs');read(await module.readQrImage(file));}
     catch(cause){setError(t(cause.message));}finally{setBusy(false);if(input.current)input.current.value='';}}
@@ -55,7 +60,7 @@ export function SharingImport({catalog,language,onClose,onConfirm}) {
     stop();setError('');setPreview(null);const token=++generation.current;setCamera(true);
     try {
       const media=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280}},audio:false});
-      if(token!==generation.current){media.getTracks().forEach(track=>track.stop());return;}
+      if(token!==generation.current||document.hidden){media.getTracks().forEach(track=>track.stop());if(token===generation.current)setCamera(false);return;}
       stream.current=media;video.current.srcObject=media;await video.current.play();
       const {readQrCanvas}=await import('./qr-reader.mjs'),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
       function scan(){if(token!==generation.current||!video.current)return;const element=video.current;
