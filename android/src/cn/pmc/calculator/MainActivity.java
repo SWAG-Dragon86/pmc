@@ -25,6 +25,8 @@ public final class MainActivity extends Activity {
     private WebView web;
     private ValueCallback<Uri[]> fileCallback;
     private byte[] exportBytes;
+    private PermissionRequest cameraRequest;
+    private static final int CAMERA_PERMISSION = 102;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -62,7 +64,7 @@ public final class MainActivity extends Activity {
         settings.setSupportMultipleWindows(false);
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " PMCAndroid/1.3.2");
+        settings.setUserAgentString(settings.getUserAgentString() + " PMCAndroid/1.4.0");
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
         WebView.setWebContentsDebuggingEnabled(false);
         web.addJavascriptInterface(new ExportBridge(), "PMCAndroid");
@@ -90,6 +92,22 @@ public final class MainActivity extends Activity {
             }
         });
         web.setWebChromeClient(new WebChromeClient() {
+            @Override public void onPermissionRequest(PermissionRequest request) {
+                runOnUiThread(() -> {
+                    if (!isLocal(request.getOrigin()) || !Arrays.equals(request.getResources(), new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE})) {
+                        request.deny(); return;
+                    }
+                    if (checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE}); return;
+                    }
+                    if (cameraRequest != null) cameraRequest.deny();
+                    cameraRequest = request;
+                    requestPermissions(new String[]{android.Manifest.permission.CAMERA}, CAMERA_PERMISSION);
+                });
+            }
+            @Override public void onPermissionRequestCanceled(PermissionRequest request) {
+                if (cameraRequest == request) cameraRequest = null;
+            }
             @Override public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = callback;
@@ -155,33 +173,44 @@ public final class MainActivity extends Activity {
             byte[] configured = new byte[1024];
             int length = config.read(configured);
             if (length <= 0) throw new IOException("No team feed URL");
+            byte[] newest = null;
+            String newestTime = "";
             for (String address : new String(configured, 0, length, "UTF-8").trim().split("\\r?\\n")) {
                 HttpsURLConnection connection = null;
                 try {
-                    URL url = new URL(address.trim());
+                    URL url = new URL(address.trim() + "?check=" + System.currentTimeMillis());
                     if (!"https".equals(url.getProtocol()) || url.getUserInfo() != null || url.getHost().isEmpty()) continue;
                     connection = (HttpsURLConnection) url.openConnection();
-                    connection.setConnectTimeout(10000);
-                    connection.setReadTimeout(15000);
+                    connection.setConnectTimeout(3500);
+                    connection.setReadTimeout(6000);
                     connection.setInstanceFollowRedirects(false);
                     connection.setRequestProperty("Accept", "application/json");
                     connection.setRequestProperty("Cache-Control", "no-cache");
                     if (connection.getResponseCode() != 200 || connection.getContentLengthLong() > 10 * 1024 * 1024) continue;
-                    InputStream body = connection.getInputStream();
-                    final HttpsURLConnection active = connection;
-                    connection = null;
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("Cache-Control", "no-store");
-                    headers.put("X-Content-Type-Options", "nosniff");
-                    return new WebResourceResponse("application/json", "UTF-8", 200, "OK", headers, new FilterInputStream(body) {
-                        long count = 0;
-                        @Override public int read() throws IOException { int value = super.read();if (value >= 0 && ++count > 10 * 1024 * 1024) throw new IOException("Feed too large");return value; }
-                        @Override public int read(byte[] data, int offset, int length) throws IOException { int n = super.read(data, offset, length);if (n > 0 && (count += n) > 10 * 1024 * 1024) throw new IOException("Feed too large");return n; }
-                        @Override public void close() throws IOException { super.close();active.disconnect(); }
-                    });
-                } catch (IOException | SecurityException ex) {
-                    // Try the next free Pages mirror; the embedded team snapshot remains available.
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    try (InputStream body = connection.getInputStream()) {
+                        byte[] chunk = new byte[8192]; int count;
+                        while ((count = body.read(chunk)) >= 0) {
+                            if (buffer.size() + count > 10 * 1024 * 1024) throw new IOException("Feed too large");
+                            buffer.write(chunk, 0, count);
+                        }
+                    }
+                    byte[] content = buffer.toByteArray();
+                    org.json.JSONObject feed = new org.json.JSONObject(new String(content, "UTF-8"));
+                    org.json.JSONObject meta = feed.getJSONObject("meta");
+                    String date = meta.getString("updatedAt");
+                    if (!date.matches("\\d{4}-\\d{2}-\\d{2}") || feed.getJSONArray("teams").length() == 0) continue;
+                    String time = meta.optString("checkedAt", date);
+                    if (newest == null || time.compareTo(newestTime) > 0) { newest = content; newestTime = time; }
+                } catch (IOException | SecurityException | org.json.JSONException ex) {
+                    // Compare every configured mirror; a stale successful primary is not enough.
                 } finally { if (connection != null) connection.disconnect(); }
+            }
+            if (newest != null) {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Cache-Control", "no-store");
+                headers.put("X-Content-Type-Options", "nosniff");
+                return new WebResourceResponse("application/json", "UTF-8", 200, "OK", headers, new ByteArrayInputStream(newest));
             }
             return errorResponse(503, "Feed Unavailable");
         } catch (IOException | SecurityException ex) { return errorResponse(503, "Feed Unavailable"); }
@@ -282,7 +311,30 @@ public final class MainActivity extends Activity {
     }
 
     private void toast(String message) { runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_LONG).show()); }
+    @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grants) {
+        super.onRequestPermissionsResult(requestCode, permissions, grants);
+        if (requestCode != CAMERA_PERMISSION || cameraRequest == null) return;
+        PermissionRequest request = cameraRequest; cameraRequest = null;
+        if (grants.length > 0 && grants[0] == android.content.pm.PackageManager.PERMISSION_GRANTED)
+            request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+        else request.deny();
+    }
+    @Override protected void onResume() {
+        super.onResume();
+        if (web != null) {
+            web.onResume();
+            web.evaluateJavascript("window.dispatchEvent(new Event('pmc-app-resume'))", null);
+        }
+    }
+    @Override protected void onPause() {
+        if (web != null) {
+            web.evaluateJavascript("window.dispatchEvent(new Event('pmc-app-background'))", null);
+            web.onPause();
+        }
+        super.onPause();
+    }
     @Override protected void onDestroy() {
+        if (cameraRequest != null) { cameraRequest.deny(); cameraRequest = null; }
         if (fileCallback != null) fileCallback.onReceiveValue(null);
         exportBytes = null;
         if (web != null) { web.removeJavascriptInterface("PMCAndroid"); web.destroy(); }

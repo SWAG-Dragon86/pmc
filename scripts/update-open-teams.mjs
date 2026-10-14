@@ -125,7 +125,7 @@ function parsePaste(text, row) {
 }
 
 async function fetchText(url) {
-  const response = await fetch(url, { headers:{ "User-Agent":"PMC Calculator data snapshot" } });
+  const response = await fetch(url, { headers:{ "User-Agent":"PMC Calculator data snapshot" }, signal:AbortSignal.timeout(25000) });
   if (!response.ok) throw new Error(`${response.status} ${url}`);
   return response.text();
 }
@@ -196,6 +196,8 @@ const teams = [...generated.filter(team => !team.rentalCode || !existingCodes.ha
 const output = {
   meta: {
     updatedAt:new Date().toISOString().slice(0,10),
+    checkedAt:new Date().toISOString(),
+    contentUpdatedAt:JSON.stringify(teams) === JSON.stringify(current.teams) ? (current.meta.contentUpdatedAt || current.meta.updatedAt) : new Date().toISOString(),
     policy:"只内置可追溯且能通过当前《宝可梦冠军》目录校验的阵容；完整66点配置可保存和载入。",
     snapshot:{ repository:SHEET_NAME, totalRows:rows.length, embeddedTeams:teams.length, generatedTeams:generated.length },
     sources:[

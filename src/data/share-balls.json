@@ -1,0 +1,686 @@
+{
+  "source": {
+    "repository": "https://github.com/PokeAPI/sprites",
+    "commit": "0dc105d5b12416932f29b594078282ab4be045f5",
+    "categories": [
+      34,
+      33,
+      39
+    ]
+  },
+  "balls": [
+    {
+      "name": "master-ball",
+      "category": "standard-balls",
+      "names": {
+        "ja-hrkt": "マスターボール",
+        "ko": "마스터볼",
+        "zh-hant": "大師球",
+        "fr": "Master Ball",
+        "de": "Meisterball",
+        "es": "Master Ball",
+        "it": "Master Ball",
+        "en": "Master Ball",
+        "ja": "マスターボール",
+        "zh-hans": "大师球",
+        "es-419": "Masterbola"
+      },
+      "sprite": "share-balls/master-ball.png"
+    },
+    {
+      "name": "ultra-ball",
+      "category": "standard-balls",
+      "names": {
+        "ja-hrkt": "ハイパーボール",
+        "ko": "하이퍼볼",
+        "zh-hant": "高級球",
+        "fr": "Hyper Ball",
+        "de": "Hyperball",
+        "es": "Ultra Ball",
+        "it": "Ultra Ball",
+        "en": "Ultra Ball",
+        "ja": "ハイパーボール",
+        "zh-hans": "高级球",
+        "es-419": "Ultrabola"
+      },
+      "sprite": "share-balls/ultra-ball.png"
+    },
+    {
+      "name": "great-ball",
+      "category": "standard-balls",
+      "names": {
+        "ja-hrkt": "スーパーボール",
+        "ko": "슈퍼볼",
+        "zh-hant": "超級球",
+        "fr": "Super Ball",
+        "de": "Superball",
+        "es": "Super Ball",
+        "it": "Mega Ball",
+        "en": "Great Ball",
+        "ja": "スーパーボール",
+        "zh-hans": "超级球",
+        "es-419": "Superbola"
+      },
+      "sprite": "share-balls/great-ball.png"
+    },
+    {
+      "name": "poke-ball",
+      "category": "standard-balls",
+      "names": {
+        "ja-hrkt": "モンスターボール",
+        "ko": "몬스터볼",
+        "zh-hant": "精靈球",
+        "fr": "Poké Ball",
+        "de": "Pokéball",
+        "es": "Poké Ball",
+        "it": "Poké Ball",
+        "en": "Poké Ball",
+        "ja": "モンスターボール",
+        "zh-hans": "精灵球",
+        "es-419": "Pokébola"
+      },
+      "sprite": "share-balls/poke-ball.png"
+    },
+    {
+      "name": "safari-ball",
+      "category": "standard-balls",
+      "names": {
+        "ja-hrkt": "サファリボール",
+        "ko": "사파리볼",
+        "zh-hant": "狩獵球",
+        "fr": "Safari Ball",
+        "de": "Safariball",
+        "es": "Safari Ball",
+        "it": "Safari Ball",
+        "en": "Safari Ball",
+        "ja": "サファリボール",
+        "zh-hans": "狩猎球",
+        "es-419": "Safaribola"
+      },
+      "sprite": "share-balls/safari-ball.png"
+    },
+    {
+      "name": "park-ball",
+      "category": "standard-balls",
+      "names": {
+        "ja-hrkt": "パークボール",
+        "ko": "파크볼",
+        "zh-hant": "公園球",
+        "fr": "Parc Ball",
+        "de": "Parkball",
+        "es": "Parque Ball",
+        "it": "Parco Ball",
+        "en": "Park Ball",
+        "ja": "パークボール",
+        "zh-hans": "公园球",
+        "es-419": "Parquebola"
+      },
+      "sprite": "share-balls/park-ball.png"
+    },
+    {
+      "name": "sport-ball",
+      "category": "standard-balls",
+      "names": {
+        "ja-hrkt": "コンペボール",
+        "ko": "컴퍼티션볼",
+        "zh-hant": "競賽球",
+        "fr": "Compét’Ball",
+        "de": "Turnierball",
+        "es": "Competi Ball",
+        "it": "Gara Ball",
+        "en": "Sport Ball",
+        "ja": "コンペボール",
+        "zh-hans": "竞赛球",
+        "es-419": "Competibola"
+      },
+      "sprite": "share-balls/sport-ball.png"
+    },
+    {
+      "name": "lastrange-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "스트레인지볼",
+        "zh-hant": "奇異球",
+        "fr": "Étrange Ball",
+        "de": "Rätselball",
+        "es": "Extraña Ball",
+        "it": "Strange Ball",
+        "en": "Strange Ball",
+        "ja": "ストレンジボール",
+        "zh-hans": "奇异球",
+        "es-419": "Extrañabola"
+      },
+      "sprite": "share-balls/lastrange-ball.png"
+    },
+    {
+      "name": "lapoke-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "몬스터볼",
+        "zh-hant": "精靈球",
+        "fr": "Poké Ball",
+        "de": "Pokéball",
+        "es": "Poké Ball",
+        "it": "Poké Ball",
+        "en": "Poké Ball",
+        "ja": "モンスターボール",
+        "zh-hans": "精灵球",
+        "es-419": "Pokébola"
+      },
+      "sprite": "share-balls/lapoke-ball.png"
+    },
+    {
+      "name": "lagreat-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "슈퍼볼",
+        "zh-hant": "超級球",
+        "fr": "Super Ball",
+        "de": "Superball",
+        "es": "Super Ball",
+        "it": "Mega Ball",
+        "en": "Great Ball",
+        "ja": "スーパーボール",
+        "zh-hans": "超级球",
+        "es-419": "Superbola"
+      },
+      "sprite": "share-balls/lagreat-ball.png"
+    },
+    {
+      "name": "laultra-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "하이퍼볼",
+        "zh-hant": "高級球",
+        "fr": "Hyper Ball",
+        "de": "Hyperball",
+        "es": "Ultra Ball",
+        "it": "Ultra Ball",
+        "en": "Ultra Ball",
+        "ja": "ハイパーボール",
+        "zh-hans": "高级球",
+        "es-419": "Ultrabola"
+      },
+      "sprite": "share-balls/laultra-ball.png"
+    },
+    {
+      "name": "laheavy-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "헤비볼",
+        "zh-hant": "沉重球",
+        "fr": "Masse Ball",
+        "de": "Schwerball",
+        "es": "Peso Ball",
+        "it": "Peso Ball",
+        "en": "Heavy Ball",
+        "ja": "ヘビーボール",
+        "zh-hans": "沉重球",
+        "es-419": "Pesabola"
+      },
+      "sprite": "share-balls/laheavy-ball.png"
+    },
+    {
+      "name": "laleaden-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "메가톤볼",
+        "zh-hant": "超重球",
+        "fr": "Mégamasse Ball",
+        "de": "Zentnerball",
+        "es": "Kilo Ball",
+        "it": "Megaton Ball",
+        "en": "Leaden Ball",
+        "ja": "メガトンボール",
+        "zh-hans": "超重球",
+        "es-419": "Kilobola"
+      },
+      "sprite": "share-balls/laleaden-ball.png"
+    },
+    {
+      "name": "lagigaton-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "기가톤볼",
+        "zh-hant": "巨重球",
+        "fr": "Gigamasse Ball",
+        "de": "Tonnenball",
+        "es": "Quintal Ball",
+        "it": "Gigaton Ball",
+        "en": "Gigaton Ball",
+        "ja": "ギガトンボール",
+        "zh-hans": "巨重球",
+        "es-419": "Quintalbola"
+      },
+      "sprite": "share-balls/lagigaton-ball.png"
+    },
+    {
+      "name": "lafeather-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "페더볼",
+        "zh-hant": "飛羽球",
+        "fr": "Plume Ball",
+        "de": "Federball",
+        "es": "Pluma Ball",
+        "it": "Piuma Ball",
+        "en": "Feather Ball",
+        "ja": "フェザーボール",
+        "zh-hans": "飞羽球",
+        "es-419": "Plumabola"
+      },
+      "sprite": "share-balls/lafeather-ball.png"
+    },
+    {
+      "name": "lawing-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "윙볼",
+        "zh-hant": "飛翼球",
+        "fr": "Envol Ball",
+        "de": "Flügelball",
+        "es": "Ala Ball",
+        "it": "Wing Ball",
+        "en": "Wing Ball",
+        "ja": "ウイングボール",
+        "zh-hans": "飞翼球",
+        "es-419": "Alabola"
+      },
+      "sprite": "share-balls/lawing-ball.png"
+    },
+    {
+      "name": "lajet-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "제트볼",
+        "zh-hant": "飛梭球",
+        "fr": "Propulse Ball",
+        "de": "Düsenball",
+        "es": "Aero Ball",
+        "it": "Jet Ball",
+        "en": "Jet Ball",
+        "ja": "ジェットボール",
+        "zh-hans": "飞梭球",
+        "es-419": "Areobola"
+      },
+      "sprite": "share-balls/lajet-ball.png"
+    },
+    {
+      "name": "laorigin-ball",
+      "category": "standard-balls",
+      "names": {
+        "ko": "오리진볼",
+        "zh-hant": "起源球",
+        "fr": "Origine Ball",
+        "de": "Urball",
+        "es": "Origen Ball",
+        "it": "Origin Ball",
+        "en": "Origin Ball",
+        "ja": "オリジンボール",
+        "zh-hans": "起源球",
+        "es-419": "Origenbola"
+      },
+      "sprite": "share-balls/laorigin-ball.png"
+    },
+    {
+      "name": "net-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "ネットボール",
+        "ko": "네트볼",
+        "zh-hant": "捕網球",
+        "fr": "Filet Ball",
+        "de": "Netzball",
+        "es": "Malla Ball",
+        "it": "Rete Ball",
+        "en": "Net Ball",
+        "ja": "ネットボール",
+        "zh-hans": "捕网球",
+        "es-419": "Mallabola"
+      },
+      "sprite": "share-balls/net-ball.png"
+    },
+    {
+      "name": "dive-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "ダイブボール",
+        "ko": "다이브볼",
+        "zh-hant": "潛水球",
+        "fr": "Scuba Ball",
+        "de": "Tauchball",
+        "es": "Buceo Ball",
+        "it": "Sub Ball",
+        "en": "Dive Ball",
+        "ja": "ダイブボール",
+        "zh-hans": "潜水球",
+        "es-419": "Buceobola"
+      },
+      "sprite": "share-balls/dive-ball.png"
+    },
+    {
+      "name": "nest-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "ネストボール",
+        "ko": "네스트볼",
+        "zh-hant": "巢穴球",
+        "fr": "Faiblo Ball",
+        "de": "Nestball",
+        "es": "Nido Ball",
+        "it": "Minor Ball",
+        "en": "Nest Ball",
+        "ja": "ネストボール",
+        "zh-hans": "巢穴球",
+        "es-419": "Nidobola"
+      },
+      "sprite": "share-balls/nest-ball.png"
+    },
+    {
+      "name": "repeat-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "リピートボール",
+        "ko": "리피트볼",
+        "zh-hant": "重複球",
+        "fr": "Bis Ball",
+        "de": "Wiederball",
+        "es": "Acopio Ball",
+        "it": "Bis Ball",
+        "en": "Repeat Ball",
+        "ja": "リピートボール",
+        "zh-hans": "重复球",
+        "es-419": "Acopiobola"
+      },
+      "sprite": "share-balls/repeat-ball.png"
+    },
+    {
+      "name": "timer-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "タイマーボール",
+        "ko": "타이머볼",
+        "zh-hant": "計時球",
+        "fr": "Chrono Ball",
+        "de": "Timerball",
+        "es": "Turno Ball",
+        "it": "Timer Ball",
+        "en": "Timer Ball",
+        "ja": "タイマーボール",
+        "zh-hans": "计时球",
+        "es-419": "Turnobola"
+      },
+      "sprite": "share-balls/timer-ball.png"
+    },
+    {
+      "name": "luxury-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "ゴージャスボール",
+        "ko": "럭셔리볼",
+        "zh-hant": "豪華球",
+        "fr": "Luxe Ball",
+        "de": "Luxusball",
+        "es": "Lujo Ball",
+        "it": "Chic Ball",
+        "en": "Luxury Ball",
+        "ja": "ゴージャスボール",
+        "zh-hans": "豪华球",
+        "es-419": "Lujobola"
+      },
+      "sprite": "share-balls/luxury-ball.png"
+    },
+    {
+      "name": "premier-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "プレミアボール",
+        "ko": "프리미어볼",
+        "zh-hant": "紀念球",
+        "fr": "Honor Ball",
+        "de": "Premierball",
+        "es": "Honor Ball",
+        "it": "Premier Ball",
+        "en": "Premier Ball",
+        "ja": "プレミアボール",
+        "zh-hans": "纪念球",
+        "es-419": "Honorbola"
+      },
+      "sprite": "share-balls/premier-ball.png"
+    },
+    {
+      "name": "dusk-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "ダークボール",
+        "ko": "다크볼",
+        "zh-hant": "黑暗球",
+        "fr": "Sombre Ball",
+        "de": "Finsterball",
+        "es": "Ocaso Ball",
+        "it": "Scuro Ball",
+        "en": "Dusk Ball",
+        "ja": "ダークボール",
+        "zh-hans": "黑暗球",
+        "es-419": "Ocasobola"
+      },
+      "sprite": "share-balls/dusk-ball.png"
+    },
+    {
+      "name": "heal-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "ヒールボール",
+        "ko": "힐볼",
+        "zh-hant": "治癒球",
+        "fr": "Soin Ball",
+        "de": "Heilball",
+        "es": "Sana Ball",
+        "it": "Cura Ball",
+        "en": "Heal Ball",
+        "ja": "ヒールボール",
+        "zh-hans": "治愈球",
+        "es-419": "Sanabola"
+      },
+      "sprite": "share-balls/heal-ball.png"
+    },
+    {
+      "name": "quick-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "クイックボール",
+        "ko": "퀵볼",
+        "zh-hant": "先機球",
+        "fr": "Rapide Ball",
+        "de": "Flottball",
+        "es": "Veloz Ball",
+        "it": "Velox Ball",
+        "en": "Quick Ball",
+        "ja": "クイックボール",
+        "zh-hans": "先机球",
+        "es-419": "Velozbola"
+      },
+      "sprite": "share-balls/quick-ball.png"
+    },
+    {
+      "name": "cherish-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "プレシャスボール",
+        "ko": "프레셔스볼",
+        "zh-hant": "貴重球",
+        "fr": "Mémoire Ball",
+        "de": "Jubelball",
+        "es": "Gloria Ball",
+        "it": "Pregio Ball",
+        "en": "Cherish Ball",
+        "ja": "プレシャスボール",
+        "zh-hans": "贵重球",
+        "es-419": "Gloriabola"
+      },
+      "sprite": "share-balls/cherish-ball.png"
+    },
+    {
+      "name": "dream-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "ドリームボール",
+        "ko": "드림볼",
+        "zh-hant": "夢境球",
+        "fr": "Rêve Ball",
+        "de": "Traumball",
+        "es": "Ensueño Ball",
+        "it": "Dream Ball",
+        "en": "Dream Ball",
+        "ja": "ドリームボール",
+        "zh-hans": "梦境球",
+        "es-419": "Ensueñobola"
+      },
+      "sprite": "share-balls/dream-ball.png"
+    },
+    {
+      "name": "beast-ball",
+      "category": "special-balls",
+      "names": {
+        "ja-hrkt": "ウルトラボール",
+        "ko": "울트라볼",
+        "zh-hant": "究極球",
+        "fr": "Ultra Ball",
+        "de": "Ultraball",
+        "es": "Ente Ball",
+        "it": "UC Ball",
+        "en": "Beast Ball",
+        "ja": "ウルトラボール",
+        "zh-hans": "究极球",
+        "es-419": "Entebola"
+      },
+      "sprite": "share-balls/beast-ball.png"
+    },
+    {
+      "name": "lure-ball",
+      "category": "apricorn-balls",
+      "names": {
+        "ja-hrkt": "ルアーボール",
+        "ko": "루어볼",
+        "zh-hant": "誘餌球",
+        "fr": "Appât Ball",
+        "de": "Köderball",
+        "es": "Cebo Ball",
+        "it": "Esca Ball",
+        "en": "Lure Ball",
+        "ja": "ルアーボール",
+        "zh-hans": "诱饵球",
+        "es-419": "Señuelobola"
+      },
+      "sprite": "share-balls/lure-ball.png"
+    },
+    {
+      "name": "level-ball",
+      "category": "apricorn-balls",
+      "names": {
+        "ja-hrkt": "レベルボール",
+        "ko": "레벨볼",
+        "zh-hant": "等級球",
+        "fr": "Niveau Ball",
+        "de": "Levelball",
+        "es": "Nivel Ball",
+        "it": "Level Ball",
+        "en": "Level Ball",
+        "ja": "レベルボール",
+        "zh-hans": "等级球",
+        "es-419": "Nivelabola"
+      },
+      "sprite": "share-balls/level-ball.png"
+    },
+    {
+      "name": "moon-ball",
+      "category": "apricorn-balls",
+      "names": {
+        "ja-hrkt": "ムーンボール",
+        "ko": "문볼",
+        "zh-hant": "月亮球",
+        "fr": "Lune Ball",
+        "de": "Mondball",
+        "es": "Luna Ball",
+        "it": "Luna Ball",
+        "en": "Moon Ball",
+        "ja": "ムーンボール",
+        "zh-hans": "月亮球",
+        "es-419": "Lunabola"
+      },
+      "sprite": "share-balls/moon-ball.png"
+    },
+    {
+      "name": "heavy-ball",
+      "category": "apricorn-balls",
+      "names": {
+        "ja-hrkt": "ヘビーボール",
+        "ko": "헤비볼",
+        "zh-hant": "沉重球",
+        "fr": "Masse Ball",
+        "de": "Schwerball",
+        "es": "Peso Ball",
+        "it": "Peso Ball",
+        "en": "Heavy Ball",
+        "ja": "ヘビーボール",
+        "zh-hans": "沉重球",
+        "es-419": "Pesabola"
+      },
+      "sprite": "share-balls/heavy-ball.png"
+    },
+    {
+      "name": "fast-ball",
+      "category": "apricorn-balls",
+      "names": {
+        "ja-hrkt": "スピードボール",
+        "ko": "스피드볼",
+        "zh-hant": "速度球",
+        "fr": "Speed Ball",
+        "de": "Turboball",
+        "es": "Rapid Ball",
+        "it": "Rapid Ball",
+        "en": "Fast Ball",
+        "ja": "スピードボール",
+        "zh-hans": "速度球",
+        "es-419": "Rapibola"
+      },
+      "sprite": "share-balls/fast-ball.png"
+    },
+    {
+      "name": "friend-ball",
+      "category": "apricorn-balls",
+      "names": {
+        "ja-hrkt": "フレンドボール",
+        "ko": "프렌드볼",
+        "zh-hant": "友友球",
+        "fr": "Copain Ball",
+        "de": "Freundesball",
+        "es": "Amigo Ball",
+        "it": "Friend Ball",
+        "en": "Friend Ball",
+        "ja": "フレンドボール",
+        "zh-hans": "友友球",
+        "es-419": "Amigobola"
+      },
+      "sprite": "share-balls/friend-ball.png"
+    },
+    {
+      "name": "love-ball",
+      "category": "apricorn-balls",
+      "names": {
+        "ja-hrkt": "ラブラブボール",
+        "ko": "러브러브볼",
+        "zh-hant": "甜蜜球",
+        "fr": "Love Ball",
+        "de": "Sympaball",
+        "es": "Amor Ball",
+        "it": "Love Ball",
+        "en": "Love Ball",
+        "ja": "ラブラブボール",
+        "zh-hans": "甜蜜球",
+        "es-419": "Amorbola"
+      },
+      "sprite": "share-balls/love-ball.png"
+    }
+  ]
+}

@@ -183,7 +183,7 @@ export function duplicateSpeciesIssues(scene, catalog) {
 export function withMandatoryActions(scene) {
   const next = clone(scene);
   next.actors.forEach((actor, index) => {
-    actor.active = index !== 3 && (index !== 2 || !!actor.moves[actor.selected]);
+    actor.active = index === 3 ? !!actor.actionEnabled && !!actor.moves[actor.selected] : (index !== 2 || !!actor.moves[actor.selected]);
   });
   return next;
 }

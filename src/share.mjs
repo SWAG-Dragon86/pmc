@@ -3,6 +3,12 @@ import {buildReport} from './report.mjs';
 import {LANGUAGE_KEY,translateText,prepareLanguage} from './localization.mjs';
 const style={brand:[38,700,'#292a30'],result:[54,750,'#b93034'],section:[26,700,'#292a30'],heading:[24,650,'#292a30'],body:[22,500,'#292a30'],muted:[20,450,'#565863'],accent:[22,650,'#a62931'],footer:[18,450,'#656774']};
 export async function exportResultImage(scene,result,catalog,options={}) {
+  const {createShareImage}=await import('./share-image.mjs');
+  const language=localStorage.getItem(LANGUAGE_KEY)||'zhHans';
+  const {blob}=await createShareImage('scene',scene,catalog,language,{...options,result});
+  await saveBlob(blob,`PMC-${options.details?'分支详情':'伤害结果'}-${Date.now()}.png`);
+}
+export async function exportLegacyResultImage(scene,result,catalog,options={}) {
   await document.fonts?.ready;
   const language=localStorage.getItem(LANGUAGE_KEY)||'zhHans';
   await prepareLanguage(language);
