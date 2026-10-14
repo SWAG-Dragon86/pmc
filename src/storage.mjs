@@ -48,6 +48,7 @@ function shapeBuild(b) {
     typeof b.hp === "number" &&
     typeof b.selected === "number" &&
     typeof b.status === "string" &&
+    (b.actionEnabled === undefined || typeof b.actionEnabled === "boolean") &&
     (b.faintedAllies === undefined ||
       (Number.isInteger(b.faintedAllies) &&
         b.faintedAllies >= 0 &&

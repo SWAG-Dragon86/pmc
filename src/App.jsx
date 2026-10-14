@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   Swords,
   Library,
@@ -33,6 +33,7 @@ import {
   Globe2,
   Lock,
   LockOpen,
+  QrCode,
 } from "lucide-react";
 import { pinyin } from "pinyin-pro";
 import catalog from "./data/catalog.json" with { type: 'json' };
@@ -40,7 +41,7 @@ import spriteInfo from "./data/sprites.json";
 import rosterAudit from "./data/roster-audit.json";
 import mcManifest from "./data/mc-manifest.json";
 import openTeams from "./data/open-teams.json";
-import { validateTeamFeed, TEAM_FEED_STORAGE_KEY } from "./team-feed.mjs";
+import { validateTeamFeed, fetchTeamFeed, TEAM_FEED_STORAGE_KEY } from "./team-feed.mjs";
 import {
   createBuild,
   defaultScene,
@@ -77,30 +78,17 @@ import { analyzeTeam } from "./team-analysis.mjs";
 import { LANGUAGES, LANGUAGE_KEY, localizeDom, localizedName, prepareLanguage, translateText } from "./localization.mjs";
 import { initialLanguage } from "./language-preference.mjs";
 import TeamImageImport from './TeamImageImport.jsx';
+import BattleComparison from './BattleComparison.jsx';
+import ShareBallSettings from './ShareBallSettings.jsx';
+import { SHARE_BALL_KEY, selectedShareBall } from './share-balls.mjs';
+import { TYPES_COLOR } from './move-types.mjs';
+import { ShareButton, SharingDialog, SharingImport } from './Sharing.jsx';
+import { shareText, localTime } from './sharing-language.mjs';
 
 const pct = (n) => `${Math.max(0, n || 0).toFixed(1)}%`;
-const APP_VERSION = "1.3.2";
+const APP_VERSION = "1.4.0";
 const range = (r) => `${pct(r.min)} – ${pct(r.max)}`;
-const TYPES_COLOR = {
-  Fire: "#ce5841",
-  Water: "#4b88cb",
-  Electric: "#b38c18",
-  Grass: "#548960",
-  Ice: "#4d929f",
-  Fighting: "#b6673c",
-  Poison: "#97619e",
-  Ground: "#af814f",
-  Flying: "#788cb5",
-  Psychic: "#c76487",
-  Bug: "#839343",
-  Rock: "#9b9167",
-  Ghost: "#766c9c",
-  Dragon: "#6f72bb",
-  Dark: "#65596c",
-  Steel: "#748c99",
-  Fairy: "#bc79a5",
-  Normal: "#8a8c84",
-};
+
 const pMap = Object.fromEntries(catalog.pokemon.map((p) => [p.id, p]));
 function itemSearchOptions(language) {
   return catalog.items.map(item=>{
@@ -337,6 +325,7 @@ function PokemonCard({
   locked,
   onToggleLock,
   language,
+  onShare,
 }) {
   const p = pMap[build.species],
     issues = validateBuild(build, catalog),
@@ -359,9 +348,9 @@ function PokemonCard({
   try {
     stats = statsOf(build, catalog);
   } catch {}
-  const update = (key, value) => {if(locked&&['species','nature','ability','item','points','moves'].includes(key))return;onChange({ ...build, [key]: value });};
+  const update = (key, value) => {if(locked&&['species','nature','ability','item','points','moves'].includes(key))return;onChange({ ...build, [key]: value, ...(index===3&&['moves','selected'].includes(key)?{actionEnabled:true}:{}) });};
   const sum = Object.values(build.points).reduce((s, n) => s + n, 0);
-  const isSecondary = index === 3;
+  const isSecondary = false;
   const selectedMoveId = build.moves[build.selected];
   const showFaintedAllies = needsFaintedAlliesInput(build);
   return (
@@ -375,9 +364,10 @@ function PokemonCard({
             ? `进攻方 ${index === 0 ? "A" : "B"}`
             : index === 2
               ? "防守方 · 主要行动者"
-              : "防守方 · 被动副目标"}
+              : build.actionEnabled ? `${shareText('defend',language)} B` : "防守方 · 被动副目标"}
         </span>
         <div>
+          <ShareButton kind="build" value={build} onShare={onShare} language={language} compact/>
           <button
             className="icon-button"
             title="从配置库载入"
@@ -649,7 +639,7 @@ function PokemonCard({
           </div>
         </>
       )}
-      {isSecondary && (
+      {index === 3 && !build.actionEnabled && (
         <p className="passive-note">
           此位置不主动出招。它的在场、守住与被动特性仍会影响范围伤害。
         </p>
@@ -707,7 +697,7 @@ function PokemonCard({
               ])}
             />
           )}
-          {index === 2 && scene.mode === "double" && (
+          {index >= 2 && scene.mode === "double" && (
             <FieldSelect
               label="反击目标"
               value={build.target}
@@ -825,7 +815,7 @@ function Battlefield({ scene, onChange }) {
   );
 }
 
-function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, feed, updateFeed, feedUpdating, feedMessage, language, actorLocks }) {
+function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, feed, updateFeed, feedUpdating, feedMessage, feedInfo, language, actorLocks, onShare }) {
   const [section,setSection]=useState("official"),[teamQuery,setTeamQuery]=useState(""),[picked,setPicked]=useState([]);
   const aliases=useContext(AliasContext);
   const [format,setFormat]=useState('all');
@@ -869,7 +859,11 @@ function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, fe
       <label className="open-team-search"><Search size={16}/><input value={teamQuery} onChange={event=>setTeamQuery(event.target.value)} placeholder="搜索选手、比赛、宝可梦或拼音"/></label>
       <button className="button open-team-refresh" disabled={feedUpdating} onClick={updateFeed}><RefreshCw size={15}/>{feedUpdating?'更新中…':'更新队伍'}</button>
     </section>
-    {feedMessage&&<p className="open-team-feed-message" role="status">{feedMessage}</p>}
+    <div className="open-team-feed-message" role="status">
+      {feedUpdating?<b>{shareText('checking',language)}</b>:feedMessage&&<b>{shareText(feedMessage,language)} · {feed.teams.length} {shareText('count',language)}</b>}
+      <span>{shareText('sourceUpdated',language)} · {feed.meta.contentUpdatedAt?localTime(feed.meta.contentUpdatedAt,language):feed.meta.updatedAt}</span>
+      {feedInfo?.checkedAt&&<span>{shareText('checkedAt',language)} · {localTime(feedInfo.checkedAt,language)}</span>}
+    </div>
     <div className="open-team-list">
       {teams.map(team=>{
         const status=teamSaveability(team,catalog),teamPicked=team.members.map((_,index)=>`${team.id}:${index}`).filter(key=>picked.includes(key));
@@ -892,11 +886,13 @@ function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, fe
                 <div className="member-title"><Sprite species={member.species}/><div><h3>{pokemon?.zh||member.species}</h3><p>{itemSearchOptions(language).find(item=>item.name===member.item)?.zh||member.item||"道具未公开"}</p></div>{status.saveable&&<input type="checkbox" aria-label={`选择${pokemon?.zh}`} checked={picked.includes(key)} onChange={()=>togglePick(key)}/>}</div>
                 <dl><div><dt>特性</dt><dd>{catalog.abilities.find(ability=>ability.name===member.ability)?.zh||member.ability||"未公开"}</dd></div><div><dt>性格</dt><dd>{natureOptions(catalog.natures).find(([name])=>name===member.nature)?.[1]||member.nature||"未公开"}</dd></div><div><dt>能力点</dt><dd>{member.points?STAT_KEYS.map(stat=>member.points[stat]).join(" / "):"未公开"}</dd></div>{stats&&<div><dt>实际值</dt><dd>{STAT_KEYS.map(stat=>stats[stat]).join(" / ")}</dd></div>}</dl>
                 <ul>{member.moves.map(move=><li key={move}>{catalog.moves[move]?.zh||move}</li>)}</ul>
+                {status.saveable&&<ShareButton kind="build" value={publicMemberBuild(team,index,catalog)} language={language} onShare={onShare}/>}
                 <select aria-label={`载入${pokemon?.zh}到计算位置`} defaultValue="" disabled={!status.saveable} onChange={event=>{loadMember(team,index,event.target.value);event.target.value=""}}><option value="">载入到计算位置…</option><option value="0" disabled={actorLocks[0]}>进攻方 A</option><option value="1" disabled={actorLocks[1]}>进攻方 B</option><option value="2" disabled={actorLocks[2]}>防守方 A</option><option value="3" disabled={actorLocks[3]}>防守方 B</option></select>
               </article>;
             })}
           </div>
           <div className="open-team-actions">
+            {status.saveable&&<ShareButton kind="team" value={{id:team.id,name:`${team.player} · ${team.event}`,members:team.members.map((_,index)=>({...publicMemberBuild(team,index,catalog),id:`${team.id}-${index}`}))}} language={language} onShare={onShare}/>}
             <div><span>来源：</span>{team.sourceUrl?<a href={team.sourceUrl} target="_blank" rel="noopener noreferrer">{team.sourceLabel}<ArrowUpRight size={13}/></a>:<b>{team.sourceLabel}</b>}{team.pasteUrl&&team.pasteUrl!==team.sourceUrl&&<> · <a href={team.pasteUrl} target="_blank" rel="noopener noreferrer">完整配招<ArrowUpRight size={13}/></a></>}</div>
             <button className="button" disabled={!status.saveable||!teamPicked.length} onClick={()=>saveMembers(team,teamPicked.map(key=>Number(key.split(":").at(-1))))}>保存选中 {teamPicked.length?`(${teamPicked.length})`:""}</button>
             <button className="button primary" disabled={!status.saveable} onClick={()=>saveMembers(team,[0,1,2,3,4,5])}>保存全部六只</button>
@@ -913,7 +909,7 @@ function OpenTeamsPage({ builds, setBuilds, scene, setScene, setPage, notify, fe
 function freshTeam() {
   return {id:uid(),name:'我的队伍',members:['venusaur','charizard','blastoise','garchomp','pikachu','dragonite'].map(id=>createBuild(catalog,id))};
 }
-function TeamBuilderPage({draft,setDraft,builds,savedTeams,setSavedTeams,threats,setThreats,notify,language,locks,setLocks}) {
+function TeamBuilderPage({draft,setDraft,builds,savedTeams,setSavedTeams,threats,setThreats,notify,language,locks,setLocks,onShare}) {
   const firstMemberRef=useRef(null);
   useEffect(()=>{if(firstMemberRef.current)firstMemberRef.current.open=true;},[]);
   const setMember=(index,next)=>{if(locks[index])return;setDraft(current=>({...current,members:current.members.map((member,i)=>i===index?next:member)}));setThreats(null);};
@@ -921,6 +917,7 @@ function TeamBuilderPage({draft,setDraft,builds,savedTeams,setSavedTeams,threats
   return <>
     <div className="page-heading"><div><p className="eyebrow">TEAM WORKSPACE</p><h1>我的队伍</h1><p>配置六只宝可梦，查看可能难处理的已实装对手。</p></div><button className="button" disabled={locks.some(Boolean)} onClick={()=>{setDraft(freshTeam());setThreats(null);}}><Plus size={16}/>新队伍</button></div>
     <TeamImageImport catalog={catalog} language={language} disabled={locks.some(Boolean)} onImport={members=>{setDraft(current=>({...current,members}));setThreats(null);notify('截图队伍已载入当前编辑区');}}/>
+    <div className="team-share-toolbar"><ShareButton kind="team" value={draft} language={language} onShare={onShare}/></div>
     <section className="panel team-builder-head"><label>队伍名称<input maxLength={80} value={draft.name} onChange={event=>setDraft(current=>({...current,name:event.target.value}))}/></label><div className="team-builder-actions"><button className="button" onClick={()=>{const result=check();if(result)notify(`已分析 ${catalog.pokemon.length} 个已实装形态`);}}><Target size={16}/>分析弱点</button><button className="button primary" onClick={()=>{if(!check())return;const saved={...clone(draft),name:draft.name.trim()||'我的队伍'};setSavedTeams(current=>current.some(team=>team.id===saved.id)?current.map(team=>team.id===saved.id?saved:team):[...current,saved]);notify('我的队伍已保存到本机');}}><Save size={16}/>保存队伍</button></div></section>
     <div className="team-member-grid">{draft.members.map((member,index)=>{
       const pokemon=pMap[member.species],points=Object.values(member.points).reduce((sum,value)=>sum+value,0),locked=locks[index];
@@ -928,6 +925,7 @@ function TeamBuilderPage({draft,setDraft,builds,savedTeams,setSavedTeams,threats
       return <details className="panel team-member-card" key={index} ref={index===0?firstMemberRef:undefined}><summary><span className="team-slot">{String(index+1).padStart(2,'0')}</span><Sprite species={member.species} small/><span><b>{pokemon?.zh||member.species}</b><small>{member.name}</small></span><ChevronDown size={18}/></summary>
         <div className="team-member-fields"><SelectSearch label={`第${index+1}只宝可梦`} options={catalog.pokemon} value={member.species} onChange={id=>setMember(index,createBuild(catalog,id))} species disabled={locked}/>
           <div className="team-library-lock"><label className="team-library-select">从配置库载入<select value="" disabled={locked} onChange={event=>{const saved=builds.find(build=>build.id===event.target.value);if(saved)setMember(index,{...clone(saved),id:uid(),originId:saved.id});}}><option value="">选择已保存配置…</option>{builds.map(build=><option key={build.id} value={build.id}>{build.name} · {pMap[build.species]?.zh}</option>)}</select></label><button type="button" className={`icon-button team-lock ${locked?'active':''}`} title={lockLabel(language,locked,index)} aria-label={lockLabel(language,locked,index)} aria-pressed={locked} onClick={()=>setLocks(current=>current.map((value,i)=>i===index?!value:value))}>{locked?<Lock size={17}/>:<LockOpen size={17}/>}</button></div>
+          <ShareButton kind="build" value={member} language={language} onShare={onShare}/>
           <FieldSelect label="特性" disabled={locked} value={member.ability} onChange={value=>update('ability',value)} options={pokemon.abilities.map(name=>[name,catalog.abilities.find(a=>a.name===name)?.zh||name])}/>
           <div className="field-select"><span>道具</span><SelectSearch label={`第${index+1}只宝可梦的道具`} disabled={locked} options={itemSearchOptions(language)} value={member.item} onChange={value=>update('item',value)} compact/></div>
           <FieldSelect label="性格" disabled={locked} value={member.nature} onChange={value=>update('nature',value)} options={natureOptions(catalog.natures)}/>
@@ -937,11 +935,11 @@ function TeamBuilderPage({draft,setDraft,builds,savedTeams,setSavedTeams,threats
       </details>;
     })}</div>
     {threats&&<section className="panel team-threat-section"><div className="section-title"><h2>潜在难处理的宝可梦</h2><span>对手配置未知 · 按可能风险排序</span></div><p className="hint">综合你队伍的招式、属性、特性、道具和速度，以及对手可学招式分析。对手实际配招与努力值可能改变结果。</p><div className="team-threat-list">{threats.length?threats.map(row=><article key={row.id}><Sprite species={row.id} small/><div><h3>{row.name}</h3>{row.reasons.map(reason=><p key={reason}>{reason}</p>)}</div></article>):<p className="hint">没有发现达到当前提示阈值的明显风险；这不代表没有不利对局。</p>}</div></section>}
-    <section className="panel team-saved-section"><div className="section-title"><h2>已保存队伍</h2><span>{savedTeams.length} 支 · 存在本机，可随完整备份导出</span></div>{savedTeams.length===0?<p className="hint">保存后可在这里载入队伍继续编辑。</p>:<div className="team-saved-list">{savedTeams.map(team=><div key={team.id}><span><b>{team.name}</b><small>{team.members.map(member=>pMap[member.species]?.zh||member.species).join(' · ')}</small></span><button className="button" disabled={locks.some(Boolean)} onClick={()=>{setDraft(clone(team));setThreats(null);}}>载入</button><button className="icon-button" aria-label={`删除${team.name}`} onClick={()=>{if(confirm(`删除队伍“${team.name}”？`))setSavedTeams(current=>current.filter(value=>value.id!==team.id));}}><Trash2 size={16}/></button></div>)}</div>}</section>
+    <section className="panel team-saved-section"><div className="section-title"><h2>已保存队伍</h2><span>{savedTeams.length} 支 · 存在本机，可随完整备份导出</span></div>{savedTeams.length===0?<p className="hint">保存后可在这里载入队伍继续编辑。</p>:<div className="team-saved-list">{savedTeams.map(team=><div key={team.id}><span><b>{team.name}</b><small>{team.members.map(member=>pMap[member.species]?.zh||member.species).join(' · ')}</small></span><ShareButton kind="team" value={team} language={language} onShare={onShare}/><button className="button" disabled={locks.some(Boolean)} onClick={()=>{setDraft(clone(team));setThreats(null);}}>载入</button><button className="icon-button" aria-label={`删除${team.name}`} onClick={()=>{if(confirm(`删除队伍“${team.name}”？`))setSavedTeams(current=>current.filter(value=>value.id!==team.id));}}><Trash2 size={16}/></button></div>)}</div>}</section>
   </>;
 }
 
-function ResultPanel({ scene, result, preview, onEnable, onShare }) {
+function ResultPanel({ scene, result, preview, onEnable, onShare, language, onSelect }) {
   const target = scene.actors[scene.target];
   return (
     <section className="result-panel panel">
@@ -960,6 +958,7 @@ function ResultPanel({ scene, result, preview, onEnable, onShare }) {
         </div>
         <span>{target.hp}% 开场血量</span>
       </div>
+      <BattleComparison scene={scene} catalog={catalog} language={language} enabled={preview} onSelect={onSelect}/>
       {!preview ? (
         <div className="result-placeholder">
           <Shield size={30} />
@@ -1092,6 +1091,11 @@ export default function App() {
   const [teamThreats,setTeamThreats]=useState(null);
   const [teamFeed,setTeamFeed]=useState(()=>{try{return validateTeamFeed(openTeams,JSON.parse(localStorage.getItem(TEAM_FEED_STORAGE_KEY)),catalog);}catch{return openTeams;}});
   const [teamFeedUpdating,setTeamFeedUpdating]=useState(false),[teamFeedMessage,setTeamFeedMessage]=useState('');
+  const [teamFeedInfo,setTeamFeedInfo]=useState(()=>{try{return JSON.parse(localStorage.getItem('pmc.team-feed.check.v1'))||{};}catch{return {};}});
+  const feedRef=useRef(teamFeed),feedBusy=useRef(false);feedRef.current=teamFeed;
+  const [shareRequest,setShareRequest]=useState(null),[sharingImport,setSharingImport]=useState(false);
+  const [shareBall,setShareBall]=useState(()=>{try{return selectedShareBall(localStorage.getItem(SHARE_BALL_KEY)).name;}catch{return 'poke-ball';}});
+  const chooseShareBall=value=>{setShareBall(value);try{localStorage.setItem(SHARE_BALL_KEY,value);}catch{notify(shareText('storageFailed',language));}};
   const [heading, setHeading] = useState(() =>
     normalizeHeading(initial?.heading),
   );
@@ -1138,19 +1142,27 @@ export default function App() {
     backgroundUrls[isPortrait ? "portrait" : "landscape"] ||
     backgroundUrls[isPortrait ? "landscape" : "portrait"];
   const notify = (text) => setMessage(text);
-  const updateTeamFeed=async()=>{
+  const updateTeamFeed=useCallback(async()=>{
+    if(feedBusy.current)return;
+    feedBusy.current=true;
     setTeamFeedUpdating(true);
     try {
-      const response=await fetch(new URL('live-teams.json',document.baseURI),{cache:'no-store',signal:AbortSignal.timeout(15000)});
-      if(!response.ok)throw new Error(`服务器返回 ${response.status}`);
-      const fresh=validateTeamFeed(openTeams,await response.json(),catalog);
-      setTeamFeed(fresh);
-      try {localStorage.setItem(TEAM_FEED_STORAGE_KEY,JSON.stringify(fresh));} catch {setTeamFeedMessage('新队伍已显示，但本机空间不足，无法保留离线副本。');return;}
-      setTeamFeedMessage(`已检查更新：${fresh.meta.updatedAt} · ${fresh.teams.length} 支队伍`);
-    } catch(error) {setTeamFeedMessage(`联网更新失败：${error.message}；继续使用本机队伍。`);}
-    finally {setTeamFeedUpdating(false);}
-  };
+      const update=await fetchTeamFeed(openTeams,feedRef.current,catalog,{baseUrl:document.baseURI,android:isAndroidApp});
+      setTeamFeed(update.feed);feedRef.current=update.feed;setTeamFeedInfo({checkedAt:update.checkedAt});
+      try {localStorage.setItem(TEAM_FEED_STORAGE_KEY,JSON.stringify(update.feed));localStorage.setItem('pmc.team-feed.check.v1',JSON.stringify({checkedAt:update.checkedAt}));}
+      catch {notify('新队伍已显示，但本机空间不足，无法保留离线副本。');}
+      setTeamFeedMessage(update.changed?'updated':'latest');
+    } catch {setTeamFeedMessage('updateFailed');}
+    finally {feedBusy.current=false;setTeamFeedUpdating(false);}
+  },[]);
   useEffect(()=>{updateTeamFeed();},[]);
+  useEffect(()=>{
+    const resume=()=>{if(!document.hidden)updateTeamFeed();};
+    document.addEventListener('visibilitychange',resume);window.addEventListener('online',resume);window.addEventListener('pmc-app-resume',resume);
+    const timer=page==='openTeams'?setInterval(resume,5*60*1000):null;
+    if(page==='openTeams')resume();
+    return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',resume);window.removeEventListener('online',resume);window.removeEventListener('pmc-app-resume',resume);};
+  },[page,updateTeamFeed]);
   useEffect(() => {
     if (!message) return;
     const t = setTimeout(() => setMessage(""), 5000);
@@ -1325,6 +1337,16 @@ export default function App() {
     notify("导入完成，原有记录已保留");
   };
   const share = async (details=false) => {
+    setShareRequest({kind:'scene',value:clone(scene),result:clone(result),details});
+  };
+  const openShare=(kind,value)=>setShareRequest({kind,value:clone(value),result:kind==='scene'?clone(result):undefined});
+  const saveShared=(data)=>{
+    setBuilds(current=>mergeRecords(current,data.builds,'copy').records);
+    setScenes(current=>mergeRecords(current,data.scenes,'copy').records);
+    setSavedTeams(current=>mergeRecords(current,data.teams,'copy').records);
+    setSharingImport(false);notify(shareText('imported',language));
+  };
+  const legacyShare = async (details=false) => {
     try {
       await exportResultImage(scene, result, catalog,{details});
       notify("结果图片已生成");
@@ -1446,6 +1468,8 @@ export default function App() {
               {LANGUAGES.map(([id,label])=><option key={id} value={id}>{label}</option>)}
             </select>
           </label>
+          <button type="button" className="icon-button sharing-import-trigger" title={shareText('import',language)} aria-label={shareText('import',language)}
+            onClick={()=>setSharingImport(true)}><QrCode size={19}/></button>
         </header>
         <div className="data-notice">
           <Info size={16} />
@@ -1586,6 +1610,7 @@ export default function App() {
                         locked={actorLocks[i]}
                         onToggleLock={()=>setActorLocks(current=>current.map((value,index)=>index===i?!value:value))}
                         language={language}
+                        onShare={openShare}
                         onChange={(b) => updateActor(i, b)}
                         onSave={() => saveBuild(i)}
                         onLoad={() => {
@@ -1603,6 +1628,8 @@ export default function App() {
                     preview={preview}
                     onEnable={() => setPreview(true)}
                     onShare={share}
+                    language={language}
+                    onSelect={(index,selected,enabled)=>updateActor(index,{...scene.actors[index],selected,...(index===3?{actionEnabled:enabled??true}:{})})}
                   />
                   <div className="side-note">
                     <span className="mini-ball" />{" "}
@@ -1682,8 +1709,8 @@ export default function App() {
               )}
             </>
           )}
-          {page === "openTeams" && <OpenTeamsPage builds={builds} setBuilds={setBuilds} scene={scene} setScene={setScene} setPage={setPage} notify={notify} feed={teamFeed} updateFeed={updateTeamFeed} feedUpdating={teamFeedUpdating} feedMessage={teamFeedMessage} language={language} actorLocks={actorLocks}/>}
-          {page === "teamBuilder" && <TeamBuilderPage draft={teamDraft} setDraft={setTeamDraft} builds={builds} savedTeams={savedTeams} setSavedTeams={setSavedTeams} threats={teamThreats} setThreats={setTeamThreats} notify={notify} language={language} locks={teamLocks} setLocks={setTeamLocks}/>}
+          {page === "openTeams" && <OpenTeamsPage builds={builds} setBuilds={setBuilds} scene={scene} setScene={setScene} setPage={setPage} notify={notify} feed={teamFeed} updateFeed={updateTeamFeed} feedUpdating={teamFeedUpdating} feedMessage={teamFeedMessage} feedInfo={teamFeedInfo} language={language} actorLocks={actorLocks} onShare={openShare}/>}
+          {page === "teamBuilder" && <TeamBuilderPage draft={teamDraft} setDraft={setTeamDraft} builds={builds} savedTeams={savedTeams} setSavedTeams={setSavedTeams} threats={teamThreats} setThreats={setTeamThreats} notify={notify} language={language} locks={teamLocks} setLocks={setTeamLocks} onShare={openShare}/>}
           {page === "library" && (
             <>
               <div className="page-heading">
@@ -1794,6 +1821,7 @@ export default function App() {
                             <p className="error-text">当前版本需修正</p>
                           )}
                           <div className="library-card-actions">
+                            <ShareButton kind="build" value={b} language={language} onShare={openShare} compact/>
                             <button
                               className="button"
                               onClick={() => {
@@ -1991,6 +2019,7 @@ export default function App() {
                   <p>外观和数据保存在本机，不需要账号。</p>
                 </div>
               </div>
+              <ShareBallSettings value={shareBall} onChange={chooseShareBall} language={language}/>
               <section className="panel settings-card alias-settings">
                 <h2>自定义搜索别称</h2><p>给宝可梦、招式或道具添加熟悉的叫法，搜索时使用，正式名称保持不变。</p>
                 <div className="alias-form">
@@ -2159,7 +2188,7 @@ export default function App() {
                 </section>
                 <section className="panel settings-card">
                   <h2>安装与备份</h2>
-                  <p>{isAndroidApp ? "安卓离线版 1.3.2 · 数据与图片已内置。网页版记录请先导出，再在这里导入。" : "本地数据不会自动同步到其他设备。"}</p>
+                  <p>{isAndroidApp ? "安卓离线版 1.4.0 · 数据与图片已内置。网页版记录请先导出，再在这里导入。" : "本地数据不会自动同步到其他设备。"}</p>
                   <div className="status-line">
                     <span>离线资源</span>
                     <b>
@@ -2268,7 +2297,7 @@ export default function App() {
                       className="button"
                       onClick={async () => {
                         if (isAndroidApp) {
-                          notify("安卓版通过新版 APK 更新。请从原发布者获取，先导出备份，再直接覆盖安装；不要先卸载。当前版本 1.3.2。");
+                          notify("安卓版通过新版 APK 更新。请从原发布者获取，先导出备份，再直接覆盖安装；不要先卸载。当前版本 1.4.0。");
                           return;
                         }
                         if (!online) {
@@ -2647,6 +2676,8 @@ export default function App() {
           )}
         </Dialog>
       )}
+      {shareRequest&&<SharingDialog share={shareRequest} catalog={catalog} language={language} ball={shareBall} onClose={()=>setShareRequest(null)} notify={notify}/>}
+      {sharingImport&&<SharingImport catalog={catalog} language={language} onClose={()=>setSharingImport(false)} onConfirm={saveShared}/>}
     </AliasContext.Provider>
   );
 }

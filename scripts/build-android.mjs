@@ -36,8 +36,9 @@ run(process.execPath, ["scripts/prepare-live-teams.mjs"]);
 run(process.execPath, ["node_modules/vite/bin/vite.js", "build", "--outDir", join(stage, "assets/www")], {
   env: { ...process.env, VITE_PMC_ANDROID: "true" },
 });
-const teamFeedUrl = process.env.PMC_TEAM_FEED_URL || "https://pmc-babb04.gitlab.io/live-teams.json";
-const teamFeedFallbackUrl = process.env.PMC_TEAM_FEED_FALLBACK_URL || "https://swag-dragon86.github.io/pmc/live-teams.json";
+const mirrors=JSON.parse(readFileSync(join(root,'public/team-feeds.json'),'utf8')).mirrors;
+const teamFeedUrl = process.env.PMC_TEAM_FEED_URL || mirrors[0];
+const teamFeedFallbackUrl = process.env.PMC_TEAM_FEED_FALLBACK_URL || mirrors[1];
 for (const url of [teamFeedUrl, teamFeedFallbackUrl])
   if (!/^https:\/\/[^\s]+\/live-teams\.json$/.test(url)) throw new Error("PMC team feeds must be HTTPS live-teams.json addresses");
 writeFileSync(join(stage, "assets/www/team-feed-url.txt"), [...new Set([teamFeedUrl, teamFeedFallbackUrl])].join("\n") + "\n");

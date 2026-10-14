@@ -523,7 +523,7 @@ export function turnLimits(scene, catalog) {
       reasons.push(
         `尚未接入回合触发特性：${catalog.abilities.find((a) => a.name === b.ability)?.zh || b.ability}`,
       );
-    if (i === 3 || !b.active) continue;
+    if (!b.active) continue;
     if (b.ability === "Imposter") {
       const opposite=i<2?i+2:i-2;
       if (scene.actors[opposite]?.present && scene.actors[opposite].hp>0) continue;
@@ -1282,7 +1282,7 @@ export function simulateTurn(scene, catalog) {
       timelineMap.set(key,row);
     }
     const acting = activeIndices(scene).filter(
-      (i) => i !== 3 && scene.actors[i].active && scene.actors[i].present,
+      (i) => scene.actors[i].active && scene.actors[i].present,
     );
     for (let step = 0; step < acting.length; step++) {
       let out = [];
