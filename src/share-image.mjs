@@ -20,6 +20,12 @@ async function asset(path) {
   return images.get(path);
 }
 const sprite=species=>asset(`sprites/${species}.png`);
+function imageBuildName(build,catalog,language) {
+  const species=catalog.pokemon.find(p=>p.id===build.species);
+  // Public builds used to append the player's name; hide that generated suffix in images.
+  if(species&&build.name?.startsWith(`${species.zh} · `))return gameName('pokemon',species,language);
+  return buildName(build,catalog,language);
+}
 function box(ctx,x,y,width,height,color='#fff',radius=24,border=line) {
   ctx.beginPath();ctx.roundRect(x,y,width,height,radius);ctx.fillStyle=color;ctx.fill();
   if(border){ctx.strokeStyle=border;ctx.lineWidth=2;ctx.stroke();}
@@ -82,7 +88,7 @@ async function buildCard(ctx,build,catalog,language,x,y,width,height,large=false
   if(compact)return teamCard(ctx,build,catalog,language,x,y,width,height);
   box(ctx,x,y,width,height,'#fff',large?32:22);
   if(!large){
-    text(ctx,buildName(build,catalog,language),x+pad,y+15,32,width-160,accent,750);
+    text(ctx,imageBuildName(build,catalog,language),x+pad,y+15,32,width-160,accent,750);
     picture(ctx,await sprite(build.species),x+width-120,y+10,90,64);
     species.types.forEach((type,index)=>picture(ctx,images.get(`types/${type.toLowerCase()}.png`),x+pad+index*30,y+52,24,24));
   }
@@ -104,7 +110,7 @@ async function teamCard(ctx,build,catalog,language,x,y,width,height) {
   ctx.font=`550 16px ${font}`;
   const badges=species.types.map(type=>({type,label:typeName(type,language),width:Math.ceil(ctx.measureText(typeName(type,language)).width)+52}));
   const badgeWidth=badges.reduce((sum,badge)=>sum+badge.width+8,0);
-  const title=text(ctx,buildName(build,catalog,language),left,y+18,30,width-184-badgeWidth,ink,650);
+  const title=text(ctx,imageBuildName(build,catalog,language),left,y+18,30,width-184-badgeWidth,ink,650);
   let badgeX=left+ctx.measureText(title).width+16;
   for(const badge of badges){
     box(ctx,badgeX,y+16,badge.width,32,'#f3f4f6',10,null);
@@ -166,9 +172,9 @@ async function drawComparison(ctx,scene,catalog,language,y,width) {
     const side=row.index<2?0:1,slot=row.index%2,x=40+side*(cardWidth+40),top=y+slot*(height+28);
     box(ctx,x,top,cardWidth,height,'#ffffffee',28,ctx.shareTheme[side?'secondary':'primary']+'50');
     text(ctx,`${t(side?'defend':'attack')} ${slot?'B':'A'}`,x+24,top+22,26,cardWidth-48,muted);
-    text(ctx,buildName(row.build,catalog,language),x+24,top+64,36,cardWidth-48,side?ink:accent,750);
+    text(ctx,imageBuildName(row.build,catalog,language),x+24,top+64,36,cardWidth-48,side?ink:accent,750);
     picture(ctx,await sprite(row.build.species),x+(cardWidth-150)/2,top+108,150,110);
-    text(ctx,`${t('target')} · ${buildName(row.target,catalog,language)}`,x+24,top+221,23,cardWidth-48,muted);
+    text(ctx,`${t('target')} · ${imageBuildName(row.target,catalog,language)}`,x+24,top+221,23,cardWidth-48,muted);
     row.moves.forEach((damage,index)=>{
       const move=catalog.moves[damage.id],moveY=top+262+index*103;
       box(ctx,x+18,moveY,cardWidth-36,92,'#fff',18);
@@ -213,7 +219,7 @@ export async function createShareImage(kind,value,catalog,language='zhHans',{res
   if(kind==='team') {
     for(let index=0;index<6;index++)await buildCard(ctx,value.members[index],catalog,language,48+(index%2)*1244,140+Math.floor(index/2)*294,1218,274);
   } else if(kind==='build') {
-    text(ctx,buildName(value,catalog,language),72,216,64,1296,ink,800);
+    text(ctx,imageBuildName(value,catalog,language),72,216,64,1296,ink,800);
     picture(ctx,await sprite(value.species),510,330,420,420);
     const species=catalog.pokemon.find(p=>p.id===value.species);
     species.types.forEach((type,index)=>picture(ctx,images.get(`types/${type.toLowerCase()}.png`),72+index*70,800,52,52));
