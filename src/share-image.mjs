@@ -8,6 +8,8 @@ import { shareText, gameName, buildName } from './sharing-language.mjs';
 import { translateText, prepareLanguage } from './localization.mjs';
 import { selectedShareBall, ballPalette } from './share-balls.mjs';
 import { typeName } from './move-types.mjs';
+import artworkCredits from './data/artwork-attribution.json' with {type:'json'};
+import { pngWithArtworkCredit } from './png-artwork.mjs';
 
 const ink='#292a30', muted='#686d78', red='#b83238', line='#e9ebef';
 const font='"PingFang SC","Yu Gothic","Malgun Gothic","Microsoft YaHei",system-ui,sans-serif';
@@ -233,7 +235,14 @@ export async function createShareImage(kind,value,catalog,language='zhHans',{res
       ['accent','result'].includes(row.kind)?palette.accent:row.kind==='muted'||row.kind==='footer'?muted:ink,heading?750:550);y+=heading?76:47;}
   }
   footer(ctx,qr,canvas.width,canvas.height,language,kind,logo);
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
-  if(!blob)throw new Error(t('tooLarge'));
+  const canvasBlob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+  if(!canvasBlob)throw new Error(t('tooLarge'));
+  const members=kind==='team'?value.members:kind==='scene'?value.actors:[value];
+  const usedPaths=new Set(['public/rotom-logo.webp',`public/${selectedShareBall(ball).sprite}`,
+    ...Object.keys(TYPES).map(type=>`public/types/${type.toLowerCase()}.png`),
+    ...members.map(build=>`public/sprites/${build.species}.png`)]);
+  const credit=JSON.stringify({notice:'Artwork retains the contributor licenses below. Noncommercial use and attribution conditions apply where stated; underlying Pokemon rights are not granted. Preserve these credits when sharing. Social platforms may strip PNG metadata; include attribution separately if that happens.',
+    artwork:artworkCredits.filter(entry=>usedPaths.has(entry.path))});
+  const blob=new Blob([pngWithArtworkCredit(new Uint8Array(await canvasBlob.arrayBuffer()),credit)],{type:'image/png'});
   return {blob,code,width:canvas.width,height:canvas.height};
 }

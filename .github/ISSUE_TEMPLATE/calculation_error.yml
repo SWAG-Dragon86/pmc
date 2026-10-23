@@ -1,0 +1,35 @@
+name: Calculation error
+description: Report damage, turn-order or mechanics discrepancies
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: PMC version, game version and regulation
+    validations:
+      required: true
+  - type: textarea
+    id: scene
+    attributes:
+      label: Reproducible scene
+      description: PMC scene code or sanitized JSON; include forms, moves, abilities, items, natures, six Stat Points, HP, stages, status and field conditions.
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Expected and actual numbers or action order
+      description: State whether the discrepancy is single-move damage or the full turn.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Rule reference or in-game evidence
+      description: Link Champions-specific evidence and identify version. Say if the expectation comes from a community model or another game instead of physical game testing.
+    validations:
+      required: true
+  - type: textarea
+    id: platform
+    attributes:
+      label: Platform and additional details
+      description: Website URL or Android APK, OS/browser versions, screenshot if useful. Remove private information.

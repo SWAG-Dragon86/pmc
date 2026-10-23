@@ -1,0 +1,24 @@
+The Artificial — Pokémon Icons
+
+Author permission statement, as published on the creators’ project page:
+“All of our icons are licensed CC-BY. This means they're free to use if you credit The Artificial.”
+
+Author page: https://www.behance.net/gallery/43311747/Pokmon-icons
+Original project: https://github.com/TheArtificial/pokemon-icons
+Pinned source: 132142217e40990f694142d9efb28ecde1e2976e
+
+The author statement does not identify a Creative Commons version. PMC preserves
+that statement as LicenseRef-TheArtificial-CC-BY-Statement; it does not invent
+a CC-BY-4.0 or GPL grant. The original project website also invites use/remix.
+Required attribution: The Artificial. These author permissions do not grant
+all rights in the underlying Pokemon characters or trademarks.
+The art is unmodified; only local PNG filenames map to PMC catalog IDs.
+
+The project page’s 2016 artist roster credits Carol Liao, Shannon E. Thomas,
+Natalia Bourges and Ariane Garoff. The upstream repository contains subsequent
+community contributions; source URLs are retained for the selected files.
+
+Additional primary evidence: the author’s downloadable archive contains its
+original README granting share-with-credit permission and stating that the art
+was created from scratch. See theartificial-original-readme.txt in this directory.
+Author archive: https://theartificial.github.io/pokemon-icons/assets/pokemon-icons.zip

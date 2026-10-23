@@ -1,0 +1,28 @@
+name: Bug report
+description: Report a reproducible application problem
+labels: []
+body:
+  - type: input
+    id: version
+    attributes:
+      label: App version and platform
+      description: Settings version, website URL or APK, browser/WebView and OS versions
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Error message and evidence
+      description: Attach sanitized screenshots or a minimal example. Remove private information.

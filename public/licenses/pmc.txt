@@ -1,0 +1,21 @@
+PMC 1.4.0 - original program code
+SPDX-License-Identifier: GPL-3.0-or-later
+Copyright (C) 2026 PMC contributors
+
+The maintainer grants this license only for material they have the right to license.
+You may redistribute and modify the original program code under GNU GPL version 3
+or, at your option, any later version. There is no warranty.
+The full GPL v3 text is distributed as chinese-translations.txt in this directory.
+Third-party code and dictionaries retain their original licenses.
+Artwork retains its separate licenses and attribution records in artwork-credits.txt
+and artwork.json in this directory. All 350 form images now have contributor permission records; The Artificial
+uses a CC-BY author statement with unspecified version. The maintainer removed the unverified Strange Ball; all 37 remaining balls have contributor permission records. The eight repository screenshots have been
+recaptured with component attributions. The background is maintainer-confirmed
+original; no separate standalone reuse license has been selected.
+The contributor licenses do not grant all underlying Pokemon character rights.
+See THIRD_PARTY_NOTICES.md and docs/LICENSING.md in the matching source.
+Source repository: https://github.com/SWAG-Dragon86/pmc
+This source update does not publish a new signed Android APK.
+
+Follow-up: The Artificial and PMC background terms are recorded in
+theartificial-permission.txt and pmc-background.txt in this directory.

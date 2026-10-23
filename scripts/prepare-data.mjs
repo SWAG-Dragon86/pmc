@@ -283,6 +283,7 @@ for (const key of moveIds) {
           chance: m.secondary.chance,
           boosts: m.secondary.boosts,
           status: m.secondary.status,
+          volatileStatus: m.secondary.volatileStatus,
           self: m.secondary.self ? { boosts: m.secondary.self.boosts } : null,
         }
       : null,

@@ -1,5 +1,6 @@
 import { Pokemon, TYPE_CHART } from './vendor/calc.mjs';
 import { activeIndices, clone, STAT_NAMES, OPENING_RULES_VERSION } from './model.mjs';
+import { groundedOnTerrain } from './grounding.mjs';
 
 export const WEATHER_NAMES = { '': '无天气', Sun: '晴天', Rain: '雨天', Sand: '沙暴', Snow: '雪天' };
 export const TERRAIN_NAMES = { '': '无场地', Electric: '电气场地', Grassy: '青草场地', Misty: '薄雾场地', Psychic: '精神场地' };
@@ -153,7 +154,7 @@ export function openingBranches(input,catalog) {
   for(const i of activeIndices(scene)) {
     const b=scene.actors[i];if(!b.present||hp[i]<=0)continue;
     const side=scene.field[i<2?'attacker':'defender'],types=speciesOf(b,catalog).types;
-    const grounded=b.item==='Iron Ball'||scene.field.gravity||(!types.includes('Flying')&&!['Levitate','Eelevate'].includes(abilityOf(b))&&b.item!=='Air Balloon');
+    const grounded=groundedOnTerrain(b,scene,catalog);
     const hazards=[];
     const ignoresDamage=abilityOf(b)==='Magic Guard'||b.item==='Heavy-Duty Boots';
     if(side.isSR&&!ignoresDamage)hazards.push(['隐形岩',Math.max(1,Math.floor(max[i]/8*types.reduce((n,t)=>n*TYPE_CHART[0].Rock[t],1)))]);

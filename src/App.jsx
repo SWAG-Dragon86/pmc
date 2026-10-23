@@ -2322,6 +2322,9 @@ export default function App() {
                     </button>
                   </div>
                   <div className="source-links">
+                    <a href={`${import.meta.env.BASE_URL}licenses/artwork-credits.txt`} target="_blank" rel="noopener noreferrer">
+                      {{zhHans:"图片署名与许可",zhHant:"圖片署名與許可",ja:"画像のクレジットとライセンス",ko:"이미지 출처 및 라이선스",en:"Artwork credits and licenses"}[language] || "Artwork credits and licenses"} <ArrowUpRight size={13} />
+                    </a>
                     <a
                       href={catalog.meta.officialAnnouncement}
                       target="_blank"

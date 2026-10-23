@@ -30,7 +30,6 @@ const palettes={
   'fast-ball':['#ab4938','#e16d51','#eed072'],
   'friend-ball':['#4c813d','#88b863','#ead26b'],
   'love-ball':['#b35f8c','#e593bc','#fae6ef'],
-  'lastrange-ball':['#3d8680','#79bcb0','#e3dabb'],
   'lapoke-ball':['#a44834','#ca6650','#a99472'],
   'lagreat-ball':['#396b91','#4d96bc','#a99870'],
   'laultra-ball':['#725926','#4b4843','#c7a347'],
@@ -50,5 +49,5 @@ export function ballPalette(value) {
 export function ballName(ball,language) {
   const key={zhHans:'zh-hans',zhHant:'zh-hant',ja:'ja',ko:'ko',en:'en'}[language]||'en';
   const name=ball.names[key]||ball.names.en;
-  return ball.name.startsWith('la')&&ball.name!=='lastrange-ball' ? `${name} (${{zhHans:'洗翠',zhHant:'洗翠',ja:'ヒスイ',ko:'히스이',en:'Hisui'}[language]||'Hisui'})` : name;
+  return ball.name.startsWith('la') ? `${name} (${{zhHans:'洗翠',zhHant:'洗翠',ja:'ヒスイ',ko:'히스이',en:'Hisui'}[language]||'Hisui'})` : name;
 }

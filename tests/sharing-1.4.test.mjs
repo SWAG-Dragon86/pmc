@@ -85,7 +85,7 @@ test('all new labels cover five languages and device timezone formats check time
   }finally{if(previous===undefined)delete process.env.TZ;else process.env.TZ=previous;}
 });
 test('every selectable ball and move type has a valid local image and localized ball name',()=>{
-  assert.equal(shareBalls.length,38);
+  assert.equal(shareBalls.length,37);
   for(const ball of shareBalls){
     const image=readFileSync(new URL(`../public/${ball.sprite}`,import.meta.url));
     assert.equal(image.subarray(1,4).toString(),'PNG',ball.name);
@@ -94,4 +94,5 @@ test('every selectable ball and move type has a valid local image and localized 
   }
   for(const type of Object.keys(TYPES))assert.equal(readFileSync(new URL(`../public/types/${type.toLowerCase()}.png`,import.meta.url)).subarray(1,4).toString(),'PNG');
   assert.equal(selectedShareBall('invalid').name,'poke-ball');
+  assert.equal(selectedShareBall('lastrange-ball').name,'poke-ball');
 });

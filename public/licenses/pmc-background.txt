@@ -1,0 +1,7 @@
+PMC original default background
+
+The maintainer confirmed on 2026-10-23: “默认背景是我们自己做的”.
+The image is retained unchanged and included in PMC at the maintainer’s request.
+This records original authorship and inclusion permission. No separate standalone
+reuse license has been selected; do not infer a new GPL or CC grant.
+Underlying designs and trademarks, if applicable, remain separate.

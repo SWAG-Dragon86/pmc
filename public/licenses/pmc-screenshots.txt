@@ -1,0 +1,9 @@
+PMC repository screenshots, recaptured 2026-10-23
+
+These captures contain PMC UI and independently licensed contributor artwork.
+No blanket new image license is asserted by the capture. Preserve the component
+authors, sources, licenses and modification notices embedded in PNG iTXt and
+listed in artwork-credits.txt. The original code license remains GPL-3.0-or-later.
+The default background was confirmed as project-created by the maintainer.
+The maintainer authorized removal of old artwork from source history.
+Caches, unreachable old objects and external clones may remain.

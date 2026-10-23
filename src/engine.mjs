@@ -1,5 +1,6 @@
 import { Pokemon, Move, Field, calculate, TYPE_CHART } from "./vendor/calc.mjs";
 import { openingBranches, changeBoost, applyOpponentBoost, triggerOpportunist } from './opening.mjs';
+import { battleTypesOf, groundedOnTerrain } from './grounding.mjs';
 import {
   validateBuild,
   activeIndices,
@@ -63,12 +64,6 @@ function weatherOf(scene) {
   )
     ? ""
     : scene.field.weather;
-}
-function groundedOnTerrain(build, scene, catalog) {
-  if (scene.field.gravity || build.item === 'Iron Ball') return true;
-  const pokemon = catalog.pokemon.find(entry => entry.id === build.species);
-  const types = build.battleTypes || (abilityOf(build) === 'Mimicry' && scene.field.terrain === 'Psychic' ? ['Psychic'] : pokemon?.types || []);
-  return !types.includes('Flying') && !['Levitate','Eelevate'].includes(abilityOf(build)) && build.item !== 'Air Balloon';
 }
 function targets(scene, attackerIndex, move, catalog) {
   const ally = attackerIndex < 2;
@@ -159,9 +154,9 @@ export function damageFor(attacker, defender, moveId, scene, catalog) {
     if (Array.isArray(scene.turnDone)) abilityOn = scene.turnDone.includes(di);
     else {
       const defenderMove = catalog.moves[defender.moves?.[defender.selected]];
-      const attackerRank = [priority(attacker, m), speedOf(attacker, scene, catalog, ai)];
+      const attackerRank = [priority(attacker, m, scene, catalog), speedOf(attacker, scene, catalog, ai)];
       const defenderRank = defenderMove
-        ? [priority(defender, defenderMove), speedOf(defender, scene, catalog, di)]
+        ? [priority(defender, defenderMove, scene, catalog), speedOf(defender, scene, catalog, di)]
         : [0, 0];
       abilityOn =
         attackerRank[0] < defenderRank[0] ||
@@ -209,6 +204,10 @@ export function damageFor(attacker, defender, moveId, scene, catalog) {
       throw new Error(`此招式连续攻击次数需为 ${minimum}–${m.multihit[1]}`);
   }
   const moveOverrides = {};
+  if (moveId === 'grassyglide') moveOverrides.priority = priority(attacker, m, scene, catalog);
+  // Scenes model entry turn. An explicitly supplied prior action makes Fake Out unavailable.
+  if (moveId === 'fakeout' && (attacker.activeMoveActions ?? 0) > 0)
+    return { rolls: Array(16).fill(0), dist: [{damage: 0, p: 1}], min: 0, max: 0, mean: 0, ko: 0, spread: false, type: m.type, category: m.category, hitDists: [[{damage: 0, p: 1}]] };
   if (moveId === 'expandingforce' && scene.field.terrain === 'Psychic' && groundedOnTerrain(attacker, scene, catalog))
     moveOverrides.target = spread ? 'allAdjacentFoes' : 'normal';
   if (!spread && ["allAdjacent", "allAdjacentFoes"].includes(m.target))
@@ -335,9 +334,10 @@ export function speedOf(b, scene, catalog, index) {
   }
   return speed;
 }
-function priority(b, m) {
+function priority(b, m, scene, catalog) {
   return (
     m.priority +
+    (m.id === 'grassyglide' && scene.field.terrain === 'Grassy' && groundedOnTerrain(b, scene, catalog) ? 1 : 0) +
     (m.category === "Status" && abilityOf(b) === "Prankster" ? 1 : 0) +
     (m.type === "Flying" && abilityOf(b) === "Gale Wings" && b.hp === 100
       ? 1
@@ -345,11 +345,16 @@ function priority(b, m) {
     (m.heal && abilityOf(b) === "Triage" ? 3 : 0)
   );
 }
+export function canApplySecondary(attacker, defender, move, sourceAbility = abilityOf(attacker)) {
+  return !!move.secondary && (move.secondary.chance === 100 || attacker.secondary) &&
+    sourceAbility !== 'Sheer Force' && defender.item !== 'Covert Cloak' &&
+    (abilityOf(defender) !== 'Shield Dust' || sourceAbility === 'Mold Breaker');
+}
 function priorityBlocker(scene, attackerIndex, move, catalog) {
   const attacker = scene.actors[attackerIndex];
   if (
     abilityOf(attacker) === "Mold Breaker" ||
-    priority(attacker, move) <= 0 ||
+    priority(attacker, move, scene, catalog) <= 0 ||
     [
       "self",
       "adjacentAlly",
@@ -534,6 +539,8 @@ export function turnLimits(scene, catalog) {
       reasons.push("行动者选中的招式栏为空");
       continue;
     }
+    if (m.id === 'fakeout' && (b.activeMoveActions ?? 0) > 0)
+      reasons.push('击掌奇袭仅能在入场首回合使用；当前配置已记录先前行动');
     if (
       (m.multihit && m.id!=="twinbeam") ||
       COMPLEX_MOVES.has(m.id) ||
@@ -700,19 +707,6 @@ function opposingUnnerve(state, index) {
       state.hp[i] > 0 &&
       abilityOf(state.scene.actors[i]) === "Unnerve",
   );
-}
-function battleTypesOf(build, scene, catalog) {
-  if (build.battleTypes) return build.battleTypes;
-  if (abilityOf(build) === "Mimicry") {
-    const type = {
-      Electric: "Electric",
-      Grassy: "Grass",
-      Psychic: "Psychic",
-      Misty: "Fairy",
-    }[scene.field.terrain];
-    if (type) return [type];
-  }
-  return catalog.pokemon.find((entry) => entry.id === build.species)?.types || [];
 }
 function canReceiveStatus(state, index, status, catalog, sourceAbility = "") {
   const pokemon = state.scene.actors[index], ability = abilityOf(pokemon);
@@ -922,6 +916,13 @@ function afterHit(s, ai, di, m, amount, catalog) {
     }
   }
   if (loss > 0) {
+    if (d.item === 'Air Balloon') {
+      recordConsumedItem(s, di, d.item);
+      d.item = '';
+      s.log.push(`${d.name} 气球破裂`);
+      applySymbiosis(s, di, catalog);
+      updateUnburden(d);
+    }
     if(m.id==='knockoff'&&transferableItem(s,di,d.item,catalog)) {
       const removed=d.item;d.item='';updateUnburden(d);
       s.log.push(`${a.name} 拍落了 ${d.name} 的${itemName(removed,catalog)}`);
@@ -1003,12 +1004,7 @@ function afterHit(s, ai, di, m, amount, catalog) {
         s.hp[ai] = Math.max(0, s.hp[ai] - Math.floor(s.max[ai] / 6));
       if(['Rough Skin','Iron Barbs'].includes(abilityOf(d))||d.item==='Rocky Helmet')s.log.push(`${a.name} 承受 ${d.name} 的接触反伤`);
     }
-    if (
-      m.secondary &&
-      (m.secondary.chance === 100 || a.secondary) &&
-      s.actionAbility !== "Sheer Force" &&
-      abilityOf(d) !== "Shield Dust"
-    ) {
+    if (canApplySecondary(a, d, m, s.actionAbility)) {
       if(m.secondary.boosts)applyOpponentBoost(s,ai,di,m.secondary.boosts,m.zh,m.secondary.chance===100,catalog);
       if (m.secondary.self) {
         const raised=changeBoost(a, m.secondary.self.boosts);triggerOpportunist(s,ai,raised);
@@ -1024,6 +1020,10 @@ function afterHit(s, ai, di, m, amount, catalog) {
           )
         )
           d.status = m.secondary.status;
+      }
+      if (m.secondary.volatileStatus === 'flinch' && s.hp[di] > 0 &&
+          !s.done.includes(di) && (abilityOf(d) !== 'Inner Focus' || ignoredDefenderAbility)) {
+        s.flinched = [...new Set([...(s.flinched || []), di])];
       }
     }
     if (s.hp[di] === 0 && abilityOf(a) === "Moxie") {
@@ -1068,6 +1068,7 @@ function mergeStates(states) {
     const key = JSON.stringify([
       s.hp,
       s.done,
+      s.flinched,
       s.scene.field,
       s.scene.actors.map((a) => [
         a.boosts,
@@ -1144,9 +1145,7 @@ function endTurn(state, catalog) {
     if (
       hp > 0 &&
       state.scene.field.terrain === "Grassy" &&
-      (state.scene.field.gravity ||
-        (!types.includes("Flying") &&
-          !["Levitate", "Eelevate"].includes(abilityOf(b))))
+      groundedOnTerrain(b, state.scene, catalog)
     )
       heal(1 / 16);
     if (hp > 0 && b.item === "Leftovers") heal(1 / 16);
@@ -1298,6 +1297,7 @@ export function simulateTurn(scene, catalog) {
           priority(
             s.scene.actors[i],
             catalog.moves[s.scene.actors[i].moves[s.scene.actors[i].selected]],
+            s.scene, catalog,
           ),
           s.quickDraw?.includes(i)
             ? 1
@@ -1330,6 +1330,16 @@ export function simulateTurn(scene, catalog) {
           state.lightningRodTriggers = [];
           state.actionAbility = abilityOf(actor);
           state.scene.turnDone = [...state.done];
+          if (state.flinched?.includes(ai)) {
+            state.log.push(`${actor.name} 畏缩，无法行动`);
+            if (abilityOf(actor) === 'Steadfast') {
+              const raised = changeBoost(actor, {spe: 1});
+              triggerOpportunist(state, ai, raised);
+            }
+            recordAction(s, state, ai, m, step);
+            out.push(state);
+            continue;
+          }
           const blockedBy = priorityBlocker(state.scene, ai, m, catalog);
           if (blockedBy) {
             state.log.push(`${blockedBy}拦下 ${actor.name} 的${m.zh}`);

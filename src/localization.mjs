@@ -319,6 +319,11 @@ const phrases=[
 ];
 if(phrases.length!==ENGLISH_UI.length)throw new Error('English UI translation count does not match source strings');
 phrases.forEach((row,index)=>row.push(ENGLISH_UI[index]));
+phrases.push(
+  ['气球破裂','氣球破裂','ふうせんが割れた','풍선이 터졌다','Air Balloon popped'],
+  ['畏缩，无法行动','畏縮，無法行動','ひるんで動けない','풀죽어서 움직일 수 없다','flinched and could not move'],
+  ['击掌奇袭仅能在入场首回合使用；当前配置已记录先前行动','擊掌奇襲僅能在入場首回合使用；目前配置已記錄先前行動','ねこだましは場に出た最初のターンのみ使用可能です。この設定には以前の行動が記録されています','속이다는 필드에 나온 첫 턴에만 사용할 수 있습니다. 현재 설정에 이전 행동이 기록되어 있습니다','Fake Out is available only on the first turn after entry; this build records a prior action'],
+);
 const languageIndex={zhHant:1,ja:2,ko:3,en:4};
 const exact=new Map(phrases.map(row=>[row[0],row]));
 const nameMap=new Map();
