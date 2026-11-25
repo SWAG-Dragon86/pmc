@@ -9041,326 +9041,164 @@
       "height": 96
     },
     {
-      "id": "pmc-rotom-dex",
-      "name": "Rotom-Dex",
+      "id": "pmc-rotom-logo",
+      "name": "Rotom logo",
       "path": "public/rotom-logo.webp",
-      "repository": "PMDCollab/SpriteCollab",
-      "commit": "341342d7ef2ed3e4427c760e829a417b501be17c",
-      "upstreamPath": "portrait/0479/0006/Normal.png",
-      "url": "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "sourcePage": "https://github.com/PMDCollab/SpriteCollab/blob/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "creditPath": "portrait/0479/0006/credits.txt",
-      "creditRecords": [
-        {
-          "date": "2023-04-30 22:23:55.128993",
-          "author": "<@!356635814668664832>",
-          "status": "CUR",
-          "license": "PMDCollab_1",
-          "actions": "Normal,Normal^"
-        }
-      ],
       "authors": [
         {
-          "id": "<@!356635814668664832>",
-          "name": "Emmuffin",
-          "contact": "https://twitter.com/Ernmuffin"
+          "name": "The Pokémon Company"
         }
       ],
       "licenses": [
-        "PMDCollab_1"
+        "Copyright-The-Pokemon-Company"
       ],
-      "modification": "Lossless WebP conversion",
-      "frame": null,
-      "sourceSha256": "9cfbc4f0e278d9ecf91197494299c861027063abd39cacde74c65662b799f4bb",
-      "sha256": "997d53a78330cc6842d9b2e44113d0150f3298e4b327de172180d3a27b407268",
-      "width": 40,
-      "height": 40
+      "source": "Maintainer-supplied artwork, 2026-11-26",
+      "modification": "Used as supplied, 200×200 WebP with transparency. No recoloring.",
+      "sha256": "67091b77d1c1feb5671d4b914ac6dc83dca7c265e162e0251e9c536e34817edf",
+      "width": 200,
+      "height": 200
     },
     {
-      "id": "pmc-rotom-dex",
-      "name": "Rotom-Dex",
+      "id": "pmc-rotom-logo",
+      "name": "Rotom logo",
       "path": "public/rotom-icon-32.png",
-      "repository": "PMDCollab/SpriteCollab",
-      "commit": "341342d7ef2ed3e4427c760e829a417b501be17c",
-      "upstreamPath": "portrait/0479/0006/Normal.png",
-      "url": "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "sourcePage": "https://github.com/PMDCollab/SpriteCollab/blob/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "creditPath": "portrait/0479/0006/credits.txt",
-      "creditRecords": [
-        {
-          "date": "2023-04-30 22:23:55.128993",
-          "author": "<@!356635814668664832>",
-          "status": "CUR",
-          "license": "PMDCollab_1",
-          "actions": "Normal,Normal^"
-        }
-      ],
       "authors": [
         {
-          "id": "<@!356635814668664832>",
-          "name": "Emmuffin",
-          "contact": "https://twitter.com/Ernmuffin"
+          "name": "The Pokémon Company"
         }
       ],
       "licenses": [
-        "PMDCollab_1"
+        "Copyright-The-Pokemon-Company"
       ],
-      "modification": "Nearest-neighbor resize to 32 × 32, flattened on #f5f3ef",
-      "frame": null,
-      "sourceSha256": "9cfbc4f0e278d9ecf91197494299c861027063abd39cacde74c65662b799f4bb",
-      "sha256": "f32781ad58bdacd7d3e729ccb7c73032ba2db08a367808b6b8ea610e7cd8814d",
+      "source": "Maintainer-supplied artwork, 2026-11-26",
+      "modification": "Scaled with Lanczos to 32×32 and flattened on #f5f3ef.",
+      "sha256": "8b7b81545aaec8c5a90aad0c3d1c2da5b056dbb952e6a8b5311a3efc35e920e0",
       "width": 32,
       "height": 32
     },
     {
-      "id": "pmc-rotom-dex",
-      "name": "Rotom-Dex",
+      "id": "pmc-rotom-logo",
+      "name": "Rotom logo",
       "path": "public/rotom-icon-180.png",
-      "repository": "PMDCollab/SpriteCollab",
-      "commit": "341342d7ef2ed3e4427c760e829a417b501be17c",
-      "upstreamPath": "portrait/0479/0006/Normal.png",
-      "url": "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "sourcePage": "https://github.com/PMDCollab/SpriteCollab/blob/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "creditPath": "portrait/0479/0006/credits.txt",
-      "creditRecords": [
-        {
-          "date": "2023-04-30 22:23:55.128993",
-          "author": "<@!356635814668664832>",
-          "status": "CUR",
-          "license": "PMDCollab_1",
-          "actions": "Normal,Normal^"
-        }
-      ],
       "authors": [
         {
-          "id": "<@!356635814668664832>",
-          "name": "Emmuffin",
-          "contact": "https://twitter.com/Ernmuffin"
+          "name": "The Pokémon Company"
         }
       ],
       "licenses": [
-        "PMDCollab_1"
+        "Copyright-The-Pokemon-Company"
       ],
-      "modification": "Nearest-neighbor resize to 180 × 180, flattened on #f5f3ef",
-      "frame": null,
-      "sourceSha256": "9cfbc4f0e278d9ecf91197494299c861027063abd39cacde74c65662b799f4bb",
-      "sha256": "ac0c93cc4057ed42d30d4eecce33aa91653e8d03e2b3033d5190e603193f7dda",
+      "source": "Maintainer-supplied artwork, 2026-11-26",
+      "modification": "Scaled with Lanczos to 180×180 and flattened on #f5f3ef.",
+      "sha256": "6fa297501dedae854742ddfc0b162aed281adf1548eae10468199ce32a55470d",
       "width": 180,
       "height": 180
     },
     {
-      "id": "pmc-rotom-dex",
-      "name": "Rotom-Dex",
+      "id": "pmc-rotom-logo",
+      "name": "Rotom logo",
       "path": "public/rotom-icon-192.png",
-      "repository": "PMDCollab/SpriteCollab",
-      "commit": "341342d7ef2ed3e4427c760e829a417b501be17c",
-      "upstreamPath": "portrait/0479/0006/Normal.png",
-      "url": "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "sourcePage": "https://github.com/PMDCollab/SpriteCollab/blob/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "creditPath": "portrait/0479/0006/credits.txt",
-      "creditRecords": [
-        {
-          "date": "2023-04-30 22:23:55.128993",
-          "author": "<@!356635814668664832>",
-          "status": "CUR",
-          "license": "PMDCollab_1",
-          "actions": "Normal,Normal^"
-        }
-      ],
       "authors": [
         {
-          "id": "<@!356635814668664832>",
-          "name": "Emmuffin",
-          "contact": "https://twitter.com/Ernmuffin"
+          "name": "The Pokémon Company"
         }
       ],
       "licenses": [
-        "PMDCollab_1"
+        "Copyright-The-Pokemon-Company"
       ],
-      "modification": "Nearest-neighbor resize to 192 × 192, flattened on #f5f3ef",
-      "frame": null,
-      "sourceSha256": "9cfbc4f0e278d9ecf91197494299c861027063abd39cacde74c65662b799f4bb",
-      "sha256": "5d1b7ce1c07a7d3f24f55422c8d3b09e5030f093687dc612086895de9e662a81",
+      "source": "Maintainer-supplied artwork, 2026-11-26",
+      "modification": "Scaled with Lanczos to 192×192 and flattened on #f5f3ef.",
+      "sha256": "70b4c3593844a5c585831de65d0152c30e8c33aaab24b0b5d18f32fd710e6dea",
       "width": 192,
       "height": 192
     },
     {
-      "id": "pmc-rotom-dex",
-      "name": "Rotom-Dex",
+      "id": "pmc-rotom-logo",
+      "name": "Rotom logo",
       "path": "public/rotom-icon-512.png",
-      "repository": "PMDCollab/SpriteCollab",
-      "commit": "341342d7ef2ed3e4427c760e829a417b501be17c",
-      "upstreamPath": "portrait/0479/0006/Normal.png",
-      "url": "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "sourcePage": "https://github.com/PMDCollab/SpriteCollab/blob/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "creditPath": "portrait/0479/0006/credits.txt",
-      "creditRecords": [
-        {
-          "date": "2023-04-30 22:23:55.128993",
-          "author": "<@!356635814668664832>",
-          "status": "CUR",
-          "license": "PMDCollab_1",
-          "actions": "Normal,Normal^"
-        }
-      ],
       "authors": [
         {
-          "id": "<@!356635814668664832>",
-          "name": "Emmuffin",
-          "contact": "https://twitter.com/Ernmuffin"
+          "name": "The Pokémon Company"
         }
       ],
       "licenses": [
-        "PMDCollab_1"
+        "Copyright-The-Pokemon-Company"
       ],
-      "modification": "Nearest-neighbor resize to 512 × 512, flattened on #f5f3ef",
-      "frame": null,
-      "sourceSha256": "9cfbc4f0e278d9ecf91197494299c861027063abd39cacde74c65662b799f4bb",
-      "sha256": "8bb0d8263ba097bd5beddf6c3e96dde49bd36973138b5db3075cf273cfaeae29",
+      "source": "Maintainer-supplied artwork, 2026-11-26",
+      "modification": "Scaled with Lanczos to 512×512 and flattened on #f5f3ef.",
+      "sha256": "37e17790e536c83da67e352fe9d5cd52415e50cd39030dd5d6b4c40c8acf4f30",
       "width": 512,
       "height": 512
     },
     {
-      "id": "pmc-rotom-dex",
-      "name": "Rotom-Dex",
+      "id": "pmc-rotom-logo",
+      "name": "Rotom logo",
       "path": "public/rotom-maskable-512.png",
-      "repository": "PMDCollab/SpriteCollab",
-      "commit": "341342d7ef2ed3e4427c760e829a417b501be17c",
-      "upstreamPath": "portrait/0479/0006/Normal.png",
-      "url": "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "sourcePage": "https://github.com/PMDCollab/SpriteCollab/blob/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "creditPath": "portrait/0479/0006/credits.txt",
-      "creditRecords": [
-        {
-          "date": "2023-04-30 22:23:55.128993",
-          "author": "<@!356635814668664832>",
-          "status": "CUR",
-          "license": "PMDCollab_1",
-          "actions": "Normal,Normal^"
-        }
-      ],
       "authors": [
         {
-          "id": "<@!356635814668664832>",
-          "name": "Emmuffin",
-          "contact": "https://twitter.com/Ernmuffin"
+          "name": "The Pokémon Company"
         }
       ],
       "licenses": [
-        "PMDCollab_1"
+        "Copyright-The-Pokemon-Company"
       ],
-      "modification": "Nearest-neighbor resize to 288 × 288, centered on 512 × 512 safe-zone background",
-      "frame": null,
-      "sourceSha256": "9cfbc4f0e278d9ecf91197494299c861027063abd39cacde74c65662b799f4bb",
-      "sha256": "12a1328c552e0630478a46152f0ca50930d553e2b86932258552edd65e48760f",
+      "source": "Maintainer-supplied artwork, 2026-11-26",
+      "modification": "Scaled with Lanczos to 288×288 and centered on a 512×512 #f5f3ef safe-zone background.",
+      "sha256": "f644bb2a42408a66a6020d81b5c5ad05a0df71b042cf33fa52f61519f71d3f8f",
       "width": 512,
       "height": 512
     },
     {
-      "id": "pmc-rotom-dex",
-      "name": "Rotom-Dex",
+      "id": "pmc-rotom-logo",
+      "name": "Rotom logo",
       "path": "public/icon-192.png",
-      "repository": "PMDCollab/SpriteCollab",
-      "commit": "341342d7ef2ed3e4427c760e829a417b501be17c",
-      "upstreamPath": "portrait/0479/0006/Normal.png",
-      "url": "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "sourcePage": "https://github.com/PMDCollab/SpriteCollab/blob/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "creditPath": "portrait/0479/0006/credits.txt",
-      "creditRecords": [
-        {
-          "date": "2023-04-30 22:23:55.128993",
-          "author": "<@!356635814668664832>",
-          "status": "CUR",
-          "license": "PMDCollab_1",
-          "actions": "Normal,Normal^"
-        }
-      ],
       "authors": [
         {
-          "id": "<@!356635814668664832>",
-          "name": "Emmuffin",
-          "contact": "https://twitter.com/Ernmuffin"
+          "name": "The Pokémon Company"
         }
       ],
       "licenses": [
-        "PMDCollab_1"
+        "Copyright-The-Pokemon-Company"
       ],
-      "modification": "Nearest-neighbor resize to 192 × 192, flattened on #f5f3ef",
-      "frame": null,
-      "sourceSha256": "9cfbc4f0e278d9ecf91197494299c861027063abd39cacde74c65662b799f4bb",
-      "sha256": "5d1b7ce1c07a7d3f24f55422c8d3b09e5030f093687dc612086895de9e662a81",
+      "source": "Maintainer-supplied artwork, 2026-11-26",
+      "modification": "Scaled with Lanczos to 192×192 and flattened on #f5f3ef.",
+      "sha256": "70b4c3593844a5c585831de65d0152c30e8c33aaab24b0b5d18f32fd710e6dea",
       "width": 192,
       "height": 192
     },
     {
-      "id": "pmc-rotom-dex",
-      "name": "Rotom-Dex",
+      "id": "pmc-rotom-logo",
+      "name": "Rotom logo",
       "path": "public/icon-512.png",
-      "repository": "PMDCollab/SpriteCollab",
-      "commit": "341342d7ef2ed3e4427c760e829a417b501be17c",
-      "upstreamPath": "portrait/0479/0006/Normal.png",
-      "url": "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "sourcePage": "https://github.com/PMDCollab/SpriteCollab/blob/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "creditPath": "portrait/0479/0006/credits.txt",
-      "creditRecords": [
-        {
-          "date": "2023-04-30 22:23:55.128993",
-          "author": "<@!356635814668664832>",
-          "status": "CUR",
-          "license": "PMDCollab_1",
-          "actions": "Normal,Normal^"
-        }
-      ],
       "authors": [
         {
-          "id": "<@!356635814668664832>",
-          "name": "Emmuffin",
-          "contact": "https://twitter.com/Ernmuffin"
+          "name": "The Pokémon Company"
         }
       ],
       "licenses": [
-        "PMDCollab_1"
+        "Copyright-The-Pokemon-Company"
       ],
-      "modification": "Nearest-neighbor resize to 512 × 512, flattened on #f5f3ef",
-      "frame": null,
-      "sourceSha256": "9cfbc4f0e278d9ecf91197494299c861027063abd39cacde74c65662b799f4bb",
-      "sha256": "8bb0d8263ba097bd5beddf6c3e96dde49bd36973138b5db3075cf273cfaeae29",
+      "source": "Maintainer-supplied artwork, 2026-11-26",
+      "modification": "Scaled with Lanczos to 512×512 and flattened on #f5f3ef.",
+      "sha256": "37e17790e536c83da67e352fe9d5cd52415e50cd39030dd5d6b4c40c8acf4f30",
       "width": 512,
       "height": 512
     },
     {
-      "id": "pmc-rotom-dex",
-      "name": "Rotom-Dex",
+      "id": "pmc-rotom-logo",
+      "name": "Rotom logo",
       "path": "public/icon.svg",
-      "repository": "PMDCollab/SpriteCollab",
-      "commit": "341342d7ef2ed3e4427c760e829a417b501be17c",
-      "upstreamPath": "portrait/0479/0006/Normal.png",
-      "url": "https://raw.githubusercontent.com/PMDCollab/SpriteCollab/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "sourcePage": "https://github.com/PMDCollab/SpriteCollab/blob/341342d7ef2ed3e4427c760e829a417b501be17c/portrait/0479/0006/Normal.png",
-      "creditPath": "portrait/0479/0006/credits.txt",
-      "creditRecords": [
-        {
-          "date": "2023-04-30 22:23:55.128993",
-          "author": "<@!356635814668664832>",
-          "status": "CUR",
-          "license": "PMDCollab_1",
-          "actions": "Normal,Normal^"
-        }
-      ],
       "authors": [
         {
-          "id": "<@!356635814668664832>",
-          "name": "Emmuffin",
-          "contact": "https://twitter.com/Ernmuffin"
+          "name": "The Pokémon Company"
         }
       ],
       "licenses": [
-        "PMDCollab_1"
+        "Copyright-The-Pokemon-Company"
       ],
-      "modification": "Original portrait embedded in SVG wrapper",
-      "frame": null,
-      "sourceSha256": "9cfbc4f0e278d9ecf91197494299c861027063abd39cacde74c65662b799f4bb",
-      "sha256": "4cc65c144bfda8418f85647abe88a03949b7ba8624ea2d8f63dafb33357ab9ed",
+      "source": "Maintainer-supplied artwork, 2026-11-26",
+      "modification": "192×192 flattened PNG embedded in an SVG wrapper.",
+      "sha256": "0fa9e657706c6b26529708d4ac2a9d6bb3ed80fe42531866e222d59b286ce19b",
       "width": 192,
       "height": 192
     },

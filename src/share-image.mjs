@@ -48,10 +48,11 @@ function wrap(ctx,value,width,size=32,weight=500) {
   }
   if(row)lines.push(row);return lines;
 }
-function picture(ctx,image,x,y,width,height) {
+function picture(ctx,image,x,y,width,height,smooth=false) {
   if(!image)return;
   const scale=Math.min(width/image.width,height/image.height);
-  ctx.imageSmoothingEnabled=false;
+  ctx.imageSmoothingEnabled=smooth;
+  if(smooth)ctx.imageSmoothingQuality='high';
   ctx.drawImage(image,x+(width-image.width*scale)/2,y+(height-image.height*scale)/2,image.width*scale,image.height*scale);
   ctx.imageSmoothingEnabled=true;
 }
@@ -216,7 +217,7 @@ export async function createShareImage(kind,value,catalog,language='zhHans',{res
   ctx.fillStyle=background;ctx.fillRect(0,0,canvas.width,canvas.height);
   ctx.fillStyle=palette.primary;ctx.fillRect(0,0,canvas.width*.65,12);
   ctx.fillStyle=palette.secondary;ctx.fillRect(canvas.width*.65,0,canvas.width*.35,12);
-  picture(ctx,brand,48,35,64,64);
+  picture(ctx,brand,48,35,64,64,true);
   text(ctx,'PMC',128,48,42,canvas.width-176,ink,800);
   if(kind==='team') {
     for(let index=0;index<6;index++)await buildCard(ctx,value.members[index],catalog,language,48+(index%2)*1244,140+Math.floor(index/2)*294,1218,274);
