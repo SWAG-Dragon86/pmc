@@ -86,9 +86,18 @@ test('all new labels cover five languages and device timezone formats check time
 });
 test('every selectable ball and move type has a valid local image and localized ball name',()=>{
   assert.equal(shareBalls.length,37);
+  const balls=JSON.parse(readFileSync(new URL('../src/data/share-balls.json',import.meta.url),'utf8'));
+  assert.equal(balls.source.repository,'PokeAPI/sprites');
+  assert.equal(balls.source.canvas,144);
+  assert.equal(balls.source.scale,6);
   for(const ball of shareBalls){
     const image=readFileSync(new URL(`../public/${ball.sprite}`,import.meta.url));
+    const record=balls.provenance[ball.name];
     assert.equal(image.subarray(1,4).toString(),'PNG',ball.name);
+    assert.equal(image.readUInt32BE(16),144,ball.name);
+    assert.equal(image.readUInt32BE(20),144,ball.name);
+    assert.match(record.url,/\/sprites\/items\/[^/]+\.png$/,ball.name);
+    assert.ok([108,114,120].includes(Math.max(record.contentWidth,record.contentHeight)),ball.name);
     for(const language of ['zhHans','zhHant','ja','ko','en'])assert(ballName(ball,language),ball.name);
     assert(Object.values(ballPalette(ball.name)).every(color=>/^#[0-9a-f]{6}$/i.test(color)),ball.name);
   }

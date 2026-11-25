@@ -5,7 +5,8 @@ Dates below follow the existing repository's commit dates (Asia/Seoul). They est
 ## 1.4.0 source maintenance · 2026-11-26
 
 - Replace all 350 ordinary, regional and Mega form images with Pokémon HOME full-body renders from PokeAPI/sprites `sprites/pokemon/other/home` at `c0542f7c51215d9672439012838c99f520596cbd`.
-- Center every form on a 512×512 canvas with 8% padding on the long side, and draw those images smoothly instead of as pixel art. Poké Ball icons stay pixelated.
+- Center every form on a 512×512 canvas with 8% padding on the long side, and draw those images smoothly instead of as pixel art.
+- Replace the 37 Poké Ball icons with PokeAPI/sprites `sprites/items` from the same commit. Each icon is enlarged 6× with nearest-neighbor sampling onto a 144×144 canvas and stays pixelated in the picker and exported images.
 - Record The Pokémon Company copyright on those images. The sprites repository CC0 statement does not license them. Mega Meowstic male and female currently share one upstream HOME file; their catalog entries stay separate.
 
 ## 1.4.0 source maintenance · 2026-10-23

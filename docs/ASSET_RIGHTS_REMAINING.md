@@ -4,7 +4,7 @@ All 350 catalog form images are Pokémon HOME renders redistributed by PokeAPI/s
 
 The default background is maintainer-confirmed original and retained unchanged. Its standalone reuse license has not been separately selected; this is not an unknown third-party source.
 
-The maintainer authorized removal of the unverified Strange Ball image and export theme on 2026-10-23. The current image inventory has no remaining files marked as lacking contributor reuse permission. All 37 remaining ball themes have permission records. Existing saved selections of the removed theme fall back to the default Poké Ball.
+The maintainer authorized removal of the unverified Strange Ball image and export theme on 2026-10-23. Existing saved selections of the removed theme fall back to the default Poké Ball. The 37 remaining ball icons are PokeAPI/sprites item images. Their contents are copyright The Pokémon Company, and the repository CC0 statement does not license them.
 
 The eight screenshots were recaptured after the replacements and carry component credits in PNG metadata. They no longer contain the old species images. The removed Strange Ball is not shown in these captures.
 
