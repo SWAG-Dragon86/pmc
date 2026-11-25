@@ -45,8 +45,23 @@ test("every catalog species has a local real PNG, no missing image placeholders"
       new URL(`../public/sprites/${p.id}.png`, import.meta.url),
     );
     assert.equal(data.subarray(0, 8).toString("hex"), "89504e470d0a1a0a", p.id);
-    assert.ok(data.readUInt32BE(16) > 0 && data.readUInt32BE(20) > 0, p.id);
+    assert.equal(data.readUInt32BE(16), 512, p.id);
+    assert.equal(data.readUInt32BE(20), 512, p.id);
+    assert.equal(info.repository, "PokeAPI/sprites");
+    assert.match(
+      info.provenance[p.id].url,
+      /\/sprites\/pokemon\/other\/home\/\d+\.png$/,
+      p.id,
+    );
+    assert.equal(
+      Math.max(info.provenance[p.id].contentWidth, info.provenance[p.id].contentHeight),
+      430,
+      p.id,
+    );
   }
+  const css = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.equal(css.includes(".sprite {\n  width: 84px;\n  height: 84px;\n  object-fit: contain;\n  image-rendering: auto;"), true);
+  assert.equal(css.includes(".share-ball-grid img { width:42px;height:42px;object-fit:contain;image-rendering:pixelated; }"), true);
 });
 test("item, ability and form labels have Chinese names and no duplicate item labels", () => {
   for (const entry of [

@@ -241,7 +241,7 @@ export async function createShareImage(kind,value,catalog,language='zhHans',{res
   const usedPaths=new Set(['public/rotom-logo.webp',`public/${selectedShareBall(ball).sprite}`,
     ...Object.keys(TYPES).map(type=>`public/types/${type.toLowerCase()}.png`),
     ...members.map(build=>`public/sprites/${build.species}.png`)]);
-  const credit=JSON.stringify({notice:'Artwork retains the contributor licenses below. Noncommercial use and attribution conditions apply where stated; underlying Pokemon rights are not granted. Preserve these credits when sharing. Social platforms may strip PNG metadata; include attribution separately if that happens.',
+  const credit=JSON.stringify({notice:'Pokémon form images are Pokémon HOME renders redistributed by PokeAPI/sprites. Those image contents are copyright The Pokémon Company; the repository CC0 statement does not license them. Other components keep the separate credits below. Preserve this notice when sharing. Social platforms may strip PNG metadata; include attribution separately if that happens.',
     artwork:artworkCredits.filter(entry=>usedPaths.has(entry.path))});
   const blob=new Blob([pngWithArtworkCredit(new Uint8Array(await canvasBlob.arrayBuffer()),credit)],{type:'image/png'});
   return {blob,code,width:canvas.width,height:canvas.height};

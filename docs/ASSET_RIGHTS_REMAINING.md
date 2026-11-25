@@ -1,6 +1,8 @@
 # Remaining image-rights gaps
 
-All 350 catalog form image paths now have contributor permission records. The default background is maintainer-confirmed original and retained unchanged. Its standalone reuse license has not been separately selected; this is not an unknown third-party source.
+All 350 catalog form images are Pokémon HOME renders redistributed by PokeAPI/sprites. Their image contents are copyright The Pokémon Company. The sprites repository CC0 statement does not license those images, and this change does not add official character or trademark clearance. The 2026-10-23 contributor-permission records described the SpriteCollab and The Artificial files that these renders replaced.
+
+The default background is maintainer-confirmed original and retained unchanged. Its standalone reuse license has not been separately selected; this is not an unknown third-party source.
 
 The maintainer authorized removal of the unverified Strange Ball image and export theme on 2026-10-23. The current image inventory has no remaining files marked as lacking contributor reuse permission. All 37 remaining ball themes have permission records. Existing saved selections of the removed theme fall back to the default Poké Ball.
 

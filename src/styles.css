@@ -619,7 +619,7 @@ main {
   width: 84px;
   height: 84px;
   object-fit: contain;
-  image-rendering: pixelated;
+  image-rendering: auto;
   flex-shrink: 0;
   filter: drop-shadow(0 4px 3px #2221);
 }
@@ -2679,7 +2679,7 @@ footer {
 .comparison-pokemon h3 { margin:0;color:var(--accent);font-size:15px;line-height:1.35;overflow-wrap:anywhere; }
 .battle-comparison-side.defense h3 { color:#93719e; }
 .comparison-pokemon h3 span { font-size:10px;margin-left:5px;opacity:.7; }
-.comparison-pokemon header img { display:block;max-width:100%;width:82px;height:72px;object-fit:contain;image-rendering:pixelated;margin:4px auto; }
+.comparison-pokemon header img { display:block;max-width:100%;width:82px;height:72px;object-fit:contain;image-rendering:auto;margin:4px auto; }
 .comparison-pokemon header small { font-size:10px;line-height:1.45;color:var(--muted);display:block;overflow-wrap:anywhere; }
 .comparison-moves { display:grid;gap:8px;margin-top:10px; }
 .comparison-move { width:100%;padding:12px 10px;min-height:92px;border:1px solid var(--line);border-radius:16px;background:var(--surface);text-align:left;transition:border-color .15s,box-shadow .15s; }
@@ -2729,7 +2729,7 @@ footer {
 .shared-data-preview { margin-top:20px;padding-top:16px;border-top:1px solid var(--line); }
 .shared-data-preview > div { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
 .shared-data-preview article { display:grid;justify-items:center;gap:5px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface);text-align:center; }
-.shared-data-preview img { width:80px;height:65px;object-fit:contain;image-rendering:pixelated; }
+.shared-data-preview img { width:80px;height:65px;object-fit:contain;image-rendering:auto; }
 .shared-data-preview b { font-size:12px;overflow-wrap:anywhere; }
 .shared-data-preview small { font-size:10px;color:var(--muted); }
 .library-card-actions,.team-saved-list > div { flex-wrap:wrap; }
